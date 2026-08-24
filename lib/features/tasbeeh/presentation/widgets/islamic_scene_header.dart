@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/theme/app_theme.dart';
 
 // IslamicSceneHeader is kept for backward compatibility.
 // The active layout now lives in TasbeehHomeScreen (full-bleed Stack).
@@ -29,8 +30,8 @@ class _IslamicScenePainter extends CustomPainter {
       ..color = const Color(0xFF6EA676).withValues(alpha: 0.20);
     final deepPaint = Paint()
       ..color = const Color(0xFF2F6048).withValues(alpha: 0.20);
-    final goldPaint = Paint()
-      ..color = const Color(0xFFC7A96B).withValues(alpha: 0.24);
+    final accentPaint = Paint()
+      ..color = AppPalette.drySage.withValues(alpha: 0.24);
 
     canvas.drawCircle(
       Offset(size.width * 0.18, size.height * 0.20),
@@ -100,7 +101,7 @@ class _IslamicScenePainter extends CustomPainter {
     );
     canvas.drawRect(
       Rect.fromLTWH(size.width * 0.10, size.height * 0.67, 58, 7),
-      goldPaint,
+      accentPaint,
     );
 
     final rayPaint = Paint()

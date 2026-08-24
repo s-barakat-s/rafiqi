@@ -122,6 +122,8 @@ class TasbeehOverlayMessenger {
       state: TasbeehState.fromJson({
         'currentCount': message['currentCount'],
         'totalCount': message['totalCount'],
+        'dailyTotal': message['dailyTotal'],
+        'dailyDateKey': message['dailyDateKey'],
         'targetMode': message['targetMode'],
       }),
       source: source is String ? source : '',

@@ -1,0 +1,359 @@
+[
+  {
+    "id": "hisn-after_prayer-69c17b37f1522c2b",
+    "order": 1,
+    "category": "after_prayer",
+    "type": "sequence",
+    "text": null,
+    "repeatCount": null,
+    "countDescription": null,
+    "instruction": null,
+    "appliesTo": [],
+    "steps": [
+      {
+        "id": "after-prayer-istighfar",
+        "text": "أَسْتَغْفِرُ اللَّهَ",
+        "repeatCount": 3,
+        "countDescription": "ثلاث مرات",
+        "instruction": null,
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "after-prayer-salam",
+        "text": "اللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الجَلَالِ وَالإِكْرَامِ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      }
+    ],
+    "source": {
+      "short": "رواه مسلم",
+      "full": "مسلم 1/ 414"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-6c42ff6fe8f4e9db",
+    "order": 2,
+    "category": "after_prayer",
+    "type": "single",
+    "text": "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ وَلَا مُعْطِيَ لِمَا مَنَعْتَ وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "البخاري 1/ 255 ومسلم 1/ 414"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-fa754042cbd9d390",
+    "order": 3,
+    "category": "after_prayer",
+    "type": "single",
+    "text": "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ المُلْكُ وَلَهُ الحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ، لَا إِلَهَ إِلَّا اللَّهُ، وَلَا نَعْبُدُ إِلَّا إِيَّاهُ، لَهُ النِّعْمَةُ وَلَهُ الفَضْلُ، وَلَهُ الثَّنَاءُ الحَسَنُ، لَا إِلَهَ إِلَّا اللَّهُ مُخْلِصِينَ لَهُ الدِّينَ وَلَوْ كَرِهَ الكَافِرُونَ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "steps": [],
+    "source": {
+      "short": "رواه مسلم",
+      "full": "مسلم 1/ 415"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-49ecf3d132763f99",
+    "order": 4,
+    "category": "after_prayer",
+    "type": "sequence",
+    "text": null,
+    "repeatCount": null,
+    "countDescription": null,
+    "instruction": null,
+    "appliesTo": [],
+    "steps": [
+      {
+        "id": "after-prayer-tasbeeh-subhanallah",
+        "text": "سُبْحَانَ اللَّهُ",
+        "repeatCount": 33,
+        "countDescription": "ثلاث وثلاثون مرة",
+        "instruction": null,
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "after-prayer-tasbeeh-alhamdulillah",
+        "text": "الحَمْدُ لِلَّهِ",
+        "repeatCount": 33,
+        "countDescription": "ثلاث وثلاثون مرة",
+        "instruction": null,
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "after-prayer-tasbeeh-allahu-akbar",
+        "text": "اللَّهُ أَكْبَرُ",
+        "repeatCount": 33,
+        "countDescription": "ثلاث وثلاثون مرة",
+        "instruction": null,
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "after-prayer-tasbeeh-conclusion",
+        "text": "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ المُلْكُ وَلَهُ الحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      }
+    ],
+    "source": {
+      "short": "رواه مسلم",
+      "full": "مسلم 1/ 418"
+    },
+    "virtue": {
+      "short": "من قال ذلك دبر كل صلاة غفرت خطاياه وإن كانت مثل زبد البحر",
+      "full": "من قال ذلك دبر كل صلاة غفرت خطاياه وإن كانت مثل زبد البحر"
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-6fac305f9dc7551e",
+    "order": 5,
+    "category": "after_prayer",
+    "type": "sequence",
+    "text": null,
+    "repeatCount": null,
+    "countDescription": null,
+    "instruction": null,
+    "appliesTo": [],
+    "steps": [
+      {
+        "id": "after-prayer-surah-al-ikhlas",
+        "text": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "quran": {
+          "isQuran": true,
+          "surah": "الإخلاص",
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "after-prayer-surah-al-falaq",
+        "text": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "quran": {
+          "isQuran": true,
+          "surah": "الفلق",
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "after-prayer-surah-an-nas",
+        "text": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "quran": {
+          "isQuran": true,
+          "surah": "الناس",
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      }
+    ],
+    "source": {
+      "short": "رواه أبو داود والترمذي",
+      "full": "أبو داود 2/ 86 والنسائي 3/ 68 وانظر صحيح التّرمذي 2/ 8 والسور الثلاث يقال لها المعوذات وانظر فتح الباري 9/ 62"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-c338a73d735a7670",
+    "order": 6,
+    "category": "after_prayer",
+    "type": "single",
+    "text": "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ\nاللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "steps": [],
+    "source": {
+      "short": "رواه النسائي",
+      "full": "النسائي في عمل اليوم والليلة برقم 100، وابن السني برقم 121 وصححه الجامع 5/ 339 وسلسلة الأحاديث الصحيحة 2/ 697 برقم 972"
+    },
+    "virtue": {
+      "short": "من قرأها دبر كل صلاة لم يمنعه من دخول الجنة إلا أن يموت",
+      "full": "من قرأها دبر كل صلاة لم يمنعه من دخول الجنة إلا أن يموت"
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-e17815a0bdb5fed4",
+    "order": 7,
+    "category": "after_prayer",
+    "type": "single",
+    "text": "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ المُلْكُ وَلَهُ الحَمْدُ، يُحْيِي وَيُمِيتُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+    "repeatCount": 10,
+    "countDescription": "عشر مرات",
+    "instruction": "(بَعْدَ صَلَاةِ المَغْرِبِ وَالصُّبْحِ)",
+    "appliesTo": [
+      "fajr",
+      "maghrib"
+    ],
+    "steps": [],
+    "source": {
+      "short": "رواه الترمذي",
+      "full": "رواه التّرمذي 5/ 515 وأحمد 4/ 227 وانظر تخريجه في زاد المعاد 1/ 300"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  },
+  {
+    "id": "hisn-after_prayer-5404f727a1835966",
+    "order": 8,
+    "category": "after_prayer",
+    "type": "single",
+    "text": "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وعَمَلًا مُتَقَبَّلًا",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": "(بَعْدَ السَّلَامِ مِنْ صَلَاةِ الفَجْرِ)",
+    "appliesTo": [
+      "fajr"
+    ],
+    "steps": [],
+    "source": {
+      "short": "رواه ابن ماجه",
+      "full": "ابن ماجه وغيره وانظر صحيح ابن ماجة 1/ 152 ومجمع الزوائد 10/ 111"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    }
+  }
+]

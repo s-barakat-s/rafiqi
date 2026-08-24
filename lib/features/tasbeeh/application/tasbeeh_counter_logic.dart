@@ -4,12 +4,14 @@ class TasbeehCounterLogic {
   const TasbeehCounterLogic._();
 
   static TasbeehState increment(TasbeehState state) {
+    state = state.forCurrentDay();
     final targetCount = state.targetCount;
 
     if (targetCount == null || targetCount <= 0) {
       return state.copyWith(
         currentCount: state.currentCount + 1,
         totalCount: state.totalCount + 1,
+        dailyTotal: state.dailyTotal + 1,
       );
     }
 
@@ -19,6 +21,7 @@ class TasbeehCounterLogic {
     return state.copyWith(
       currentCount: nextCurrent,
       totalCount: state.totalCount + 1,
+      dailyTotal: state.dailyTotal + 1,
     );
   }
 

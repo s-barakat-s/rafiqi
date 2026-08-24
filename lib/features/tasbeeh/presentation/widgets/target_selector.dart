@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/formatters/arabic_numerals.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 
 enum TasbeehTarget {
-  thirtyThree('33', 33, TasbeehState.targetMode33),
-  ninetyNine('99', 99, TasbeehState.targetMode99),
-  open('مفتوح', null, TasbeehState.targetModeOpen);
+  thirtyThree(33, TasbeehState.targetMode33),
+  ninetyNine(99, TasbeehState.targetMode99),
+  open(null, TasbeehState.targetModeOpen);
 
-  const TasbeehTarget(this.label, this.value, this.targetMode);
+  const TasbeehTarget(this.value, this.targetMode);
 
-  final String label;
   final int? value;
   final String targetMode;
+
+  String get label => value == null ? 'مفتوح' : ArabicNumerals.integer(value!);
 
   static TasbeehTarget fromMode(String targetMode) {
     return switch (targetMode) {

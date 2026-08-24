@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/theme/app_theme.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/widgets/soft_section_card.dart';
 
 class DhikrCard extends StatelessWidget {
@@ -15,7 +16,7 @@ class DhikrCard extends StatelessWidget {
             child: Icon(
               Icons.auto_awesome_rounded,
               size: 72,
-              color: const Color(0xFFC7A96B).withValues(alpha: 0.10),
+              color: context.appColors.selected.withValues(alpha: 0.18),
             ),
           ),
           Row(

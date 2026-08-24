@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/formatters/arabic_numerals.dart';
 import 'package:flutter/services.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
@@ -530,7 +531,7 @@ class _CountText extends StatelessWidget {
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(
-          value.toString(),
+          ArabicNumerals.integer(value),
           maxLines: 1,
           style: TextStyle(
             color: color,

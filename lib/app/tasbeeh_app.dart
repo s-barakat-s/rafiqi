@@ -12,28 +12,47 @@ class TasbeehApp extends StatefulWidget {
 
 class _TasbeehAppState extends State<TasbeehApp> {
   static const _themeKey = 'app_dark_theme';
+  static const _adhkarVibrationKey = 'adhkar_tap_vibration';
+  static const _adhkarSoundKey = 'adhkar_tap_sound';
   ThemeMode _themeMode = ThemeMode.light;
+  bool _adhkarVibrationEnabled = true;
+  bool _adhkarSoundEnabled = true;
 
   @override
   void initState() {
     super.initState();
-    _loadTheme();
+    _loadPreferences();
   }
 
-  Future<void> _loadTheme() async {
+  Future<void> _loadPreferences() async {
     final preferences = await SharedPreferences.getInstance();
     if (!mounted) return;
-    setState(
-      () => _themeMode = (preferences.getBool(_themeKey) ?? false)
+    setState(() {
+      _themeMode = (preferences.getBool(_themeKey) ?? false)
           ? ThemeMode.dark
-          : ThemeMode.light,
-    );
+          : ThemeMode.light;
+      _adhkarVibrationEnabled =
+          preferences.getBool(_adhkarVibrationKey) ?? true;
+      _adhkarSoundEnabled = preferences.getBool(_adhkarSoundKey) ?? true;
+    });
   }
 
   Future<void> _setDarkMode(bool enabled) async {
     setState(() => _themeMode = enabled ? ThemeMode.dark : ThemeMode.light);
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_themeKey, enabled);
+  }
+
+  Future<void> _setAdhkarVibration(bool enabled) async {
+    setState(() => _adhkarVibrationEnabled = enabled);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_adhkarVibrationKey, enabled);
+  }
+
+  Future<void> _setAdhkarSound(bool enabled) async {
+    setState(() => _adhkarSoundEnabled = enabled);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_adhkarSoundKey, enabled);
   }
 
   @override
@@ -51,6 +70,10 @@ class _TasbeehAppState extends State<TasbeehApp> {
       home: MainShellScreen(
         isDarkMode: _themeMode == ThemeMode.dark,
         onThemeChanged: _setDarkMode,
+        adhkarVibrationEnabled: _adhkarVibrationEnabled,
+        onAdhkarVibrationChanged: _setAdhkarVibration,
+        adhkarSoundEnabled: _adhkarSoundEnabled,
+        onAdhkarSoundChanged: _setAdhkarSound,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/formatters/arabic_numerals.dart';
 
 class CountCard extends StatelessWidget {
   const CountCard({
@@ -41,7 +42,7 @@ class CountCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            count.toString(),
+            ArabicNumerals.integer(count),
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
               color: isPrimary ? colorScheme.primary : colorScheme.onSurface,
               fontWeight: FontWeight.w900,

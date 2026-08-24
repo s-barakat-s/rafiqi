@@ -26,6 +26,8 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = context.appColors;
+    final isDark = theme.brightness == Brightness.dark;
+    final activeColor = isDark ? AppPalette.drySage : colors.primary;
     return Material(
       color: theme.colorScheme.surface,
       elevation: 8,
@@ -35,7 +37,7 @@ class AppBottomNavBar extends StatelessWidget {
       child: Container(
         height: 74,
         decoration: BoxDecoration(
-          border: Border.all(color: colors.gold.withValues(alpha: 0.28)),
+          border: Border.all(color: colors.outline.withValues(alpha: 0.55)),
           borderRadius: BorderRadius.circular(22),
         ),
         child: Row(
@@ -60,23 +62,18 @@ class AppBottomNavBar extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: center
-                              ? colors.gold
-                              : (selected
-                                    ? colors.emerald.withValues(alpha: 0.12)
-                                    : Colors.transparent),
-                          border: center
-                              ? Border.all(
-                                  color: colors.gold.withValues(alpha: 0.55),
-                                  width: 2,
-                                )
+                              ? (isDark ? colors.secondary : colors.selected)
+                              : (selected ? colors.selected : Colors.transparent),
+                          border: center && !isDark
+                              ? Border.all(color: colors.outline, width: 2)
                               : null,
                         ),
                         child: Icon(
                           selected ? item.$2 : item.$1,
                           size: center ? 23 : 21,
                           color: center
-                              ? const Color(0xFF173C35)
-                              : (selected ? colors.gold : colors.secondaryText),
+                              ? theme.colorScheme.onSecondary
+                              : (selected ? activeColor : colors.navigationInactive),
                         ),
                       ),
                       if (!center) ...[
@@ -86,8 +83,8 @@ class AppBottomNavBar extends StatelessWidget {
                           maxLines: 1,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: selected
-                                ? colors.gold
-                                : colors.secondaryText,
+                                ? activeColor
+                                : colors.navigationInactive,
                             fontWeight: selected
                                 ? FontWeight.w700
                                 : FontWeight.w500,

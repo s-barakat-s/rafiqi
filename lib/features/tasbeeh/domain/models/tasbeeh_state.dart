@@ -2,13 +2,17 @@ class TasbeehState {
   const TasbeehState({
     required this.currentCount,
     required this.totalCount,
+    required this.dailyTotal,
+    required this.dailyDateKey,
     required this.targetMode,
   });
 
   factory TasbeehState.initial() {
-    return const TasbeehState(
+    return TasbeehState(
       currentCount: 0,
       totalCount: 0,
+      dailyTotal: 0,
+      dailyDateKey: dateKey(DateTime.now()),
       targetMode: targetMode33,
     );
   }
@@ -17,8 +21,10 @@ class TasbeehState {
     return TasbeehState(
       currentCount: json['currentCount'] as int? ?? 0,
       totalCount: json['totalCount'] as int? ?? 0,
+      dailyTotal: json['dailyTotal'] as int? ?? 0,
+      dailyDateKey: json['dailyDateKey'] as String? ?? '',
       targetMode: _normalizeTargetMode(json['targetMode'] as String?),
-    );
+    ).forCurrentDay();
   }
 
   static const targetMode33 = '33';
@@ -26,7 +32,11 @@ class TasbeehState {
   static const targetModeOpen = 'open';
 
   final int currentCount;
+
+  /// The all-time count. Kept as `totalCount` for overlay compatibility.
   final int totalCount;
+  final int dailyTotal;
+  final String dailyDateKey;
   final String targetMode;
 
   int? get targetCount {
@@ -43,6 +53,8 @@ class TasbeehState {
       'type': 'state_update',
       'currentCount': currentCount,
       'totalCount': totalCount,
+      'dailyTotal': dailyTotal,
+      'dailyDateKey': dailyDateKey,
       'targetMode': targetMode,
     };
   }
@@ -50,13 +62,30 @@ class TasbeehState {
   TasbeehState copyWith({
     int? currentCount,
     int? totalCount,
+    int? dailyTotal,
+    String? dailyDateKey,
     String? targetMode,
   }) {
     return TasbeehState(
       currentCount: currentCount ?? this.currentCount,
       totalCount: totalCount ?? this.totalCount,
+      dailyTotal: dailyTotal ?? this.dailyTotal,
+      dailyDateKey: dailyDateKey ?? this.dailyDateKey,
       targetMode: _normalizeTargetMode(targetMode ?? this.targetMode),
     );
+  }
+
+  TasbeehState forCurrentDay([DateTime? now]) {
+    final today = dateKey(now ?? DateTime.now());
+    if (dailyDateKey == today) return this;
+    return copyWith(dailyTotal: 0, dailyDateKey: today);
+  }
+
+  static String dateKey(DateTime date) {
+    final local = date.toLocal();
+    return '${local.year.toString().padLeft(4, '0')}-'
+        '${local.month.toString().padLeft(2, '0')}-'
+        '${local.day.toString().padLeft(2, '0')}';
   }
 
   static String _normalizeTargetMode(String? targetMode) {

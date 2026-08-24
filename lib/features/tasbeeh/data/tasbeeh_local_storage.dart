@@ -5,6 +5,8 @@ import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 class TasbeehLocalStorage {
   static const _currentCountKey = 'tasbeeh.currentCount';
   static const _totalCountKey = 'tasbeeh.totalCount';
+  static const _dailyTotalKey = 'tasbeeh.dailyTotal';
+  static const _dailyDateKey = 'tasbeeh.dailyDate';
   static const _targetModeKey = 'tasbeeh.targetMode';
   static const _autoCollapseSecondsKey = 'tasbeeh.autoCollapseSeconds';
   static const _opacityKey = 'tasbeeh.opacity';
@@ -32,6 +34,8 @@ class TasbeehLocalStorage {
     return TasbeehState.fromJson({
       'currentCount': prefs.getInt(_currentCountKey),
       'totalCount': prefs.getInt(_totalCountKey),
+      'dailyTotal': prefs.getInt(_dailyTotalKey),
+      'dailyDateKey': prefs.getString(_dailyDateKey),
       'targetMode': prefs.getString(_targetModeKey),
     });
   }
@@ -42,6 +46,8 @@ class TasbeehLocalStorage {
     await Future.wait([
       prefs.setInt(_currentCountKey, state.currentCount),
       prefs.setInt(_totalCountKey, state.totalCount),
+      prefs.setInt(_dailyTotalKey, state.dailyTotal),
+      prefs.setString(_dailyDateKey, state.dailyDateKey),
       prefs.setString(_targetModeKey, state.targetMode),
     ]);
   }

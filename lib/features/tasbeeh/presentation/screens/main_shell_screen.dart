@@ -15,6 +15,8 @@ import 'package:tasbeh/features/tasbeeh/presentation/screens/floating_tasbeeh_se
 import 'package:tasbeh/features/tasbeeh/presentation/screens/statistics_placeholder_screen.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_home_screen.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/widgets/app_bottom_nav_bar.dart';
+import 'package:tasbeh/features/adhkar/domain/adhkar_data.dart';
+import 'package:tasbeh/features/adhkar/presentation/wird_reader_screen.dart';
 import 'package:tasbeh/features/home/presentation/home_screen.dart';
 import 'package:tasbeh/app/theme/app_theme.dart';
 
@@ -22,11 +24,19 @@ class MainShellScreen extends StatefulWidget {
   const MainShellScreen({
     required this.isDarkMode,
     required this.onThemeChanged,
+    required this.adhkarVibrationEnabled,
+    required this.onAdhkarVibrationChanged,
+    required this.adhkarSoundEnabled,
+    required this.onAdhkarSoundChanged,
     super.key,
   });
 
   final bool isDarkMode;
   final ValueChanged<bool> onThemeChanged;
+  final bool adhkarVibrationEnabled;
+  final ValueChanged<bool> onAdhkarVibrationChanged;
+  final bool adhkarSoundEnabled;
+  final ValueChanged<bool> onAdhkarSoundChanged;
 
   @override
   State<MainShellScreen> createState() => _MainShellScreenState();
@@ -191,11 +201,34 @@ class _MainShellScreenState extends State<MainShellScreen>
     _showMessage('تم إيقاف السبحة العائمة');
   }
 
+  Future<void> _openAdhkarReader(String categoryId) async {
+    final categories = await AdhkarLocalRepository.loadCategories();
+    if (!mounted) return;
+    final category = categories.firstWhere(
+      (item) => item.id == categoryId,
+    );
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => WirdReaderScreen(
+          category: category,
+          vibrationEnabled: widget.adhkarVibrationEnabled,
+          soundEnabled: widget.adhkarSoundEnabled,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeScreen(onOpenTasbeeh: () => setState(() => _tabIndex = 2)),
-      const AzkarPlaceholderScreen(),
+      HomeScreen(
+        onOpenTasbeeh: () => setState(() => _tabIndex = 2),
+        onOpenAdhkar: _openAdhkarReader,
+      ),
+      AzkarPlaceholderScreen(
+        vibrationEnabled: widget.adhkarVibrationEnabled,
+        soundEnabled: widget.adhkarSoundEnabled,
+      ),
       TasbeehHomeScreen(
         state: _state,
         onIncrement: _incrementTasbeeh,
@@ -203,10 +236,14 @@ class _MainShellScreenState extends State<MainShellScreen>
         onStartFloating: _startFloatingTasbeeh,
         onStopFloating: _stopFloatingTasbeeh,
       ),
-      StatisticsPlaceholderScreen(state: _state),
+      const StatisticsPlaceholderScreen(),
       _MoreScreen(
         isDarkMode: widget.isDarkMode,
         onThemeChanged: widget.onThemeChanged,
+        adhkarVibrationEnabled: widget.adhkarVibrationEnabled,
+        onAdhkarVibrationChanged: widget.onAdhkarVibrationChanged,
+        adhkarSoundEnabled: widget.adhkarSoundEnabled,
+        onAdhkarSoundChanged: widget.onAdhkarSoundChanged,
         onOpenTasbeehSettings: _openTasbeehSettings,
       ),
     ];
@@ -276,10 +313,18 @@ class _MoreScreen extends StatelessWidget {
   const _MoreScreen({
     required this.isDarkMode,
     required this.onThemeChanged,
+    required this.adhkarVibrationEnabled,
+    required this.onAdhkarVibrationChanged,
+    required this.adhkarSoundEnabled,
+    required this.onAdhkarSoundChanged,
     required this.onOpenTasbeehSettings,
   });
   final bool isDarkMode;
   final ValueChanged<bool> onThemeChanged;
+  final bool adhkarVibrationEnabled;
+  final ValueChanged<bool> onAdhkarVibrationChanged;
+  final bool adhkarSoundEnabled;
+  final ValueChanged<bool> onAdhkarSoundChanged;
   final VoidCallback onOpenTasbeehSettings;
 
   @override
@@ -308,7 +353,7 @@ class _MoreScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: colors.gold.withValues(alpha: .28)),
+              border: Border.all(color: colors.outline.withValues(alpha: .55)),
             ),
             child: Column(
               children: [
@@ -319,7 +364,7 @@ class _MoreScreen extends StatelessWidget {
                     isDarkMode
                         ? Icons.dark_mode_outlined
                         : Icons.light_mode_outlined,
-                    color: colors.gold,
+                    color: colors.secondary,
                   ),
                   title: const Text('الوضع الداكن'),
                   subtitle: const Text('خلفية حبرية مريحة للعين'),
@@ -332,13 +377,56 @@ class _MoreScreen extends StatelessWidget {
                 ),
                 ListTile(
                   onTap: onOpenTasbeehSettings,
-                  leading: Icon(Icons.tune_rounded, color: colors.gold),
+                  leading: Icon(Icons.tune_rounded, color: colors.secondary),
                   title: const Text('إعدادات السبحة'),
                   subtitle: const Text('الهدف والسبحة العائمة'),
                   trailing: const Icon(
                     Icons.arrow_back_ios_new_rounded,
                     size: 16,
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'تفاعل الأذكار',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: colors.outline.withValues(alpha: .55)),
+            ),
+            child: Column(
+              children: [
+                SwitchListTile(
+                  value: adhkarVibrationEnabled,
+                  onChanged: onAdhkarVibrationChanged,
+                  secondary: Icon(
+                    Icons.vibration_rounded,
+                    color: colors.secondary,
+                  ),
+                  title: const Text('اهتزاز عند الذكر'),
+                ),
+                Divider(
+                  height: 1,
+                  indent: 18,
+                  endIndent: 18,
+                  color: colors.divider.withValues(alpha: .6),
+                ),
+                SwitchListTile(
+                  value: adhkarSoundEnabled,
+                  onChanged: onAdhkarSoundChanged,
+                  secondary: Icon(
+                    Icons.volume_up_outlined,
+                    color: colors.secondary,
+                  ),
+                  title: const Text('صوت عند الذكر'),
                 ),
               ],
             ),

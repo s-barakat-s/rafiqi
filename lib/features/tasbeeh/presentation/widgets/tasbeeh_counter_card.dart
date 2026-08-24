@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/formatters/arabic_numerals.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 
 class TasbeehCounterCard extends StatefulWidget {
@@ -163,7 +164,7 @@ class _CenterContent extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              currentCount.toString(),
+              ArabicNumerals.integer(currentCount),
               style: TextStyle(
                 color: const Color(0xFF1A3D2A),
                 fontSize: w * 0.38,
@@ -211,7 +212,7 @@ class _CenterContent extends StatelessWidget {
 
           // ── total count ───────────────────────────────────────────────────
           Text(
-            totalCount.toString(),
+            ArabicNumerals.integer(totalCount),
             style: TextStyle(
               color: const Color(0xFF2F6048),
               fontSize: w * 0.210,

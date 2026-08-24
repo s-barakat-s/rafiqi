@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/app/formatters/arabic_numerals.dart';
+import 'package:tasbeh/app/theme/app_theme.dart';
 
 class AutoHideSelector extends StatelessWidget {
   const AutoHideSelector({
@@ -10,19 +12,20 @@ class AutoHideSelector extends StatelessWidget {
   final int? autoCollapseSeconds;
   final ValueChanged<int?> onChanged;
 
-  static const _options = <int?>[5, 10, 20, 30, null];
+  static const _options = <int?>[null, 5, 10, 20, 30];
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'الإخفاء التلقائي',
           style: TextStyle(
-            color: Color(0xFF2F6048),
-            fontWeight: FontWeight.w900,
-            fontSize: 17,
+            color: colors.textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
           ),
         ),
         const SizedBox(height: 12),
@@ -32,15 +35,19 @@ class AutoHideSelector extends StatelessWidget {
           children: _options.map((seconds) {
             final selected = seconds == autoCollapseSeconds;
             return ChoiceChip(
-              label: Text(seconds == null ? 'إيقاف' : '$seconds ث'),
+              label: Text(
+                seconds == null
+                    ? 'إيقاف'
+                    : '${ArabicNumerals.integer(seconds)} ث',
+              ),
               selected: selected,
               showCheckmark: false,
-              selectedColor: const Color(0xFF2F6048),
+              selectedColor: colors.selected,
+              backgroundColor: Colors.transparent,
+              side: BorderSide(color: colors.outline),
               labelStyle: TextStyle(
-                color: selected
-                    ? const Color(0xFFFFFBF0)
-                    : const Color(0xFF6F7F73),
-                fontWeight: FontWeight.w800,
+                color: selected ? colors.textPrimary : colors.textSecondary,
+                fontWeight: FontWeight.w600,
               ),
               onSelected: (_) => onChanged(seconds),
             );
