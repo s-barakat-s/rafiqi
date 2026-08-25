@@ -1,75 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-enum DhikrEntryType { prelude, single, sequenceStep, compositeStep }
-
-class DhikrItem {
-  const DhikrItem({
-    required this.id,
-    required this.order,
-    required this.category,
-    required this.text,
-    required this.repeatCount,
-    required this.entryType,
-    this.parentId,
-    this.countDescription,
-    this.instruction,
-    this.appliesTo = const [],
-    this.source,
-    this.fullSource,
-    this.virtue,
-    this.virtuePreview,
-    this.hadithText,
-    this.explanation,
-    this.audioUrl,
-    this.isQuran,
-    this.surah,
-    this.ayahFrom,
-    this.ayahTo,
-  });
-
-  final String id;
-  final int order;
-  final String category;
-  final String text;
-  final int repeatCount;
-  final DhikrEntryType entryType;
-  final String? parentId;
-  final String? countDescription;
-  final String? instruction;
-  final List<String> appliesTo;
-  final String? source;
-  final String? fullSource;
-  final String? virtue;
-  final String? virtuePreview;
-  final String? hadithText;
-  final String? explanation;
-  final String? audioUrl;
-  final bool? isQuran;
-  final String? surah;
-  final int? ayahFrom;
-  final int? ayahTo;
-
-  bool get isPrelude => entryType == DhikrEntryType.prelude;
-}
-
-class AdhkarCategory {
-  const AdhkarCategory({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.items,
-  });
-
-  final String id;
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final List<DhikrItem> items;
-}
+import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 
 abstract final class AdhkarLocalRepository {
   static Future<List<AdhkarCategory>>? _cache;
@@ -83,25 +15,25 @@ abstract final class AdhkarLocalRepository {
         'morning',
         'أذكار الصباح',
         'بداية مطمئنة ليومك وحفظٌ بإذن الله',
-        Icons.wb_sunny_outlined,
+        AdhkarCategoryKind.morning,
       ),
       (
         'evening',
         'أذكار المساء',
         'سكينة المساء وخاتمة هادئة لليوم',
-        Icons.nightlight_outlined,
+        AdhkarCategoryKind.evening,
       ),
       (
         'after_prayer',
         'أذكار بعد الصلاة',
         'ورد مأثور تتمّ به الفريضة',
-        Icons.mosque_outlined,
+        AdhkarCategoryKind.afterPrayer,
       ),
       (
         'sleep',
         'أذكار النوم',
         'طمأنينة القلب قبل النوم',
-        Icons.bedtime_outlined,
+        AdhkarCategoryKind.sleep,
       ),
     ];
     return Future.wait(
@@ -109,18 +41,17 @@ abstract final class AdhkarLocalRepository {
         final raw = await rootBundle.loadString(
           'assets/data/adhkar/normalized/${definition.$1}.json',
         );
-        final entries = (jsonDecode(raw) as List<dynamic>)
-            .cast<Map<String, dynamic>>()
-          ..sort(
-            (a, b) =>
-                (a['order'] as int).compareTo(b['order'] as int),
-          );
+        final entries =
+            (jsonDecode(raw) as List<dynamic>).cast<Map<String, dynamic>>()
+              ..sort(
+                (a, b) => (a['order'] as int).compareTo(b['order'] as int),
+              );
         final items = entries.expand(_expandEntry).toList(growable: false);
         return AdhkarCategory(
           id: definition.$1,
           title: definition.$2,
           subtitle: definition.$3,
-          icon: definition.$4,
+          kind: definition.$4,
           items: List.unmodifiable(items),
         );
       }),
@@ -212,7 +143,8 @@ abstract final class AdhkarLocalRepository {
       parentId: parentId,
       countDescription:
           (content['countDescription'] ?? entry['countDescription']) as String?,
-      instruction: instruction ??
+      instruction:
+          instruction ??
           (inheritEntryInstructions ? entry['instruction'] as String? : null),
       appliesTo: ((entry['appliesTo'] as List<dynamic>?) ?? const [])
           .cast<String>(),

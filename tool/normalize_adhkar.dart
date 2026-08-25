@@ -33,7 +33,8 @@ Map<String, dynamic> _canonicalEntry(Map<String, dynamic> entry) {
       : entry['repeatCount'] as int?;
   final instructionParts = <String>[
     if (_present(entry['instruction'])) entry['instruction'] as String,
-    if (_present(entry['instructionAfter'])) entry['instructionAfter'] as String,
+    if (_present(entry['instructionAfter']))
+      entry['instructionAfter'] as String,
   ];
   return {
     'id': entry['id'],
@@ -178,10 +179,12 @@ List<Map<String, dynamic>> _normalizeAfterPrayer(
       final separator = text.indexOf(' (ثَلَاثًا)، ');
       final first = text.substring(0, separator);
       final second = text.substring(separator + ' (ثَلَاثًا)، '.length);
-      result.add(_sequence(item, [
-        _step('after-prayer-istighfar', first, 3),
-        _step('after-prayer-salam', second, 1),
-      ]));
+      result.add(
+        _sequence(item, [
+          _step('after-prayer-istighfar', first, 3),
+          _step('after-prayer-salam', second, 1),
+        ]),
+      );
       continue;
     }
     if (order == 4) {
@@ -191,51 +194,71 @@ List<Map<String, dynamic>> _normalizeAfterPrayer(
           .split('، وَ');
       final conclusion = lines.last.replaceFirst(' (مَرَّةً وَاحِدَةً)', '');
       final quoted = RegExp(r'^"([^"]+)"(.*)$').firstMatch(source)!;
-      result.add(_sequence(
-        item,
-        [
-          _step('after-prayer-tasbeeh-subhanallah', phrases[0], 33),
-          _step('after-prayer-tasbeeh-alhamdulillah', phrases[1], 33),
-          _step('after-prayer-tasbeeh-allahu-akbar', phrases[2], 33),
-          _step('after-prayer-tasbeeh-conclusion', conclusion, 1),
-        ],
-        sourceFull: quoted.group(2)!.trim(),
-        virtueFull: quoted.group(1),
-      ));
+      result.add(
+        _sequence(
+          item,
+          [
+            _step('after-prayer-tasbeeh-subhanallah', phrases[0], 33),
+            _step('after-prayer-tasbeeh-alhamdulillah', phrases[1], 33),
+            _step('after-prayer-tasbeeh-allahu-akbar', phrases[2], 33),
+            _step('after-prayer-tasbeeh-conclusion', conclusion, 1),
+          ],
+          sourceFull: quoted.group(2)!.trim(),
+          virtueFull: quoted.group(1),
+        ),
+      );
       continue;
     }
     if (order == 5) {
       final surahs = text.split(RegExp(r'\r?\n\r?\n'));
-      result.add(_sequence(item, [
-        _step('after-prayer-surah-al-ikhlas', surahs[0], 1,
-            quran: _quran('سورة الإخلاص')),
-        _step('after-prayer-surah-al-falaq', surahs[1], 1,
-            quran: _quran('سورة الفلق')),
-        _step('after-prayer-surah-an-nas', surahs[2], 1,
-            quran: _quran('سورة الناس')),
-      ]));
+      result.add(
+        _sequence(item, [
+          _step(
+            'after-prayer-surah-al-ikhlas',
+            surahs[0],
+            1,
+            quran: _quran('سورة الإخلاص'),
+          ),
+          _step(
+            'after-prayer-surah-al-falaq',
+            surahs[1],
+            1,
+            quran: _quran('سورة الفلق'),
+          ),
+          _step(
+            'after-prayer-surah-an-nas',
+            surahs[2],
+            1,
+            quran: _quran('سورة الناس'),
+          ),
+        ]),
+      );
       continue;
     }
     if (order == 6) {
       const marker = ' . والنسائي';
       final splitAt = source.indexOf(marker);
-      result.add(_single(
-        item,
-        sourceFull: splitAt < 0
-            ? source
-            : 'النسائي${source.substring(splitAt + marker.length)}',
-        virtueFull: splitAt < 0 ? null : source.substring(0, splitAt),
-      ));
+      result.add(
+        _single(
+          item,
+          sourceFull: splitAt < 0
+              ? source
+              : 'النسائي${source.substring(splitAt + marker.length)}',
+          virtueFull: splitAt < 0 ? null : source.substring(0, splitAt),
+        ),
+      );
       continue;
     }
     if (order == 7 || order == 8) {
       final lines = text.split(RegExp(r'\r?\n'));
-      result.add(_single(
-        item,
-        text: lines.first,
-        appliesTo: order == 7 ? const ['fajr', 'maghrib'] : const ['fajr'],
-        instruction: lines.skip(1).join('\n'),
-      ));
+      result.add(
+        _single(
+          item,
+          text: lines.first,
+          appliesTo: order == 7 ? const ['fajr', 'maghrib'] : const ['fajr'],
+          instruction: lines.skip(1).join('\n'),
+        ),
+      );
       continue;
     }
     result.add(_single(item));
@@ -252,71 +275,104 @@ List<Map<String, dynamic>> _normalizeSleep(List<Map<String, dynamic>> raw) {
     final source = item['source'] as String;
     if (order == 1) {
       final parts = text.split(RegExp(r'\r?\n\r?\n'));
-      result.add(_withoutNulls({
-        'id': item['id'],
-        'category': 'sleep',
-        'sourceOrder': order,
-        'displayOrder': order,
-        'type': 'compositePractice',
-        'instruction': parts.first,
-        'instructionAfter': parts.last,
-        'overallRepeatCount': item['repeatCount'],
-        'steps': [
-          _step('sleep-palms-al-ikhlas', parts[1], 1,
-              quran: _quran('سورة الإخلاص')),
-          _step('sleep-palms-al-falaq', parts[2], 1,
-              quran: _quran('سورة الفلق')),
-          _step('sleep-palms-an-nas', parts[3], 1,
-              quran: _quran('سورة الناس')),
-        ],
-        'source': _source(source),
-      }));
+      result.add(
+        _withoutNulls({
+          'id': item['id'],
+          'category': 'sleep',
+          'sourceOrder': order,
+          'displayOrder': order,
+          'type': 'compositePractice',
+          'instruction': parts.first,
+          'instructionAfter': parts.last,
+          'overallRepeatCount': item['repeatCount'],
+          'steps': [
+            _step(
+              'sleep-palms-al-ikhlas',
+              parts[1],
+              1,
+              quran: _quran('سورة الإخلاص'),
+            ),
+            _step(
+              'sleep-palms-al-falaq',
+              parts[2],
+              1,
+              quran: _quran('سورة الفلق'),
+            ),
+            _step(
+              'sleep-palms-an-nas',
+              parts[3],
+              1,
+              quran: _quran('سورة الناس'),
+            ),
+          ],
+          'source': _source(source),
+        }),
+      );
       continue;
     }
     if (order == 2) {
       final splitAt = source.indexOf('البخاري');
-      result.add(_single(
-        item,
-        sourceFull: source.substring(splitAt),
-        virtueFull: source.substring(0, splitAt).trim(),
-      ));
+      result.add(
+        _single(
+          item,
+          sourceFull: source.substring(splitAt),
+          virtueFull: source.substring(0, splitAt).trim(),
+        ),
+      );
       continue;
     }
     if (order == 3) {
       final splitAt = source.indexOf('البخاري');
-      result.add(_single(
-        item,
-        sourceFull: source.substring(splitAt),
-        virtueFull: source.substring(0, splitAt).replaceFirst(RegExp(r'،\s*$'), ''),
-        quran: _quran('سورة البقرة', 285, 286),
-      ));
+      result.add(
+        _single(
+          item,
+          sourceFull: source.substring(splitAt),
+          virtueFull: source
+              .substring(0, splitAt)
+              .replaceFirst(RegExp(r'،\s*$'), ''),
+          quran: _quran('سورة البقرة', 285, 286),
+        ),
+      );
       continue;
     }
     if (order == 4 || order == 6) {
       final parts = source.split(RegExp(r'\r?\n\r?\n'));
-      result.add(_single(
-        item,
-        instruction: parts.first.trim(),
-        sourceFull: parts.skip(1).join('\n\n').trim(),
-      ));
+      result.add(
+        _single(
+          item,
+          instruction: parts.first.trim(),
+          sourceFull: parts.skip(1).join('\n\n').trim(),
+        ),
+      );
       continue;
     }
     if (order == 8) {
       final grouped = raw.sublist(index, index + 3);
       final splitAt = source.indexOf('البخاري');
-      result.add(_sequence(
-        item,
-        [
-          _step('sleep-tasbeeh-subhanallah', grouped[0]['text'] as String,
-              grouped[0]['repeatCount'] as int),
-          _step('sleep-tasbeeh-alhamdulillah', grouped[1]['text'] as String,
-              grouped[1]['repeatCount'] as int),
-          _step('sleep-tasbeeh-allahu-akbar', grouped[2]['text'] as String,
-              grouped[2]['repeatCount'] as int),
-        ],
-        sourceFull: source.substring(splitAt),
-        virtueFull: source.substring(0, splitAt).trim(),
-      ));
+      result.add(
+        _sequence(
+          item,
+          [
+            _step(
+              'sleep-tasbeeh-subhanallah',
+              grouped[0]['text'] as String,
+              grouped[0]['repeatCount'] as int,
+            ),
+            _step(
+              'sleep-tasbeeh-alhamdulillah',
+              grouped[1]['text'] as String,
+              grouped[1]['repeatCount'] as int,
+            ),
+            _step(
+              'sleep-tasbeeh-allahu-akbar',
+              grouped[2]['text'] as String,
+              grouped[2]['repeatCount'] as int,
+            ),
+          ],
+          sourceFull: source.substring(splitAt),
+          virtueFull: source.substring(0, splitAt).trim(),
+        ),
+      );
       index += 2;
       continue;
     }
@@ -325,13 +381,15 @@ List<Map<String, dynamic>> _normalizeSleep(List<Map<String, dynamic>> raw) {
       final citationStart = source.indexOf('البخاري');
       final evidence = source.substring(instructionEnd, citationStart).trim();
       const virtueText = 'فإن متَّ، متَّ على الفطرة';
-      result.add(_single(
-        item,
-        instruction: source.substring(0, instructionEnd).trim(),
-        sourceFull: source.substring(citationStart),
-        virtueFull: virtueText,
-        hadithText: evidence,
-      ));
+      result.add(
+        _single(
+          item,
+          instruction: source.substring(0, instructionEnd).trim(),
+          sourceFull: source.substring(citationStart),
+          virtueFull: virtueText,
+          hadithText: evidence,
+        ),
+      );
       continue;
     }
     result.add(_single(item));
@@ -423,10 +481,7 @@ Map<String, dynamic>? _morningEveningQuran(String category, int order) {
 Map<String, dynamic> _quran(String surah, [int? from, int? to]) =>
     _withoutNulls({'surah': surah, 'ayahFrom': from, 'ayahTo': to});
 
-Map<String, dynamic> _source(
-  String full, {
-  Map<String, dynamic>? quran,
-}) => {
+Map<String, dynamic> _source(String full, {Map<String, dynamic>? quran}) => {
   'short': _shortSource(full, quran: quran),
   'full': full.trim(),
 };
