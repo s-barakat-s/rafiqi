@@ -43,3 +43,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# flutter_overlay_window example generated files
+packages/flutter_overlay_window/example/android/.gradle/
+packages/flutter_overlay_window/example/android/app/src/main/java/io/
+packages/flutter_overlay_window/example/android/gradle/wrapper/gradle-wrapper.jar
+packages/flutter_overlay_window/example/android/gradlew
+packages/flutter_overlay_window/example/android/gradlew.bat
+packages/flutter_overlay_window/example/android/local.properties
+packages/flutter_overlay_window/example/build/
+packages/flutter_overlay_window/example/pubspec.lock
