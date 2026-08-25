@@ -7,20 +7,14 @@ import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 
 class TasbeehStateMessage {
-  const TasbeehStateMessage({
-    required this.state,
-    required this.source,
-  });
+  const TasbeehStateMessage({required this.state, required this.source});
 
   final TasbeehState state;
   final String source;
 }
 
 class TasbeehSettingsMessage {
-  const TasbeehSettingsMessage({
-    required this.settings,
-    required this.source,
-  });
+  const TasbeehSettingsMessage({required this.settings, required this.source});
 
   final TasbeehSettings settings;
   final String source;
@@ -33,8 +27,8 @@ class TasbeehOverlayMessenger {
   static const sourceOverlay = 'overlay';
   static const _mainAppPortName = 'tasbeeh_main_app_state_port';
 
-  static final Stream<Object?> _messages =
-      FlutterOverlayWindow.overlayListener.asBroadcastStream();
+  static final Stream<Object?> _messages = FlutterOverlayWindow.overlayListener
+      .asBroadcastStream();
 
   static Stream<TasbeehStateMessage> get stateMessages {
     return _messages
@@ -95,10 +89,7 @@ class TasbeehOverlayMessenger {
     TasbeehState state,
     String source,
   ) {
-    return {
-      ...state.toJson(),
-      'source': source,
-    };
+    return {...state.toJson(), 'source': source};
   }
 
   static Map<String, Object?> _settingsUpdateMap(

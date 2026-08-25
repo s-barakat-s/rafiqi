@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:tasbeh/app/theme/app_theme.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_launcher.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_messenger.dart';
-import 'package:tasbeh/features/tasbeeh/data/tasbeeh_local_storage.dart';
+import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/widgets/auto_hide_selector.dart';
@@ -25,7 +25,7 @@ class FloatingTasbeehSettingsScreen extends StatefulWidget {
 
 class _FloatingTasbeehSettingsScreenState
     extends State<FloatingTasbeehSettingsScreen> {
-  final _storage = TasbeehLocalStorage();
+  final _repository = TasbeehRepository();
   late TasbeehSettings _settings = widget.initialSettings;
 
   Future<void> _updateSettings(
@@ -33,7 +33,7 @@ class _FloatingTasbeehSettingsScreenState
     bool restartOverlay = false,
   }) async {
     final wasOverlayActive = await FlutterOverlayWindow.isActive();
-    await _storage.saveSettings(settings);
+    await _repository.saveSettings(settings);
     if (!mounted) return;
 
     setState(() => _settings = settings);
@@ -82,7 +82,7 @@ class _FloatingTasbeehSettingsScreenState
                 Text(
                   'إعدادات السبحة العائمة',
                   style: TextStyle(
-                    fontFamily: 'ArefRuqaa',
+                    fontFamily: AppFonts.display,
                     color: colors.textPrimary,
                     fontSize: 31,
                     fontWeight: FontWeight.w700,
@@ -91,10 +91,7 @@ class _FloatingTasbeehSettingsScreenState
                 const SizedBox(height: 5),
                 Text(
                   'اضبط طريقة ظهور العداد فوق التطبيقات',
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 15),
                 ),
                 const SizedBox(height: 28),
                 _SettingsSection(
@@ -137,20 +134,16 @@ class _FloatingTasbeehSettingsScreenState
                       max: 1,
                       divisions: 6,
                       label: _opacityLabel(_settings.opacity),
-                      onChanged: (value) => _updateSettings(
-                        _settings.copyWith(opacity: value),
-                      ),
+                      onChanged: (value) =>
+                          _updateSettings(_settings.copyWith(opacity: value)),
                     ),
                     const _SettingDivider(),
                     AutoHideSelector(
-                      autoCollapseSeconds:
-                          _settings.autoCollapseSeconds == 0
+                      autoCollapseSeconds: _settings.autoCollapseSeconds == 0
                           ? null
                           : _settings.autoCollapseSeconds,
                       onChanged: (seconds) => _updateSettings(
-                        _settings.copyWith(
-                          autoCollapseSeconds: seconds ?? 0,
-                        ),
+                        _settings.copyWith(autoCollapseSeconds: seconds ?? 0),
                       ),
                     ),
                   ],

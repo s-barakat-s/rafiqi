@@ -1,3 +1,5 @@
+import 'package:tasbeh/core/time/local_day.dart';
+
 class TasbeehState {
   const TasbeehState({
     required this.currentCount,
@@ -12,7 +14,7 @@ class TasbeehState {
       currentCount: 0,
       totalCount: 0,
       dailyTotal: 0,
-      dailyDateKey: dateKey(DateTime.now()),
+      dailyDateKey: LocalDay.key(DateTime.now()),
       targetMode: targetMode33,
     );
   }
@@ -76,16 +78,9 @@ class TasbeehState {
   }
 
   TasbeehState forCurrentDay([DateTime? now]) {
-    final today = dateKey(now ?? DateTime.now());
+    final today = LocalDay.key(now ?? DateTime.now());
     if (dailyDateKey == today) return this;
     return copyWith(dailyTotal: 0, dailyDateKey: today);
-  }
-
-  static String dateKey(DateTime date) {
-    final local = date.toLocal();
-    return '${local.year.toString().padLeft(4, '0')}-'
-        '${local.month.toString().padLeft(2, '0')}-'
-        '${local.day.toString().padLeft(2, '0')}';
   }
 
   static String _normalizeTargetMode(String? targetMode) {

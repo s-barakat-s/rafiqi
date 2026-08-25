@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 
-class TasbeehLocalStorage {
+class TasbeehRepository {
   static const _currentCountKey = 'tasbeeh.currentCount';
   static const _totalCountKey = 'tasbeeh.totalCount';
   static const _dailyTotalKey = 'tasbeeh.dailyTotal';

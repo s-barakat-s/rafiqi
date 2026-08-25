@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tasbeh/app/theme/app_theme.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
@@ -63,7 +63,9 @@ class AppBottomNavBar extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: center
                               ? (isDark ? colors.secondary : colors.selected)
-                              : (selected ? colors.selected : Colors.transparent),
+                              : (selected
+                                    ? colors.selected
+                                    : Colors.transparent),
                           border: center && !isDark
                               ? Border.all(color: colors.outline, width: 2)
                               : null,
@@ -73,7 +75,9 @@ class AppBottomNavBar extends StatelessWidget {
                           size: center ? 23 : 21,
                           color: center
                               ? theme.colorScheme.onSecondary
-                              : (selected ? activeColor : colors.navigationInactive),
+                              : (selected
+                                    ? activeColor
+                                    : colors.navigationInactive),
                         ),
                       ),
                       if (!center) ...[

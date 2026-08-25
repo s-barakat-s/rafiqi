@@ -5,7 +5,7 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_counter_logic.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_layout_controller.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_messenger.dart';
-import 'package:tasbeh/features/tasbeeh/data/tasbeeh_local_storage.dart';
+import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/overlay/floating_tasbeeh_overlay.dart';
@@ -36,7 +36,7 @@ class _TasbeehOverlayStateHost extends StatefulWidget {
 }
 
 class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
-  final _storage = TasbeehLocalStorage();
+  final _storage = TasbeehRepository();
   TasbeehState _state = TasbeehState.initial();
   TasbeehSettings _settings = TasbeehSettings.initial();
   StreamSubscription<TasbeehStateMessage>? _mainAppStateSubscription;

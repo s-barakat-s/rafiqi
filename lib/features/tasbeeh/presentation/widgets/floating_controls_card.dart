@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:tasbeh/app/theme/app_theme.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 
 class FloatingControlsCard extends StatefulWidget {
   const FloatingControlsCard({
@@ -87,11 +87,10 @@ class _FloatingControlsCardState extends State<FloatingControlsCard>
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _isActive ? 'نشطة فوق التطبيقات' : 'عدّاد صغير أثناء استخدام هاتفك',
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontSize: 12,
-                  ),
+                  _isActive
+                      ? 'نشطة فوق التطبيقات'
+                      : 'عدّاد صغير أثناء استخدام هاتفك',
+                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
                 ),
               ],
             ),

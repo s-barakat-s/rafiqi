@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tasbeh/app/formatters/arabic_numerals.dart';
-import 'package:tasbeh/app/theme/app_theme.dart';
+import 'package:tasbeh/core/formatting/arabic_numerals.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 
 class AutoHideSelector extends StatelessWidget {
   const AutoHideSelector({

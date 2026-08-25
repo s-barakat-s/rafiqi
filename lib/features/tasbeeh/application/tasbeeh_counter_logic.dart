@@ -15,8 +15,9 @@ class TasbeehCounterLogic {
       );
     }
 
-    final nextCurrent =
-        state.currentCount >= targetCount ? 1 : state.currentCount + 1;
+    final nextCurrent = state.currentCount >= targetCount
+        ? 1
+        : state.currentCount + 1;
 
     return state.copyWith(
       currentCount: nextCurrent,
