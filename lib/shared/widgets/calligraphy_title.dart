@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tasbeh/app/theme/app_theme.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 
 class CalligraphyTitle extends StatelessWidget {
   const CalligraphyTitle({

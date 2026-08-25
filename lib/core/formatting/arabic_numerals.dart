@@ -1,3 +1,4 @@
+/// Formats app-generated numbers without altering source or religious text.
 abstract final class ArabicNumerals {
   static const _westernDigits = '0123456789';
   static const _arabicIndicDigits = '٠١٢٣٤٥٦٧٨٩';

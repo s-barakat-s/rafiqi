@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+abstract final class AppFonts {
+  static const ui = 'IBMPlexSansArabic';
+  static const reading = 'Amiri';
+  static const display = 'ArefRuqaa';
+}
+
+/// Approved brand primitives. Widgets should consume [AppColors] roles.
 abstract final class AppPalette {
   static const dustGrey = Color(0xFFDAD7CD);
   static const drySage = Color(0xFFA3B18A);
@@ -188,9 +195,9 @@ abstract final class AppTheme {
       canvasColor: colors.surface,
       cardColor: colors.surface,
       extensions: [colors],
-      fontFamily: 'IBMPlexSansArabic',
+      fontFamily: AppFonts.ui,
       textTheme: base.apply(
-        fontFamily: 'IBMPlexSansArabic',
+        fontFamily: AppFonts.ui,
         bodyColor: colors.textPrimary,
         displayColor: colors.textPrimary,
       ),
@@ -200,7 +207,7 @@ abstract final class AppTheme {
         backgroundColor: Colors.transparent,
         foregroundColor: colors.textPrimary,
         titleTextStyle: TextStyle(
-          fontFamily: 'ArefRuqaa',
+          fontFamily: AppFonts.display,
           color: colors.textPrimary,
           fontSize: 25,
           fontWeight: FontWeight.w700,
@@ -242,7 +249,7 @@ abstract final class AppTheme {
             ? AppPalette.pineTeal
             : AppPalette.hunterGreen,
         contentTextStyle: const TextStyle(
-          fontFamily: 'IBMPlexSansArabic',
+          fontFamily: AppFonts.ui,
           color: AppPalette.dustGrey,
         ),
       ),
