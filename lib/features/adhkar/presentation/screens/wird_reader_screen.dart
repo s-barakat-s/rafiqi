@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +7,6 @@ import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/wird_reader_mode.dart';
 import 'package:tasbeh/features/adhkar/presentation/controllers/wird_reader_controller.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/dhikr_details_screen.dart';
-import 'package:tasbeh/features/adhkar/presentation/widgets/adhkar_category_title_hero.dart';
 import 'package:tasbeh/features/settings/data/repositories/app_preferences_repository.dart';
 
 part '../widgets/reader/dhikr_card.dart';
@@ -44,6 +42,8 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
   late final AnimationController _deckController;
   final _preferences = AppPreferencesRepository.instance;
   late WirdReaderMode _mode = _preferences.value.readerMode;
+  late bool _hapticEnabled = _preferences.value.adhkarVibrationEnabled;
+  late bool _audioEnabled = _preferences.value.adhkarSoundEnabled;
   final ValueNotifier<double> _readingScrollProgress = ValueNotifier(0);
   int _readingSessionGeneration = 0;
 
@@ -70,9 +70,18 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
   }
 
   void _onPreferencesChanged() {
-    if (mounted && _mode != _preferences.value.readerMode) {
-      setState(() => _mode = _preferences.value.readerMode);
+    if (!mounted) return;
+    final value = _preferences.value;
+    if (_mode == value.readerMode &&
+        _hapticEnabled == value.adhkarVibrationEnabled &&
+        _audioEnabled == value.adhkarSoundEnabled) {
+      return;
     }
+    setState(() {
+      _mode = value.readerMode;
+      _hapticEnabled = value.adhkarVibrationEnabled;
+      _audioEnabled = value.adhkarSoundEnabled;
+    });
   }
 
   @override
@@ -96,10 +105,10 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
     await _reader.resumeIfDayChanged();
     if (!mounted || _reader.isComplete) return;
     final currentItem = _reader.current;
-    if (!currentItem.isPrelude && widget.vibrationEnabled) {
+    if (!currentItem.isPrelude && _hapticEnabled) {
       HapticFeedback.selectionClick();
     }
-    if (!currentItem.isPrelude && widget.soundEnabled) {
+    if (!currentItem.isPrelude && _audioEnabled) {
       SystemSound.play(SystemSoundType.click);
     }
     await _reader.decrement(
@@ -128,10 +137,10 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
     Future<void> Function()? animateRemoval,
   }) async {
     if (_reader.isTransitioning || _reader.isItemCompleted(item.id)) return;
-    if (!item.isPrelude && widget.vibrationEnabled) {
+    if (!item.isPrelude && _hapticEnabled) {
       HapticFeedback.selectionClick();
     }
-    if (!item.isPrelude && widget.soundEnabled) {
+    if (!item.isPrelude && _audioEnabled) {
       SystemSound.play(SystemSoundType.click);
     }
     await _reader.decrementItem(item.id, animateRemoval: animateRemoval);
@@ -144,6 +153,62 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
       _readingScrollProgress.value = 1;
     }
     await _preferences.setReaderMode(mode);
+  }
+
+  Future<void> _toggleHaptic() =>
+      _preferences.setAdhkarVibration(!_hapticEnabled);
+
+  Future<void> _toggleAudio() =>
+      _preferences.setAdhkarSound(!_audioEnabled);
+
+  Widget _buildHeader(BuildContext context) {
+    final colors = context.appColors;
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'رجوع',
+          icon: const Icon(Icons.arrow_forward_rounded),
+        ),
+        Expanded(child: _ReaderTitle(category: widget.category)),
+        if (_mode != WirdReaderMode.reading)
+          IconButton(
+            onPressed: _reader.canUndo ? _undo : null,
+            tooltip: 'تراجع خطوة',
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.undo_rounded, size: 21),
+          ),
+        IconButton(
+          onPressed: _toggleHaptic,
+          tooltip: _hapticEnabled ? 'إيقاف الاهتزاز' : 'تشغيل الاهتزاز',
+          visualDensity: VisualDensity.compact,
+          icon: Icon(
+            _hapticEnabled
+                ? Icons.vibration_rounded
+                : Icons.mobile_off_rounded,
+            size: 21,
+            color: _hapticEnabled ? colors.secondary : null,
+          ),
+        ),
+        IconButton(
+          onPressed: _toggleAudio,
+          tooltip: _audioEnabled ? 'إيقاف الصوت' : 'تشغيل الصوت',
+          visualDensity: VisualDensity.compact,
+          icon: Icon(
+            _audioEnabled
+                ? Icons.volume_up_outlined
+                : Icons.volume_off_outlined,
+            size: 21,
+            color: _audioEnabled ? colors.secondary : null,
+          ),
+        ),
+        _ReaderModeButton(
+          selected: _mode,
+          hapticsEnabled: _hapticEnabled,
+          onSelected: _selectMode,
+        ),
+      ],
+    );
   }
 
   @override
@@ -159,50 +224,7 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
           child: Column(
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    tooltip: 'رجوع',
-                    icon: const Icon(Icons.arrow_forward_rounded),
-                  ),
-                  Expanded(
-                    child: AdhkarCategoryTitleHero(
-                      category: widget.category,
-                      child: _ReaderTitle(category: widget.category),
-                    ),
-                  ),
-                  if (_mode != WirdReaderMode.reading)
-                    IconButton(
-                      onPressed: _reader.canUndo ? _undo : null,
-                      tooltip: 'تراجع خطوة',
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(Icons.undo_rounded, size: 21),
-                    ),
-                  _HeaderAction(
-                    icon: Icons.volume_up_outlined,
-                    label: 'تشغيل الصوت',
-                  ),
-                  _HeaderAction(
-                    icon: Icons.bookmark_border_rounded,
-                    label: 'المفضلة',
-                  ),
-                  _HeaderAction(
-                    icon: Icons.ios_share_outlined,
-                    label: 'مشاركة',
-                  ),
-                  IconButton(
-                    onPressed: () => _showReaderModeSelector(
-                      context,
-                      selected: _mode,
-                      onSelected: _selectMode,
-                    ),
-                    tooltip: 'طريقة قراءة الورد',
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.view_agenda_outlined, size: 21),
-                  ),
-                ],
-              ),
+              _buildHeader(context),
               const SizedBox(height: 10),
               ValueListenableBuilder<double>(
                 valueListenable: _readingScrollProgress,

@@ -1,6 +1,6 @@
 enum DhikrEntryType { prelude, single, sequenceStep, compositeStep }
 
-enum AdhkarCategoryKind { morning, evening, afterPrayer, sleep }
+enum AdhkarCategoryKind { morning, evening, afterPrayer, sleep, custom }
 
 class DhikrItem {
   const DhikrItem({
@@ -50,6 +50,30 @@ class DhikrItem {
   final int? ayahTo;
 
   bool get isPrelude => entryType == DhikrEntryType.prelude;
+
+  DhikrItem withRepeatCount(int value) => DhikrItem(
+    id: id,
+    order: order,
+    category: category,
+    text: text,
+    repeatCount: value,
+    entryType: entryType,
+    parentId: parentId,
+    countDescription: value == repeatCount ? countDescription : null,
+    instruction: instruction,
+    appliesTo: appliesTo,
+    source: source,
+    fullSource: fullSource,
+    virtue: virtue,
+    virtuePreview: virtuePreview,
+    hadithText: hadithText,
+    explanation: explanation,
+    audioUrl: audioUrl,
+    isQuran: isQuran,
+    surah: surah,
+    ayahFrom: ayahFrom,
+    ayahTo: ayahTo,
+  );
 }
 
 class AdhkarCategory {

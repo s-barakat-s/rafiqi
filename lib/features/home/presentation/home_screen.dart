@@ -6,10 +6,12 @@ import 'package:tasbeh/core/time/local_day.dart';
 import 'package:tasbeh/features/calendar/presentation/screens/hijri_calendar_screen.dart';
 import 'package:tasbeh/shared/widgets/calligraphy_title.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_progress_repository.dart';
+import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar_progress.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_local_repository.dart';
 import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_repository.dart';
 import 'package:tasbeh/features/daily_wird/domain/entities/daily_wird.dart';
+import 'package:tasbeh/features/home/data/repositories/daily_dhikr_repository.dart';
 import 'package:tasbeh/features/home/domain/adhkar_time_period.dart';
 
 part '../../daily_wird/presentation/widgets/add_daily_task_sheet.dart';
@@ -33,6 +35,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _store = DailyWirdRepository.instance;
   final _progressRepository = AdhkarProgressRepository.instance;
+  final _dailyDhikrRepository = DailyDhikrRepository.instance;
   Map<String, AdhkarProgressSummary> _adhkarProgress = const {};
   late DateTime _today;
   late HijriDate _hijriToday;
@@ -84,7 +87,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _onProgressChanged() => _loadAdhkarProgress();
 
   Future<void> _loadHomeState() async {
-    await _store.initialize();
+    await Future.wait([
+      _store.initialize(),
+      _dailyDhikrRepository.initialize(),
+    ]);
     await _loadAdhkarProgress();
   }
 
@@ -142,6 +148,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _showAddTaskSheet() async {
+    final choice = await showModalBottomSheet<_DailyTaskAddChoice>(
+      context: context,
+      useSafeArea: true,
+      builder: (_) => const _AddTaskChoiceSheet(),
+    );
+    if (choice == null || !mounted) return;
+    if (choice == _DailyTaskAddChoice.readyMade) {
+      await _showReadyTaskPicker();
+      return;
+    }
     final task = await showModalBottomSheet<DailyTask>(
       context: context,
       isScrollControlled: true,
@@ -150,6 +166,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
     if (task == null || !mounted) return;
     await _store.addTask(task);
+  }
+
+  Future<void> _showReadyTaskPicker() async {
+    final categories = await AdhkarLocalRepository.loadCategories();
+    if (!mounted) return;
+    final category = await showModalBottomSheet<AdhkarCategory>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => _ReadyTaskPickerSheet(categories: categories),
+    );
+    if (category == null || !mounted) return;
+    if (_store.hasLinkedCollection(category.id)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('هذا الورد مضاف بالفعل إلى وردك اليومي')),
+      );
+      return;
+    }
+    await _store.addTask(
+      DailyTask(
+        id: 'linked_adhkar_${category.id}',
+        title: category.title,
+        type: 'ذكر',
+        taskType: DailyTask.adhkarCollectionTaskType,
+        collectionId: category.id,
+      ),
+    );
   }
 
   Future<void> _openHijriCalendar() async {

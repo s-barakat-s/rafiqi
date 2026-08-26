@@ -20,12 +20,16 @@ class DailyWirdRepository extends ChangeNotifier {
       title: 'أذكار الصباح',
       type: 'ذكر',
       isBase: true,
+      taskType: DailyTask.adhkarCollectionTaskType,
+      collectionId: 'morning',
     ),
     DailyTask(
       id: 'evening_adhkar',
       title: 'أذكار المساء',
       type: 'ذكر',
       isBase: true,
+      taskType: DailyTask.adhkarCollectionTaskType,
+      collectionId: 'evening',
     ),
   ];
 
@@ -143,6 +147,67 @@ class DailyWirdRepository extends ChangeNotifier {
     await _saveHistory(preferences);
     notifyListeners();
   }
+
+  bool hasLinkedCollection(String collectionId) => tasks.any(
+    (task) =>
+        task.taskType == DailyTask.adhkarCollectionTaskType &&
+        task.collectionId == collectionId,
+  );
+
+  Future<void> renameLinkedCollectionTask(
+    String collectionId,
+    String title,
+  ) async {
+    _customTasks = _customTasks
+        .map(
+          (task) => task.collectionId == collectionId
+              ? DailyTask(
+                  id: task.id,
+                  title: title,
+                  type: task.type,
+                  goal: task.goal,
+                  taskType: task.taskType,
+                  collectionId: task.collectionId,
+                )
+              : task,
+        )
+        .toList();
+    final preferences = await SharedPreferences.getInstance();
+    await _saveTasks(preferences);
+    notifyListeners();
+  }
+
+  Future<void> removeLinkedCollectionTask(String collectionId) async {
+    final removedIds = _customTasks
+        .where((task) => task.collectionId == collectionId)
+        .map((task) => task.id)
+        .toSet();
+    if (removedIds.isEmpty) return;
+    _customTasks = _customTasks
+        .where((task) => !removedIds.contains(task.id))
+        .toList();
+    final todayKey = LocalDay.key(DateTime.now());
+    final current = _history[todayKey];
+    if (current != null) {
+      _history[todayKey] = _evaluateCompletion(
+        current.copyWith(
+          items: current.items
+              .where((item) => !removedIds.contains(item.id))
+              .toList(),
+        ),
+      );
+    }
+    final preferences = await SharedPreferences.getInstance();
+    await _saveTasks(preferences);
+    await _saveHistory(preferences);
+    notifyListeners();
+  }
+
+  Future<void> _saveTasks(SharedPreferences preferences) =>
+      preferences.setStringList(
+        _tasksKey,
+        _customTasks.map((item) => jsonEncode(item.toJson())).toList(),
+      );
 
   static const int maxMonthlyGraceDays = 2;
 

@@ -150,6 +150,65 @@ class _FloatingTasbeehSettingsScreenState
                 ),
                 const SizedBox(height: 26),
                 _SettingsSection(
+                  title: 'العداد والمقبض',
+                  children: [
+                    _SettingLabel(
+                      label: 'حجم رقم العداد',
+                      value: _scaleLabel(_settings.counterScale),
+                    ),
+                    Slider(
+                      value: _settings.counterScale,
+                      min: TasbeehSettings.minCounterScale,
+                      max: TasbeehSettings.maxCounterScale,
+                      divisions: 13,
+                      label: _scaleLabel(_settings.counterScale),
+                      onChanged: (value) => _updateSettings(
+                        _settings.copyWith(counterScale: value),
+                      ),
+                    ),
+                    const _SettingDivider(),
+                    _SettingLabel(
+                      label: 'حجم المقبض الجانبي',
+                      value: _scaleLabel(_settings.collapsedHandleScale),
+                    ),
+                    Slider(
+                      value: _settings.collapsedHandleScale,
+                      min: TasbeehSettings.minCollapsedHandleScale,
+                      max: TasbeehSettings.maxCollapsedHandleScale,
+                      divisions: 12,
+                      label: _scaleLabel(_settings.collapsedHandleScale),
+                      onChanged: (value) => _updateSettings(
+                        _settings.copyWith(collapsedHandleScale: value),
+                      ),
+                    ),
+                    const _SettingDivider(),
+                    _SettingLabel(
+                      label: 'شفافية المقبض',
+                      value: _opacityLabel(_settings.collapsedHandleOpacity),
+                    ),
+                    Slider(
+                      value: _settings.collapsedHandleOpacity,
+                      min: TasbeehSettings.minCollapsedHandleOpacity,
+                      max: 1,
+                      divisions: 15,
+                      label: _opacityLabel(_settings.collapsedHandleOpacity),
+                      onChanged: (value) => _updateSettings(
+                        _settings.copyWith(collapsedHandleOpacity: value),
+                      ),
+                    ),
+                    const _SettingDivider(),
+                    const _SettingLabel(label: 'لون المقبض'),
+                    const SizedBox(height: 10),
+                    _HandleColorSelector(
+                      value: _settings.handleColorMode,
+                      onChanged: (value) => _updateSettings(
+                        _settings.copyWith(handleColorMode: value),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 26),
+                _SettingsSection(
                   title: 'التفاعل',
                   children: [
                     _SettingsSwitch(
@@ -187,6 +246,12 @@ class _FloatingTasbeehSettingsScreenState
     if (value < .62) return 'خفيفة';
     if (value < .88) return 'متوسطة';
     return 'واضحة';
+  }
+
+  String _scaleLabel(double value) {
+    if (value < .9) return 'صغير';
+    if (value > 1.12) return 'كبير';
+    return 'متوسط';
   }
 }
 
@@ -272,6 +337,41 @@ class _SideSelector extends StatelessWidget {
       segments: const [
         ButtonSegment(value: TasbeehSettings.sideRight, label: Text('يمين')),
         ButtonSegment(value: TasbeehSettings.sideLeft, label: Text('يسار')),
+      ],
+      selected: {value},
+      showSelectedIcon: false,
+      style: ButtonStyle(
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.textPrimary
+              : colors.textSecondary,
+        ),
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? colors.selected
+              : Colors.transparent,
+        ),
+        side: WidgetStatePropertyAll(BorderSide(color: colors.outline)),
+      ),
+      onSelectionChanged: (selection) => onChanged(selection.first),
+    );
+  }
+}
+
+class _HandleColorSelector extends StatelessWidget {
+  const _HandleColorSelector({required this.value, required this.onChanged});
+
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    return SegmentedButton<String>(
+      segments: const [
+        ButtonSegment(value: TasbeehSettings.handleWhite, label: Text('فاتح')),
+        ButtonSegment(value: TasbeehSettings.handleAccent, label: Text('أخضر')),
+        ButtonSegment(value: TasbeehSettings.handleGray, label: Text('رمادي')),
       ],
       selected: {value},
       showSelectedIcon: false,

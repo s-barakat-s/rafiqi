@@ -192,9 +192,7 @@ class _ListDhikrCardState extends State<_ListDhikrCard>
       ),
     );
     return _DhikrDetailsTransition(
-      categoryId: widget.categoryId,
       item: widget.item,
-      borderRadius: BorderRadius.circular(18),
       child: card,
     );
   }

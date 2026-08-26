@@ -16,6 +16,7 @@ class TasbeehHomeScreen extends StatelessWidget {
     required this.onResetSession,
     required this.onStartFloating,
     required this.onStopFloating,
+    required this.onOpenSettings,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class TasbeehHomeScreen extends StatelessWidget {
   final VoidCallback onResetSession;
   final Future<void> Function() onStartFloating;
   final Future<void> Function() onStopFloating;
+  final VoidCallback onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +43,27 @@ class TasbeehHomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'تسبيح',
-                  style: TextStyle(
-                    fontFamily: AppFonts.display,
-                    color: colors.textPrimary,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w700,
-                    height: 1.15,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'تسبيح',
+                        style: TextStyle(
+                          fontFamily: AppFonts.display,
+                          color: colors.textPrimary,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w700,
+                          height: 1.15,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: onOpenSettings,
+                      tooltip: 'إعدادات السبحة العائمة',
+                      icon: const Icon(Icons.tune_rounded),
+                      color: colors.textSecondary,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(

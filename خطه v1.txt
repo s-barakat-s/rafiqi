@@ -1,0 +1,1477 @@
+تمام. خلينا نمسك **Rafiqi V1 فقط** ونحولها لخطة تنفيذ فعلية Phase-by-Phase، بحيث كل Phase لها هدف واضح وDefinition of Done، وممنوع نفتح V2 قبل ما V1 تتقفل.
+
+# Rafiqi V1 — الهدف النهائي
+
+نسخة Production محترمة فيها:
+
+```text
+Rafiqi V1.0
+──────────────
+رفيقي Branding
+New UI / App Shell
+Home
+Adhkar
+3 Reader Modes
+Daily Wird
+Daily Dhikr
+Journey + History + Streak
+Grace Days
+Hijri Calendar
+Tasbeeh
+Floating Tasbeeh
+Adhkar Audio
+Multiple Reciters
+Streaming
+Offline Downloads
+Onboarding
+Feature Coach Marks
+Settings
+Light / Dark
+Arabic / RTL
+Production QA
+Signed APK / AAB
+```
+
+وخارج V1 تمامًا:
+
+```text
+❌ Prayer Times
+❌ Adhan
+❌ Qibla
+❌ Quran
+❌ Quran Audio
+❌ Accounts / Cloud Sync
+```
+
+---
+
+# Phase 0 — Close Current Core
+
+دي آخر مرحلة قبل ما نلمس شكل التطبيق.
+
+**الهدف:** نثبت إن كل اللي بنيناه حاليًا شغال، ونقفل أي Feature ناقصة.
+
+نعمل فيها:
+
+* ربط `daily_dhikr.json` فعليًا بـ **ذكر اليوم**.
+* Dynamic Daily Dhikr.
+* Persist:
+
+  * اليوم.
+  * الذكر الحالي.
+  * remaining count.
+* الانتقال للذكر التالي.
+* التأكد من multi-step Undo لو لسه ناقص.
+* التأكد إن Reader / Daily Wird / Journey / Tasbeeh مفيهمش exceptions واضحة.
+* Clean Git status.
+
+**ممنوع:** إعادة تصميم أي شاشة.
+
+**Done لما:**
+
+```text
+كل الـCore الحالي شغال وظيفيًا
+ولا توجد feature أساسية نصف مكتملة
+```
+
+Commit:
+
+```text
+feat: finalize core worship functionality
+```
+
+---
+
+# Phase 1 — Rafiqi Product Identity
+
+هنا التطبيق يبطل رسميًا يكون Tasbeh ويصبح **رفيقي**.
+
+مش مجرد تغيير اسم.
+
+### Branding
+
+نعتمد:
+
+```text
+Arabic: رفيقي
+English: Rafiqi
+```
+
+ونحدد tagline بعدين، مثل:
+
+```text
+رفيقك في يومك
+```
+
+### Assets
+
+نعمل:
+
+* Logo.
+* App Icon.
+* Android Adaptive Icon.
+* Monochrome icon لو محتاج.
+* Splash logo.
+* Splash background.
+* App name.
+
+### Android
+
+تغيير الـdisplay name في المشروع بدون العبث بالـpackage identifier إلا لو عندنا سبب.
+
+### Internal cleanup
+
+أي نص قديم مثل:
+
+```text
+Tasbeh
+Tasbeeh App
+Electronic Tasbeeh
+```
+
+يتشال من الأماكن اللي بتواجه المستخدم.
+
+### About
+
+نعمل أساس بسيط:
+
+```text
+رفيقي
+Version 1.0.0
+```
+
+**Done لما:**
+
+تشغل APK ومفيش أي إحساس إن اسم التطبيق القديم لسه موجود.
+
+Commit:
+
+```text
+feat: rebrand app as Rafiqi
+```
+
+---
+
+# Phase 2 — V1 Design System
+
+دي Phase مهمة جدًا قبل إعادة تصميم الشاشات.
+
+بدل ما كل شاشة تتظبط لوحدها، نقفل لغة تصميم واحدة.
+
+### Typography
+
+نثبت أدوار الخطوط:
+
+```text
+Aref Ruqaa
+→ expressive / heritage headings
+
+Amiri
+→ Quran / Dhikr / religious text
+
+IBM Plex Sans Arabic
+→ buttons / metadata / UI
+```
+
+### Colors
+
+نرتب الـtokens الموجودة:
+
+```text
+Background
+Surface
+Elevated Surface
+
+Primary
+Secondary
+Accent
+
+Text Primary
+Text Secondary
+Muted
+
+Border
+Divider
+
+Success
+Warning
+Error
+```
+
+Light + Dark.
+
+### Components
+
+نوحد شكل:
+
+```text
+Button
+IconButton
+Card
+Section Header
+Bottom Sheet
+Dialog
+Switch
+Slider
+Tabs
+Chip
+Empty State
+Error State
+Loading
+Snackbar
+Tooltip
+```
+
+### Layout
+
+نحدد:
+
+```text
+Page horizontal padding
+Section spacing
+Card padding
+Border radius
+Bottom navigation safe area
+Maximum text widths
+```
+
+### Motion
+
+نعمل Motion language بسيطة:
+
+```text
+tap feedback
+fade
+slide
+shared surface
+card completion
+screen transition
+```
+
+تقريبًا:
+
+```text
+180–300 ms
+```
+
+من غير animations زيادة.
+
+**Done لما:**
+
+أي Feature جديدة نقدر نبنيها بدون اختراع style جديد.
+
+Commit:
+
+```text
+refactor: establish Rafiqi design system
+```
+
+---
+
+# Phase 3 — New App Shell
+
+هنا نغير الإطار الخارجي للتطبيق.
+
+لكن **مش محتوى الشاشات بالكامل لسه**.
+
+V1 Navigation:
+
+```text
+الرئيسية
+الأذكار
+السبحة
+رحلتي
+المزيد
+```
+
+نحتفظ بالسبحة Tab في V1 لأنها Feature أساسية فعلًا.
+
+في V3 لما القرآن يدخل، نقدر نعيد التفكير.
+
+### App Shell يشمل
+
+* Bottom navigation.
+* Active state.
+* Safe areas.
+* Consistent page backgrounds.
+* Global app bar behavior.
+* Android back.
+* Navigation persistence.
+* Transitions.
+* Status bar.
+* Light/Dark system bars.
+
+### More screen
+
+أول نسخة:
+
+```text
+التقويم الهجري
+إعدادات السبحة العائمة
+التنزيلات
+المظهر
+الإرشادات
+عن رفيقي
+```
+
+بعضهم يقدر يظهر بعد الـPhases اللي جاية.
+
+**Done لما:**
+
+تتنقل في التطبيق وتحس إنه منتج واحد متماسك حتى لو بعض Content الشاشات لسه بتصميمها القديم.
+
+Commit:
+
+```text
+refactor: introduce Rafiqi app shell
+```
+
+---
+
+# Phase 4 — Home V1
+
+دي أهم شاشة بصريًا.
+
+هدفها مش إنها تعرض كل Features، بل تقول للمستخدم:
+
+> إيه المفيد لي النهارده؟
+
+الشكل الأساسي:
+
+```text
+السلام عليكم
+
+الثلاثاء، ٢٥ أغسطس
+١٧ صفر ١٤٤٨ هـ
+
+[ Hero ]
+أذكار الصباح / المساء
+
+وردك اليوم
+
+ذكر اليوم
+
+رحلتك
+٧ أيام متتالية
+
+أدوات سريعة
+السبحة    التقويم الهجري
+```
+
+### الجزء العلوي
+
+* Salam.
+* Gregorian date.
+* Hijri date.
+* التاريخ tappable → Hijri Calendar.
+
+### Hero
+
+حسب الوقت:
+
+```text
+Morning → Morning Adhkar
+Evening → Evening Adhkar
+```
+
+وبالحالات:
+
+```text
+ابدأ
+متابعة
+مكتمل
+```
+
+### Daily Wird
+
+نحافظ على الـlogic الموجود.
+
+### Daily Dhikr
+
+يستخدم JSON الجديد.
+
+### Journey teaser
+
+مش Dashboard كامل.
+
+مثلاً:
+
+```text
+٧ أيام متتالية
+```
+
+مع link لـرحلتي.
+
+### Quick Tools
+
+فقط الحاجات الموجودة:
+
+```text
+السبحة
+التقويم
+```
+
+**ممنوع:** Prayer/Quran cards وهمية.
+
+**Done لما:**
+
+Home تقدر تكون Screenshot أساسية في Play Store.
+
+Commit:
+
+```text
+feat: redesign home for Rafiqi V1
+```
+
+---
+
+# Phase 5 — Adhkar Experience Polish
+
+الـlogic موجود بالفعل، هنا نخلي التجربة Product-grade.
+
+### Categories
+
+توحيد:
+
+* Cards.
+* Calligraphy.
+* spacing.
+* selected state.
+* loading.
+
+### Reader Focus
+
+نراجع:
+
+* fixed card sizing.
+* previews.
+* internal scrolling.
+* tap counting.
+* animation.
+* Undo.
+
+### List
+
+* Completion removal animation.
+* scroll behavior.
+* progress consistency.
+
+### Reading
+
+* continuous reading.
+* visual scroll progress.
+* no auto completion.
+* explicit button.
+
+### Details
+
+Long press:
+
+```text
+الذكر
+المصدر
+الفضل
+الشرح
+```
+
+حسب الموجود في الداتا فقط.
+
+### Reader Chrome
+
+نخلي:
+
+```text
+Mode switch
+Progress
+Undo
+Audio
+```
+
+من غير ما الشاشة تبقى مزدحمة.
+
+**Done لما:**
+
+التلات Modes يبانوا كأنهم Feature واحدة مصممة من البداية، مش 3 Screens ملزوقين ببعض.
+
+Commit:
+
+```text
+feat: polish Rafiqi adhkar reading experience
+```
+
+---
+
+# Phase 6 — Daily Wird + Journey Polish
+
+وظيفيًا دول شبه مكتملين، لكن محتاجين V1 UI وEdge cases.
+
+### Daily Wird
+
+نراجع:
+
+```text
+Morning
+Evening
+Custom tasks
+Manual completion
+Reader completion
+Undo completion
+Historical state
+```
+
+### Completion Experience
+
+لما اليوم يكتمل:
+
+مش عايزين fireworks أو gamification.
+
+ممكن Surface بسيطة:
+
+```text
+أتممت ورد اليوم
+تقبل الله منك
+```
+
+### Journey
+
+نراجع التصميم:
+
+```text
+Current streak
+Longest streak
+Week
+Month
+History
+Grace
+```
+
+### Calendar
+
+واضح فيه:
+
+```text
+Completed
+Grace
+Missed
+Today
+```
+
+بتباين subtle.
+
+**Done لما:**
+
+Daily Wird → History → Journey كلها تستخدم نفس الحقيقة ونفس لغة الـUI.
+
+Commit:
+
+```text
+feat: polish daily wird and journey experience
+```
+
+---
+
+# Phase 7 — Tasbeeh V1 Polish
+
+السبحة بالفعل قوية، فمش محتاجة redesign جذري كل شوية.
+
+### Main Tasbeeh
+
+نقفل:
+
+```text
+current count
+target
+daily total
+lifetime total
+reset
+```
+
+### Interaction
+
+* haptic.
+* press animation.
+* responsiveness.
+* big tap area.
+* unlimited.
+* target completion.
+
+### Floating Tasbeeh
+
+نتأكد من:
+
+```text
+App → Overlay
+Overlay → App
+Restart
+Daily rollover
+Background
+Screen lock where supported
+```
+
+### Settings
+
+V1:
+
+```text
+Size
+Side
+Opacity
+Auto-hide
+Haptic
+Animation
+```
+
+بس.
+
+**Done لما:**
+
+نقدر نعتبر Floating Tasbeeh واحدة من Features اللي نعلن عنها في Store listing.
+
+Commit:
+
+```text
+feat: polish tasbeeh and floating overlay
+```
+
+---
+
+# Phase 8 — Hijri Calendar V1 Polish
+
+بما إنه اتعمل بالفعل، نقفله للـV1.
+
+يدعم:
+
+```text
+Hijri month
+Hijri year
+Previous
+Next
+Today
+Selected date
+Gregorian equivalent
+```
+
+مثال:
+
+```text
+١٧ صفر ١٤٤٨ هـ
+يوافق
+٢٥ أغسطس ٢٠٢٦ م
+```
+
+ونراجع:
+
+* RTL.
+* month boundaries.
+* year boundaries.
+* today highlight.
+* app resume/date change.
+
+مفيش مناسبات إسلامية في V1.
+
+**Done لما:**
+
+Home والتقويم يعرضوا نفس Hijri date دائمًا.
+
+Commit:
+
+```text
+feat: finalize hijri calendar experience
+```
+
+---
+
+# Phase 9 — Shared Audio Foundation
+
+دي أكبر Phase تقنية جديدة في V1.
+
+لا نبني:
+
+```text
+DhikrAudioPlayer
+```
+
+بطريقة هتترمي في V4.
+
+نبني Audio Layer عامة.
+
+Architecture:
+
+```text
+features/media/
+
+domain/
+  audio_track.dart
+  audio_reciter.dart
+  audio_collection.dart
+  playback_state.dart
+
+data/
+  media_repository.dart
+  download_repository.dart
+
+application/
+  audio_player_controller.dart
+  audio_queue_controller.dart
+  download_controller.dart
+
+presentation/
+  mini_player/
+  player/
+  reciter_selector/
+```
+
+### نحتاج من البداية
+
+* stream remote audio.
+* play / pause.
+* seek.
+* next.
+* previous.
+* queue.
+* background playback.
+* audio interruptions.
+* headphones.
+* lock-screen/media notification.
+* playback persistence basics.
+
+### Important
+
+الـengine ما يعرفش يعني إيه:
+
+```text
+Dhikr
+Quran
+```
+
+هو يعرف فقط:
+
+```text
+AudioTrack
+AudioCollection
+```
+
+وده اللي هيخلينا في V4 نركب القرآن عليه.
+
+**Done لما:**
+
+نقدر ندي الـPlayer أي مجموعة Tracks ويشغلها بدون معرفة نوع المحتوى.
+
+Commit:
+
+```text
+feat: introduce shared audio playback engine
+```
+
+---
+
+# Phase 10 — Adhkar Audio
+
+دلوقتي نربط الـAudio Engine بالأذكار.
+
+### Reciters
+
+نبدأ بعدد صغير:
+
+```text
+3–4 readers
+```
+
+مش 50 قارئ.
+
+### User actions
+
+داخل ذكر:
+
+```text
+▶ Play
+```
+
+داخل الورد:
+
+```text
+تشغيل الورد كاملًا
+```
+
+### Reciter selection
+
+المستخدم يختار قارئ افتراضي.
+
+ويتحفظ.
+
+### Queue
+
+مثلاً Morning Adhkar:
+
+```text
+Dhikr 1
+↓
+Dhikr 2
+↓
+Dhikr 3
+...
+```
+
+### Audio & Counting
+
+قاعدة ثابتة:
+
+```text
+Audio playback != Dhikr completion
+```
+
+سماع الذكر لا ينقص العداد.
+
+### Missing Audio
+
+لو ذكر معين ملوش Audio:
+
+* ما نكسرش Queue.
+* نتخطاه أو نخفي play حسب القرار النهائي.
+
+**Done لما:**
+
+المستخدم يقدر يدخل أذكار الصباح ويضغط:
+
+```text
+تشغيل الورد
+```
+
+ويقفل الشاشة ويكمل الصوت.
+
+Commit:
+
+```text
+feat: add audio playback to adhkar
+```
+
+---
+
+# Phase 11 — Offline Downloads
+
+بعد Streaming فقط.
+
+### المستخدم يقدر
+
+مثلاً:
+
+```text
+تنزيل أذكار الصباح
+القارئ: ...
+```
+
+### Download Manager
+
+يعرض:
+
+```text
+أذكار الصباح
+24 MB
+تم التنزيل
+
+[ حذف ]
+```
+
+### Storage
+
+داخل app storage.
+
+مش:
+
+```text
+assets/
+```
+
+### States
+
+```text
+Not downloaded
+Downloading
+Downloaded
+Failed
+```
+
+### Network
+
+* retry.
+* cancel.
+* offline detection.
+* fallback to local track.
+
+### Settings
+
+ممكن نعرض:
+
+```text
+المساحة المستخدمة
+```
+
+**Done لما:**
+
+المستخدم يحط الهاتف Airplane mode ويشغل مجموعة أذكار نزلها مسبقًا.
+
+Commit:
+
+```text
+feat: add offline adhkar downloads
+```
+
+---
+
+# Phase 12 — Onboarding
+
+بعد ما الـUI خلص.
+
+### First Launch
+
+3 شاشات كفاية.
+
+مثلاً:
+
+**1**
+
+```text
+رفيقي
+
+أذكارك ووردك اليومي
+في مكان واحد
+```
+
+**2**
+
+```text
+رافق عبادتك
+
+تابع وردك ورحلتك
+بهدوء ومن غير تعقيد
+```
+
+**3**
+
+```text
+حتى خارج التطبيق
+
+استخدم السبحة العائمة
+واستمع لأذكارك
+```
+
+ثم:
+
+```text
+ابدأ مع رفيقي
+```
+
+مع:
+
+```text
+تخطي
+```
+
+### مهم
+
+Onboarding مش Manual تعليمات.
+
+هو تعريف بالقيمة.
+
+**Done لما:**
+
+يظهر أول Launch فقط.
+
+Commit:
+
+```text
+feat: add Rafiqi first-launch onboarding
+```
+
+---
+
+# Phase 13 — Feature Coach Marks
+
+وده مختلف عن Onboarding.
+
+أول مرة المستخدم يدخل Reader:
+
+تعتم الشاشة وتشرح:
+
+```text
+اضغط على الذكر للعد
+```
+
+Next:
+
+```text
+اضغط مطولًا لعرض التفاصيل
+```
+
+Next:
+
+```text
+غير طريقة القراءة من هنا
+```
+
+### Floating Tasbeeh
+
+أول مرة:
+
+```text
+يمكنك تشغيل السبحة فوق التطبيقات الأخرى
+```
+
+### قواعد
+
+* 2–4 steps maximum per feature.
+* Skip.
+* never show repeatedly.
+* settings option:
+
+```text
+إعادة عرض الإرشادات
+```
+
+State:
+
+```text
+hasSeenReaderTour
+hasSeenTasbeehTour
+...
+```
+
+**Done لما:**
+
+المستخدم الجديد يفهم العناصر غير البديهية بدون tutorials طويلة.
+
+Commit:
+
+```text
+feat: add contextual feature guidance
+```
+
+---
+
+# Phase 14 — Settings Consolidation
+
+نعمل Settings حقيقية لـRafiqi V1.
+
+Structure تقريبًا:
+
+```text
+المظهر
+────────
+الوضع الفاتح / الداكن
+
+الصوت
+────────
+القارئ الافتراضي
+التنزيلات
+
+السبحة العائمة
+────────
+إعدادات السبحة
+
+التطبيق
+────────
+الإرشادات
+إعادة عرض مقدمة التطبيق
+
+عن رفيقي
+────────
+الإصدار
+الخصوصية
+```
+
+ولا نظهر Settings لحاجات مش موجودة.
+
+**Done لما:**
+
+مفيش إعدادات scattered في Screens بدون سبب.
+
+Commit:
+
+```text
+feat: consolidate Rafiqi settings
+```
+
+---
+
+# Phase 15 — Accessibility & UX Hardening
+
+قبل Testing النهائي.
+
+نراجع:
+
+* touch targets.
+* text scaling.
+* screen readers.
+* semantic labels.
+* contrast.
+* RTL.
+* long Arabic text.
+* small phones.
+* large phones.
+* system dark mode.
+* landscape في الأماكن اللي تهم.
+* gestures.
+* keyboard لو فيه inputs.
+
+خصوصًا:
+
+```text
+Reader
+Calendar
+Tasbeeh
+Audio controls
+Bottom nav
+```
+
+---
+
+# Phase 16 — Persistence & Lifecycle Hardening
+
+مهمة جدًا لأن التطبيق Local-first.
+
+نجرب:
+
+```text
+Open app
+↓
+do progress
+↓
+kill process
+↓
+open again
+```
+
+على:
+
+* Reader.
+* Daily Dhikr.
+* Wird.
+* Journey.
+* Tasbeeh.
+* Floating Tasbeeh.
+* Audio position لو هنحفظها.
+* downloads.
+* settings.
+* tours.
+
+### Date rollover
+
+نجرب يوم جديد:
+
+```text
+23:59 → 00:00
+```
+
+ونتأكد من:
+
+* Daily total.
+* Daily Dhikr.
+* Hero.
+* Wird.
+* History.
+* Hijri/Gregorian date.
+
+دي Phase لوحدها لأنها Critical جدًا لتطبيق يومي.
+
+---
+
+# Phase 17 — Performance Pass
+
+نعالج:
+
+```text
+Skipped frames
+unnecessary rebuilds
+large JSON parsing
+image/font loading
+reader animations
+overlay messaging
+calendar rendering
+audio lifecycle
+```
+
+مش عايزين premature optimization، لكن أي Lag المستخدم يشوفه يتصلح.
+
+Target:
+
+* smooth launch.
+* smooth navigation.
+* responsive counter.
+* no animation jank.
+* low idle resource usage.
+
+---
+
+# Phase 18 — Failure States
+
+نشغل التطبيق في الظروف السيئة عمدًا.
+
+### No internet
+
+الأذكار والنصوص والتاريخ والسبحة لازم يفضلوا شغالين.
+
+Audio:
+
+```text
+لا يوجد اتصال بالإنترنت
+يمكنك تشغيل المحتوى الذي تم تنزيله
+```
+
+### Corrupted/missing data
+
+واجهة محترمة بدل crash.
+
+### Overlay permission رفض
+
+شرح واضح.
+
+### Storage full
+
+Download failure message.
+
+### Audio URL unavailable
+
+الـPlayer ما ينهارش.
+
+---
+
+# Phase 19 — V1 Full QA
+
+هنا Freeze Features.
+
+**ممنوع Feature جديدة.**
+
+نعمل test matrix:
+
+```text
+Fresh install
+Upgrade existing install
+Light mode
+Dark mode
+Offline
+Online
+Restart
+Process kill
+Day rollover
+Reader modes
+Daily Wird
+Past history
+Grace
+Journey
+Calendar
+Tasbeeh
+Overlay
+Audio
+Downloads
+Onboarding
+Coach marks
+Settings
+```
+
+ونقسم المشاكل:
+
+```text
+P0 Crash/Data loss
+P1 Core feature broken
+P2 UX problem
+P3 cosmetic
+```
+
+V1 ما تنزلش وفيها P0/P1.
+
+---
+
+# Phase 20 — Private Alpha
+
+أول APK حقيقية:
+
+```text
+Rafiqi v1.0.0-alpha
+```
+
+تستعملها أنت يومين/تلاتة استعمال حقيقي، مش Testing لمدة 5 دقايق.
+
+بعدها نديها لعدد صغير من الأصدقاء.
+
+نسألهم فقط:
+
+```text
+إيه اللي مش مفهوم؟
+إيه اللي بوظ؟
+إيه اللي ضايقك؟
+إيه أكتر حاجة استخدمتها؟
+```
+
+مش:
+
+> تحب نضيف إيه؟
+
+عشان ما يتحولش Scope V1 لمئة Feature.
+
+---
+
+# Phase 21 — Beta Fixes
+
+نعمل فقط:
+
+```text
+bugs
+confusing UX
+performance
+critical missing polish
+```
+
+ونسميها:
+
+```text
+v1.0.0-beta.1
+v1.0.0-beta.2
+```
+
+لو احتاجت.
+
+---
+
+# Phase 22 — GitHub / Portfolio Polish
+
+بما إن الريبو مرتبط بالـCV، دي جزء فعلي من V1.
+
+README قوي:
+
+```text
+Rafiqi
+──────
+What is it?
+Screenshots
+Features
+Architecture
+Tech Stack
+Offline-first approach
+Floating Tasbeeh
+Adhkar Reader
+Audio system
+Project structure
+Roadmap
+```
+
+ونحط Screenshots حقيقية.
+
+ممكن Architecture diagram بسيط.
+
+GitHub Releases.
+
+Clean commit history من هنا لقدام.
+
+---
+
+# Phase 23 — Google Play Preparation
+
+حتى لو قررت الأول تستخدمه شخصيًا، نجهزه من البداية بحيث الطريق للStore يبقى قصير.
+
+نحتاج:
+
+```text
+App Icon
+Feature Graphic
+Phone Screenshots
+Short Description
+Full Description
+Privacy Policy
+Data Safety answers
+Content rating
+Signed AAB
+Version code
+Version name
+Release notes
+```
+
+وكمان مراجعة الـpermissions:
+
+خصوصًا:
+
+```text
+overlay
+notifications لاحقًا لو audio/background يحتاج
+storage/media حسب implementation
+internet
+foreground service إذا استخدمناه
+```
+
+ما نطلبش Permission إلا وقت الحاجة.
+
+---
+
+# Phase 24 — Release Candidate
+
+نبني:
+
+```text
+Rafiqi v1.0.0-rc.1
+```
+
+ونعمل آخر Smoke Test على النسخة نفسها اللي هتترفع.
+
+مش Debug build.
+
+---
+
+# Phase 25 — Rafiqi V1.0.0
+
+بعد التأكد:
+
+```text
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+وتطلع أول Release رسمية:
+
+```text
+Rafiqi v1.0.0
+Core Daily Worship
+```
+
+وبعدها **V1 تتقفل**.
+
+أي Feature جديدة:
+
+```text
+Prayer Times
+Adhan
+Qibla
+```
+
+تدخل رسميًا:
+
+# Rafiqi V2
+
+---
+
+## لو اختصرنا الـ25 Phase لسبع Milestones كبيرة
+
+```text
+M1 — Core Freeze
+Phases 0
+
+M2 — Rafiqi Transformation
+Phases 1–4
+
+M3 — Existing Features Production Polish
+Phases 5–8
+
+M4 — Adhkar Audio & Offline
+Phases 9–11
+
+M5 — User Experience Layer
+Phases 12–14
+
+M6 — Production Hardening
+Phases 15–19
+
+M7 — Release
+Phases 20–25
+```
+
+وده بالنسبة لي يبقى **الـofficial execution plan لـRafiqi V1**.
+
+وأول خطوة بعد ما Codex يخلص ربط `daily_dhikr.json` هي مباشرة **Phase 1: Rebrand**، وبعدها مش هنقفز للصوت قبل ما نقفل الـDesign System + App Shell + Home، لأن دول اللي هيحددوا شكل V1 كلها.

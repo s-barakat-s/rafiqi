@@ -11,6 +11,9 @@ class TasbeehRepository {
   static const _autoCollapseSecondsKey = 'tasbeeh.autoCollapseSeconds';
   static const _opacityKey = 'tasbeeh.opacity';
   static const _sizeScaleKey = 'tasbeeh.sizeScale';
+  static const _counterScaleKey = 'tasbeeh.counterScale';
+  static const _collapsedHandleScaleKey = 'tasbeeh.collapsedHandleScale';
+  static const _collapsedHandleOpacityKey = 'tasbeeh.collapsedHandleOpacity';
   static const _sizePresetKey = 'tasbeeh.sizePreset';
   static const _accentColorKey = 'tasbeeh.accentColor';
   static const _backgroundIntensityKey = 'tasbeeh.backgroundIntensity';
@@ -65,6 +68,9 @@ class TasbeehRepository {
     return TasbeehSettings.fromJson({
       'opacity': prefs.getDouble(_opacityKey),
       'sizeScale': prefs.getDouble(_sizeScaleKey),
+      'counterScale': prefs.getDouble(_counterScaleKey),
+      'collapsedHandleScale': prefs.getDouble(_collapsedHandleScaleKey),
+      'collapsedHandleOpacity': prefs.getDouble(_collapsedHandleOpacityKey),
       'sizePreset': prefs.getString(_sizePresetKey),
       'accentColor': prefs.getString(_accentColorKey),
       'backgroundIntensity': prefs.getString(_backgroundIntensityKey),
@@ -89,6 +95,12 @@ class TasbeehRepository {
     await Future.wait([
       prefs.setDouble(_opacityKey, settings.opacity),
       prefs.setDouble(_sizeScaleKey, settings.sizeScale),
+      prefs.setDouble(_counterScaleKey, settings.counterScale),
+      prefs.setDouble(_collapsedHandleScaleKey, settings.collapsedHandleScale),
+      prefs.setDouble(
+        _collapsedHandleOpacityKey,
+        settings.collapsedHandleOpacity,
+      ),
       prefs.setString(_accentColorKey, settings.accentColor),
       prefs.setString(_backgroundIntensityKey, settings.backgroundIntensity),
       prefs.setString(_borderStyleKey, settings.borderStyle),

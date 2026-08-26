@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tasbeh/app/navigation/main_shell_screen.dart';
+import 'package:tasbeh/app/widgets/rafiqi_startup_intro.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/settings/data/repositories/app_preferences_repository.dart';
 
@@ -34,14 +35,16 @@ class _TasbeehAppState extends State<TasbeehApp> {
   Widget build(BuildContext context) {
     final preferences = _preferences.value;
     return MaterialApp(
-      title: 'تسبيح',
+      title: 'رفيقي',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: preferences.themeMode,
-      builder: (context, child) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: child ?? const SizedBox.shrink(),
+      builder: (context, child) => RafiqiStartupIntro(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
       home: MainShellScreen(
         isDarkMode: preferences.isDarkMode,

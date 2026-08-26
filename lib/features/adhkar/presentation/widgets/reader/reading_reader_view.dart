@@ -79,9 +79,7 @@ class _ReadingReaderViewState extends State<_ReadingReaderView> {
         Divider(color: colors.outlineStrong),
         ...widget.category.items.map(
           (item) => _DhikrDetailsTransition(
-            categoryId: widget.category.id,
             item: item,
-            borderRadius: BorderRadius.zero,
             child: _ReadingEntry(item: item),
           ),
         ),

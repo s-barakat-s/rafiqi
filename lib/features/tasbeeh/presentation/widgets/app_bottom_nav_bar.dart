@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
+import 'package:tasbeh/features/tasbeeh/presentation/widgets/tasbeeh_nav_icon.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   const AppBottomNavBar({
@@ -13,11 +14,7 @@ class AppBottomNavBar extends StatelessWidget {
   static const _items = [
     (Icons.home_outlined, Icons.home_rounded, 'الرئيسية'),
     (Icons.auto_stories_outlined, Icons.auto_stories_rounded, 'الأذكار'),
-    (
-      Icons.radio_button_checked_rounded,
-      Icons.radio_button_checked_rounded,
-      'السبحة',
-    ),
+    (Icons.circle_outlined, Icons.circle, 'السبحة'),
     (Icons.route_outlined, Icons.route_rounded, 'رحلتي'),
     (Icons.grid_view_outlined, Icons.grid_view_rounded, 'المزيد'),
   ];
@@ -70,15 +67,20 @@ class AppBottomNavBar extends StatelessWidget {
                               ? Border.all(color: colors.outline, width: 2)
                               : null,
                         ),
-                        child: Icon(
-                          selected ? item.$2 : item.$1,
-                          size: center ? 23 : 21,
-                          color: center
-                              ? theme.colorScheme.onSecondary
-                              : (selected
+                        child: center
+                            ? IconTheme(
+                                data: IconThemeData(
+                                  color: theme.colorScheme.onSecondary,
+                                ),
+                                child: TasbeehNavIcon(selected: selected),
+                              )
+                            : Icon(
+                                selected ? item.$2 : item.$1,
+                                size: 21,
+                                color: selected
                                     ? activeColor
-                                    : colors.navigationInactive),
-                        ),
+                                    : colors.navigationInactive,
+                              ),
                       ),
                       if (!center) ...[
                         const SizedBox(height: 2),

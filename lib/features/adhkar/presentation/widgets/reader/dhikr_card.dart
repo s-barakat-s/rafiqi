@@ -91,46 +91,42 @@ class _DhikrCard extends StatelessWidget {
                   ),
                 ),
               ),
-              ...[
-                Divider(color: colors.divider.withValues(alpha: .55)),
-                const SizedBox(height: 8),
-                if (hasMetadata)
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+              Divider(color: colors.divider.withValues(alpha: .55)),
+              const SizedBox(height: 8),
+              if (hasMetadata)
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (conciseSource.isNotEmpty)
+                        Text(
+                          conciseSource,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontFamily: AppFonts.ui,
+                            color: colors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      if (virtuePreview != null) ...[
                         if (conciseSource.isNotEmpty)
-                          Text(
-                            conciseSource,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  fontFamily: AppFonts.ui,
-                                  color: colors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          const SizedBox(height: 3),
+                        Text(
+                          'الفضل: $virtuePreview',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontFamily: AppFonts.ui,
+                            color: colors.textSecondary,
+                            height: 1.45,
                           ),
-                        if (virtuePreview != null) ...[
-                          if (conciseSource.isNotEmpty)
-                            const SizedBox(height: 3),
-                          Text(
-                            'الفضل: $virtuePreview',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  fontFamily: AppFonts.ui,
-                                  color: colors.textSecondary,
-                                  height: 1.45,
-                                ),
-                          ),
-                        ],
+                        ),
                       ],
-                    ),
+                    ],
                   ),
-              ],
+                ),
             ],
           ),
         ),
@@ -138,9 +134,7 @@ class _DhikrCard extends StatelessWidget {
     );
     if (!enabled) return card;
     return _DhikrDetailsTransition(
-      categoryId: categoryId,
       item: item,
-      borderRadius: BorderRadius.circular(22),
       child: card,
     );
   }

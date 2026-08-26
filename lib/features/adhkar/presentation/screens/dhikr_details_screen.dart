@@ -4,7 +4,10 @@ import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 
 class DhikrDetailsScreen extends StatelessWidget {
-  const DhikrDetailsScreen({required this.item, super.key});
+  const DhikrDetailsScreen({
+    required this.item,
+    super.key,
+  });
 
   final DhikrItem item;
 
@@ -45,22 +48,35 @@ class DhikrDetailsScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(26, 22, 26, 40),
               sliver: SliverList.list(
                 children: [
-                  Text(
-                    item.text,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(
-                      fontFamily: AppFonts.reading,
-                      fontSize: 27,
-                      height: 1.95,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    _countText(item),
-                    textAlign: TextAlign.end,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: context.appColors.secondary,
-                      fontWeight: FontWeight.w700,
+                  Material(
+                    color: context.appColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(22),
+                    child: Padding(
+                      padding: const EdgeInsets.all(22),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            item.text,
+                            textAlign: TextAlign.start,
+                            style: const TextStyle(
+                              fontFamily: AppFonts.reading,
+                              fontSize: 27,
+                              height: 1.95,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Text(
+                            _countText(item),
+                            textAlign: TextAlign.end,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: context.appColors.secondary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 22),

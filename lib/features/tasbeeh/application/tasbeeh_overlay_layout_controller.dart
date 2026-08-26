@@ -145,7 +145,9 @@ class TasbeehOverlayLayoutController {
       _ => config.collapsedHandleHeight,
     };
 
-    return (handleHeight + 32).clamp(180, 540).toDouble();
+    return (handleHeight * settings.collapsedHandleScale + 32)
+        .clamp(140, 620)
+        .toDouble();
   }
 
   static String _alignmentForSide(String side) {

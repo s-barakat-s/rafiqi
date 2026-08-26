@@ -1,0 +1,1455 @@
+تمام. دي الخطة اللي أقترح نعتمدها رسميًا لـ **رفيقي** من دلوقتي لحد **Version 5**، بحيث كل Version تبقى منتج مكتمل قابل للاستخدام، مش مجرد تجميعة Features.
+
+# الرؤية العامة
+
+**رفيقي** يبقى Muslim Companion يومي، يبدأ صغير ومتماسك، وبعد كل Version يتوسع طبيعيًا:
+
+```text
+V1  الأذكار والعبادة اليومية
+        ↓
+V2  الصلاة والأذان والقبلة
+        ↓
+V3  القرآن قراءة
+        ↓
+V4  القرآن والصوت
+        ↓
+V5  رفيق المسلم المتكامل
+```
+
+والقاعدة من هنا:
+
+> **ممنوع نبدأ Features الإصدار اللي بعده قبل ما الإصدار الحالي يبقى Stable وقابل للاستخدام والنشر.**
+
+---
+
+# المرحلة الحالية — قبل Rafiqi V1
+
+إحنا بالفعل عندنا أساس قوي جدًا:
+
+* Adhkar Reader
+* Focus / List / Reading modes
+* Long press details
+* Daily Wird
+* Home
+* Daily history
+* Streak
+* Grace days
+* Journey
+* Tasbeeh
+* Floating Tasbeeh
+* Tasbeeh settings
+* Hijri calendar
+* Daily Dhikr
+* Feature-first architecture
+* Local persistence
+* Light/Dark
+* Arabic formatting
+
+قبل أي تحول كبير، نقفل فقط:
+
+```text
+daily_dhikr.json integration
+```
+
+وبعدها نبدأ رسميًا:
+
+```text
+Rafiqi Transformation
+```
+
+---
+
+# Rafiqi V1.0
+
+## Core Daily Worship
+
+دي أهم Version؛ لأنها أول نسخة هتستخدمها أنت وأصحابك، وبعدها ممكن تتحول لأول نسخة Google Play.
+
+الهدف:
+
+> تطبيق صغير نسبيًا، Premium، سريع، مستقر، ومفيد يوميًا حتى لو المستخدم ما استخدمش غير الأذكار والسبحة.
+
+---
+
+## V1.1 — Rebrand من Tasbeh إلى Rafiqi
+
+نغير هوية المنتج بالكامل بدون لمس الـbusiness logic.
+
+### الاسم
+
+```text
+رفيقي
+Rafiqi
+```
+
+ممكن Subtitle:
+
+```text
+رفيقي
+رفيقك في يومك
+```
+
+أو لاحقًا:
+
+```text
+رفيقي — رفيق المسلم اليومي
+```
+
+### يتغير
+
+* Android app name
+* App icon
+* Adaptive icon
+* Splash screen
+* Logo
+* Branding
+* About screen
+* README
+* Package descriptions
+* أي نصوص قديمة مرتبطة باسم Tasbeh
+
+### لا يتغير
+
+الـrepositories والـdomain logic والـstored user data.
+
+Commit:
+
+```text
+feat: rebrand app as Rafiqi
+```
+
+---
+
+# V1.2 — Rafiqi Design System
+
+قبل إعادة تصميم الشاشات، نقفل الـdesign language.
+
+نحتفظ بالروح الحالية:
+
+* Arabic heritage
+* Premium
+* هادئ
+* أخضر / Sage
+* Warm paper
+* Typography قوية
+* تفاصيل إسلامية subtle جدًا
+
+ونبعد عن:
+
+* المساجد في كل Card
+* الهلال والنجوم في كل مكان
+* Gold مبالغ فيه
+* gradients
+* glow
+* dashboard شكل fintech
+
+نحدد رسميًا:
+
+```text
+Colors
+Typography
+Spacing
+Radius
+Borders
+Cards
+Buttons
+Sheets
+Dialogs
+Bottom navigation
+Loading states
+Empty states
+Error states
+Animations
+```
+
+والثيم يبقى مصدر واحد لكل التطبيق.
+
+---
+
+# V1.3 — App Shell الجديد
+
+الـNavigation الحالية تتغير لتناسب مستقبل رفيقي، لكن من غير إضافة Features مستقبلية وهمية.
+
+في V1 أقترح:
+
+```text
+الرئيسية
+الأذكار
+السبحة
+رحلتي
+المزيد
+```
+
+لأن القرآن مش موجود لسه.
+
+ولما V3 ينزل، ساعتها نعيد توزيع الـnavigation لو احتجنا:
+
+```text
+الرئيسية
+القرآن
+الأذكار
+رحلتي
+المزيد
+```
+
+والسبحة تدخل Quick Tools / More.
+
+ده أفضل من إننا نحط Tab قرآن فاضي سنتين.
+
+---
+
+# V1.4 — Home الجديدة
+
+Home تبقى أول خطوة في تحويل التطبيق من Tasbeeh App إلى Muslim Companion.
+
+لكن نعرض فقط Features الموجودة فعليًا.
+
+ممكن تبقى بالشكل ده:
+
+```text
+السلام عليكم
+
+الثلاثاء، ٢٥ أغسطس
+١٧ صفر ١٤٤٨ هـ
+
+وردك اليوم
+أذكار الصباح / المساء
+
+ذكر اليوم
+
+تابع وردك
+
+رحلتك
+٧ أيام متتالية
+
+أدوات سريعة
+السبحة | التقويم الهجري
+```
+
+ولا نضيف:
+
+```text
+الصلاة القادمة
+القرآن
+القبلة
+```
+
+غير لما يبقوا موجودين فعلًا.
+
+---
+
+# V1.5 — الأذكار
+
+نقفل Reader كمنتج Production-ready.
+
+يبقى عندنا:
+
+### Focus Mode
+
+البطاقات والعداد.
+
+### List Mode
+
+القائمة التفاعلية.
+
+### Reading Mode
+
+قراءة مستمرة.
+
+### Details
+
+Long press → source / virtue / explanation / information.
+
+### Progress
+
+استكمال من آخر مكان.
+
+### Undo
+
+Multi-step undo في Interactive modes.
+
+### Completion
+
+منطق Reader مستقل عن Daily Wird completion زي ما بنيناه بالفعل.
+
+---
+
+# V1.6 — ذكر اليوم
+
+يعتمد بالكامل على:
+
+```text
+assets/data/adhkar/daily_dhikr.json
+```
+
+ويعمل:
+
+```text
+stable daily shuffle
+↓
+current dhikr
+↓
+tap countdown
+↓
+next dhikr
+↓
+persist progress
+```
+
+وما يكونش مرتبط بالـstreak أو Daily Wird في V1.
+
+---
+
+# V1.7 — Daily Wird
+
+يبقى نظام العبادة اليومية الأساسي:
+
+```text
+أذكار الصباح
+أذكار المساء
+Custom tasks
+```
+
+مع:
+
+* Manual completion
+* Reader integration
+* reversible completion
+* historical snapshots
+* تعديل أيام قديمة
+* day completion
+* local-day handling
+
+---
+
+# V1.8 — Journey
+
+نحتفظ بفكرة بسيطة جدًا:
+
+```text
+Current streak
+Longest streak
+Weekly activity
+Monthly calendar
+Grace days
+Historical day details
+```
+
+من غير badges أو XP أو gamification.
+
+الفكرة:
+
+> يشجع المستخدم، مش يخليه يحس إنه بيلعب لعبة.
+
+---
+
+# V1.9 — Tasbeeh
+
+يبقى:
+
+* finite targets
+* unlimited mode
+* daily total
+* lifetime total
+* current session
+* reset
+* haptic
+* animation
+* persisted state
+
+مع التصميم الجديد.
+
+---
+
+# V1.10 — Floating Tasbeeh
+
+ميزة قوية ومميزة في Rafiqi V1.
+
+نقفل:
+
+* size
+* side
+* opacity
+* auto hide
+* haptic
+* animation
+* light/dark
+* shared counter source
+* overlay ↔ app synchronization
+
+ونعمل onboarding خاص بيها أول مرة.
+
+---
+
+# V1.11 — Hijri Calendar
+
+يبقى جزء أساسي من V1:
+
+* التاريخ الهجري الديناميكي
+* Gregorian equivalent
+* الشهر الهجري
+* previous / next
+* today
+* selected day
+
+في V1:
+
+**Calendar فقط.**
+
+من غير:
+
+* مناسبات
+* صيام
+* رمضان logic
+
+دول Version لاحقة.
+
+---
+
+# V1.12 — Adhkar Audio
+
+دي آخر Feature كبيرة قبل إطلاق V1.
+
+وده مهم نبنيه صح لأنه هيبقى أساس Quran Audio في V4.
+
+نعمل architecture عامة:
+
+```text
+features/media/
+    domain/
+        audio_track
+        audio_reciter
+        audio_collection
+
+    data/
+        repositories
+        downloads
+
+    application/
+        audio_player_controller
+        audio_queue_controller
+
+    presentation/
+        mini_player
+        player
+        reciter_selector
+```
+
+## في V1 ندعم فقط Adhkar
+
+المستخدم يقدر:
+
+```text
+يشغل ذكر واحد
+يشغل الورد كامل
+Pause / Resume
+Next / Previous
+اختيار القارئ
+تشغيل في الخلفية
+```
+
+ونستهدف مثلًا:
+
+```text
+3–4 reciters
+```
+
+### Offline
+
+الصوت ما يدخلش داخل APK.
+
+يبقى:
+
+```text
+Remote audio
+↓
+stream
+or
+download to device
+```
+
+وده يمنع APK من إنه يبقى ضخم.
+
+### قاعدة مهمة
+
+Audio playback:
+
+**لا يعد الذكر تلقائيًا.**
+
+العداد يفضل user interaction.
+
+---
+
+# V1.13 — Downloads
+
+بما إن عندنا Audio، نحتاج Manager بسيط:
+
+```text
+التنزيلات
+```
+
+يعرض:
+
+* الملفات المنزلة
+* القارئ
+* الحجم
+* delete
+* storage used
+
+مش محتاج يكون معقد.
+
+---
+
+# V1.14 — Onboarding & Coach Marks
+
+هنا نحط الفكرة اللي اتكلمنا عنها.
+
+## First Launch Onboarding
+
+مثلاً 3 Screens فقط:
+
+```text
+رفيقك في يومك
+أذكارك ووردك
+رحلتك مع العبادة
+```
+
+وفي الآخر:
+
+```text
+ابدأ
+```
+
+من غير onboarding طويل.
+
+## Feature Tours
+
+تظهر أول مرة فقط.
+
+Reader:
+
+```text
+اضغط على الذكر للعد
+اضغط مطولًا لعرض التفاصيل
+يمكنك تغيير طريقة القراءة
+```
+
+Floating Tasbeeh:
+
+```text
+فعّل السبحة العائمة
+حرّكها واستخدمها فوق التطبيقات
+```
+
+Journey:
+
+شرح Grace Day لو لزم.
+
+ويتخزن:
+
+```text
+hasSeenAppOnboarding
+hasSeenReaderTour
+hasSeenFloatingTasbeehTour
+hasSeenJourneyTour
+```
+
+وفي Settings:
+
+```text
+إعادة عرض الإرشادات
+```
+
+---
+
+# V1.15 — Settings
+
+نجمع الإعدادات في مكان واحد:
+
+```text
+المظهر
+الصوت
+الأذكار الصوتية
+التنزيلات
+السبحة العائمة
+الإرشادات
+عن رفيقي
+```
+
+وممكن لاحقًا:
+
+```text
+الإشعارات
+الصلاة
+القرآن
+```
+
+تظهر فقط لما Features دي تدخل.
+
+---
+
+# V1.16 — V1 Production Polish
+
+دي مرحلة ممنوع نتخطاها.
+
+نعمل:
+
+* full app smoke test
+* app restart tests
+* local day rollover
+* persistence
+* RTL
+* Arabic numbers
+* light mode
+* dark mode
+* Android back gesture
+* overlay stability
+* process restart
+* audio interruption
+* headphones
+* phone calls
+* offline audio
+* low network states
+* loading states
+* empty states
+* error states
+* performance
+* skipped frames
+* memory
+* debug cleanup
+* remove placeholders
+
+---
+
+# V1.17 — First Distribution
+
+أول حاجة:
+
+```text
+Rafiqi v1.0.0 APK
+```
+
+تستعمله أنت وأصحابك.
+
+نستقبل feedback فترة.
+
+ثم:
+
+```text
+v1.0.1
+v1.0.2
+```
+
+Bug fixes.
+
+وبعدها نجهز:
+
+* privacy policy
+* screenshots
+* Play Store description
+* feature graphic
+* app icon
+* signing
+* AAB
+* release notes
+
+ثم Google Play.
+
+---
+
+# Rafiqi V2.0
+
+## Prayer Companion
+
+بعد V1 المستقرة فقط.
+
+الهدف:
+
+> رفيقي يعرف المستخدم بالصلاة القادمة ويساعده في مواقيت الصلاة والأذان.
+
+---
+
+## Prayer Times
+
+نعمل Feature مستقلة:
+
+```text
+features/prayer/
+```
+
+تضم:
+
+* Fajr
+* Sunrise
+* Dhuhr
+* Asr
+* Maghrib
+* Isha
+
+ويظهر:
+
+```text
+الصلاة القادمة
+العصر
+بعد ١ ساعة و٢٣ دقيقة
+```
+
+---
+
+## Location
+
+ندعم:
+
+```text
+GPS
+Manual city selection
+```
+
+ولو المستخدم رفض Permission يقدر يحدد المدينة يدويًا.
+
+---
+
+## Calculation Settings
+
+لازم ندعم:
+
+* calculation method
+* madhab for Asr
+* manual minute offsets لو احتجنا
+
+من غير ما نعقد الشاشة الرئيسية.
+
+---
+
+# Adhan
+
+المستخدم يختار:
+
+```text
+Off
+Notification only
+Adhan sound
+```
+
+ويقدر يعمل إعداد مستقل لكل صلاة لاحقًا.
+
+---
+
+# Prayer Notifications
+
+ندعم:
+
+```text
+وقت الصلاة
+قبل الصلاة
+بعد الصلاة
+```
+
+مع Android notification reliability.
+
+---
+
+# Qibla
+
+تدخل مع V2 لأنها مرتبطة بالصلاة.
+
+Feature:
+
+```text
+Compass
+Qibla direction
+Kaaba bearing
+Calibration state
+Sensor unavailable state
+```
+
+وتشتغل كويس من غير network بعد تحديد الموقع.
+
+---
+
+# Home V2
+
+Home تتطور إلى:
+
+```text
+السلام عليكم
+
+الصلاة القادمة
+العصر — بعد ساعة
+
+ورد اليوم
+
+تابع الأذكار
+
+ذكر اليوم
+
+أدوات سريعة
+القبلة
+السبحة
+التقويم
+
+رحلتك
+```
+
+وده أول إصدار فعلًا يخلي Home تبقى **رفيق يوم المسلم**.
+
+---
+
+# V2 Release
+
+```text
+Rafiqi v2.0.0
+Prayer Times • Adhan • Qibla
+```
+
+---
+
+# Rafiqi V3.0
+
+## Quran Reading
+
+الهدف:
+
+> إضافة القرآن كتجربة قراءة ممتازة، بدون إدخال الصوت في نفس المرحلة.
+
+Feature مستقلة:
+
+```text
+features/quran/
+```
+
+---
+
+# Quran Library
+
+نعمل:
+
+```text
+Surahs
+Juz
+Ayahs
+Pages
+```
+
+حسب المصدر اللي نعتمده.
+
+---
+
+# Quran Home
+
+صفحة القرآن تعرض:
+
+```text
+تابع القراءة
+
+آخر موضع
+سورة البقرة
+الآية ٣٥
+
+السور
+
+الأجزاء
+
+المحفوظات
+```
+
+---
+
+# Quran Reader
+
+نركز جدًا على القراءة:
+
+* Arabic Quran typography
+* ayah numbers
+* page/continuous modes حسب ما نقرر
+* no clutter
+* night mode
+* large text
+* comfortable spacing
+
+---
+
+# Last Read
+
+يتحفظ:
+
+```text
+surah
+ayah
+page
+timestamp
+```
+
+ويظهر على Home.
+
+---
+
+# Bookmarks
+
+المستخدم يقدر يعمل:
+
+```text
+Bookmark
+```
+
+لآية.
+
+---
+
+# Search
+
+بحث في:
+
+```text
+Surah names
+Quran text
+```
+
+لو مصدر البيانات يسمح بده بشكل محترم.
+
+---
+
+# Quran Progress
+
+في V3 ما نحولش القرآن لمسابقة.
+
+بس نقدر نعرض:
+
+```text
+آخر قراءة
+Pages read
+Reading history
+```
+
+---
+
+# App Navigation في V3
+
+هنا فعليًا نعيد Bottom Navigation:
+
+```text
+الرئيسية
+القرآن
+الأذكار
+رحلتي
+المزيد
+```
+
+والسبحة تبقى:
+
+```text
+Home quick action
++
+More
+```
+
+---
+
+# Home V3
+
+تضاف:
+
+```text
+تابع القرآن
+سورة الكهف — الآية ٢٤
+```
+
+---
+
+# V3 Release
+
+```text
+Rafiqi v3.0.0
+Quran Reading
+```
+
+---
+
+# Rafiqi V4.0
+
+## Quran Audio & Media
+
+هنا نوسع Audio Engine الموجود من V1.
+
+بدل:
+
+```text
+Adhkar audio
+```
+
+يبقى:
+
+```text
+Shared Islamic Media Platform
+```
+
+---
+
+# Quran Reciters
+
+ندعم عدد أكبر من القراء.
+
+مثل:
+
+```text
+Reciter
+Riwaya
+Quality
+```
+
+حسب مصدر الـAPI.
+
+---
+
+# Quran Playback
+
+المستخدم يقدر:
+
+```text
+تشغيل سورة
+تشغيل آية
+Next ayah
+Previous ayah
+Repeat ayah
+Repeat range
+Continue automatically
+```
+
+---
+
+# Reader Synchronization
+
+أثناء الصوت:
+
+```text
+Current ayah highlight
+Auto scroll
+```
+
+لكن نخلي ده بعد ما الـbasic playback يبقى stable.
+
+---
+
+# Background Playback
+
+يبقى عندنا Media Notification:
+
+```text
+Play
+Pause
+Next
+Previous
+```
+
+والتشغيل يستمر والشاشة مقفولة.
+
+---
+
+# Quran Downloads
+
+المستخدم يقدر:
+
+```text
+Download Surah
+Download reciter
+Delete download
+```
+
+مع عرض:
+
+```text
+size
+storage usage
+download progress
+```
+
+---
+
+# Unified Player
+
+Mini Player واحد يخدم:
+
+```text
+Adhkar
+Quran
+```
+
+مش Player منفصل لكل Feature.
+
+---
+
+# Offline
+
+V4 لازم يبقى قوي جدًا Offline:
+
+```text
+Downloaded Quran audio
+Downloaded Adhkar
+Quran text
+Bookmarks
+Last read
+```
+
+---
+
+# V4 Release
+
+```text
+Rafiqi v4.0.0
+Quran Audio & Offline Listening
+```
+
+---
+
+# Rafiqi V5.0
+
+## Complete Daily Muslim Companion
+
+V5 مش الهدف منها نحشر 20 Feature.
+
+الهدف:
+
+> نجمع كل اللي بنيناه ونضيف آخر طبقة تخلي Rafiqi فعلاً رفيق يومي.
+
+---
+
+# Duas
+
+نضيف Feature مستقلة للأدعية:
+
+```text
+دعاء السفر
+دعاء الاستخارة
+دعاء دخول المنزل
+دعاء الخروج
+دعاء الطعام
+...
+```
+
+بداتا موثوقة ومراجعة، بنفس القاعدة:
+
+> لا نص ديني بدون Source معتمد.
+
+وممكن لاحقًا Audio باستخدام نفس Media Engine.
+
+---
+
+# Islamic Calendar 2.0
+
+نطور التقويم الهجري:
+
+* رمضان
+* العشر الأوائل من ذي الحجة
+* يوم عرفة
+* عاشوراء
+* الأيام البيض
+
+لكن بعرض معلومات موثوقة، وبدون افتراضات في اختلاف رؤية الهلال.
+
+---
+
+# Optional Worship Reminders
+
+المستخدم يقدر يختار:
+
+```text
+أذكار الصباح
+أذكار المساء
+قراءة القرآن
+صيام الأيام البيض
+ورد شخصي
+```
+
+من غير spam.
+
+---
+
+# Journey 2.0
+
+رحلتي تتطور من streak فقط إلى insight محترم:
+
+```text
+الأذكار
+القرآن
+الورد
+الصلاة
+```
+
+مثلاً:
+
+```text
+هذا الأسبوع
+أكملت وردك ٦ من ٧ أيام
+قرأت القرآن ٤ أيام
+```
+
+من غير:
+
+```text
+XP
+coins
+levels
+leaderboards
+```
+
+---
+
+# Widgets
+
+لو Android architecture تسمح بشكل مستقر:
+
+Home Screen Widgets مثل:
+
+```text
+الصلاة القادمة
+ذكر اليوم
+السبحة
+```
+
+وده Feature قوية جدًا لـRafiqi.
+
+---
+
+# Backup / Sync
+
+لو شفنا إن الناس بدأت تستخدم التطبيق فعليًا:
+
+نضيف Optional Account / Backup.
+
+لكن مش شرط إجبار المستخدم على Login.
+
+الافتراضي:
+
+```text
+Local-first
+```
+
+وممكن:
+
+```text
+Sign in
+→ backup
+→ restore
+→ multi-device
+```
+
+لاحقًا.
+
+---
+
+# More Hub في V5
+
+يبقى المكان النهائي لكل الخدمات:
+
+```text
+السبحة
+القبلة
+التقويم الهجري
+الأدعية
+التنزيلات
+الإعدادات
+عن رفيقي
+```
+
+---
+
+# Home V5
+
+وقتها Home فعليًا ممكن تبقى:
+
+```text
+السلام عليكم
+
+الصلاة القادمة
+العصر — بعد ٤٥ دقيقة
+
+وردك اليوم
+٣ / ٤
+
+تابع القرآن
+سورة البقرة — الآية ٢٥٥
+
+ذكر اليوم
+
+رحلتك
+١٢ يومًا متتاليًا
+
+أدواتك
+القبلة | السبحة | الأدعية | التقويم
+```
+
+والـHome تتكيف مع الوقت.
+
+الصباح:
+
+```text
+أذكار الصباح
+```
+
+بعد المغرب:
+
+```text
+أذكار المساء
+```
+
+وقت صلاة قريب:
+
+```text
+الصلاة القادمة
+```
+
+مش personalization AI ولا تعقيد؛ مجرد Context-aware UX.
+
+---
+
+# الشكل النهائي للـVersions
+
+```text
+Rafiqi v1.0
+Core Daily Worship
+────────────────
+Adhkar
+Daily Wird
+Daily Dhikr
+Journey
+Streak
+Hijri Calendar
+Tasbeeh
+Floating Tasbeeh
+Adhkar Audio
+Downloads
+Onboarding
+New Rafiqi UI
+
+
+Rafiqi v2.0
+Prayer Companion
+────────────────
+Prayer Times
+Adhan
+Notifications
+Location
+Qibla
+Prayer-aware Home
+
+
+Rafiqi v3.0
+Quran
+────────────────
+Quran Reading
+Surahs
+Juz
+Search
+Bookmarks
+Last Read
+Reading Progress
+
+
+Rafiqi v4.0
+Quran Audio
+────────────────
+Reciters
+Streaming
+Background Player
+Ayah Playback
+Offline Downloads
+Unified Media Engine
+
+
+Rafiqi v5.0
+Complete Companion
+────────────────
+Duas
+Islamic Calendar 2.0
+Worship Reminders
+Journey 2.0
+Widgets
+Optional Backup / Sync
+Final Companion Home
+```
+
+# قواعد المشروع من V1 إلى V5
+
+في شوية قواعد أنا شايف نثبتهم من دلوقتي:
+
+**Local-first.** أغلب التطبيق لازم يشتغل من غير Account ولا Internet قدر الإمكان.
+
+**Religious data is data, not code.** الأذكار والقرآن والأدعية والمصادر تبقى Structured Data، وممنوع Codex يخترعها.
+
+**Feature-first architecture.** كل Feature الجديدة تدخل Module مستقلة.
+
+**Shared services فقط لما فعلًا تكون مشتركة.** زي Audio Engine، Downloads، Date، Notifications.
+
+**No feature placeholders في Production.** ما نظهرش قرآن/صلاة في V1 وهي مش موجودة.
+
+**كل Version لازم تتنشر أو على الأقل تتعمل APK Production usable قبل اللي بعدها.**
+
+**كل Version لها Git tag:**
+
+```text
+v1.0.0
+v2.0.0
+v3.0.0
+v4.0.0
+v5.0.0
+```
+
+وبينهم:
+
+```text
+v1.0.1
+v1.1.0
+v2.0.1
+...
+```
+
+---
+
+# وإحنا واقفين فين دلوقتي؟
+
+فعليًا إحنا عند بداية:
+
+```text
+Rafiqi V1
+```
+
+والترتيب اللي نمشي به الآن:
+
+```text
+1. Finish Daily Dhikr JSON integration
+
+2. Rebrand → Rafiqi
+
+3. Freeze V1 Design System
+
+4. Rebuild App Shell
+
+5. Redesign Home
+
+6. Polish existing Adhkar / Journey / Tasbeeh / Calendar
+   to match Rafiqi
+
+7. Build Adhkar Audio Engine
+
+8. Add Downloads
+
+9. Add Onboarding + Feature Tours
+
+10. Settings consolidation
+
+11. V1 QA / performance / offline / persistence
+
+12. Build signed APK
+
+13. Test with friends
+
+14. Fix feedback
+
+15. Google Play preparation
+
+16. Tag:
+    v1.0.0
+```
+
+وأنا شايف إننا من هنا نشتغل **Version by Version**. يعني حاليًا أي فكرة جديدة تظهر نسأل سؤال واحد:
+**هل دي مطلوبة عشان V1 تبقى مكتملة؟** لو لأ، تتحط في Roadmap وما توقفناش عن إطلاق أول نسخة.

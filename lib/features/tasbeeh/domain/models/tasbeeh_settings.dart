@@ -4,6 +4,9 @@ class TasbeehSettings {
   const TasbeehSettings({
     required this.opacity,
     required this.sizeScale,
+    required this.counterScale,
+    required this.collapsedHandleScale,
+    required this.collapsedHandleOpacity,
     required this.accentColor,
     required this.backgroundIntensity,
     required this.borderStyle,
@@ -25,6 +28,9 @@ class TasbeehSettings {
     return const TasbeehSettings(
       opacity: 1,
       sizeScale: defaultSizeScale,
+      counterScale: 1,
+      collapsedHandleScale: 1,
+      collapsedHandleOpacity: .8,
       accentColor: accentGreen,
       backgroundIntensity: backgroundDark,
       borderStyle: borderSubtle,
@@ -49,6 +55,17 @@ class TasbeehSettings {
       sizeScale: _normalizeSizeScale(
         (json['sizeScale'] as num?)?.toDouble() ??
             _scaleFromLegacyPreset(json['sizePreset']),
+      ),
+      counterScale: _normalizeCounterScale(
+        (json['counterScale'] as num?)?.toDouble(),
+      ),
+      collapsedHandleScale: _normalizeHandleScale(
+        (json['collapsedHandleScale'] as num?)?.toDouble() ??
+            _handleScaleFromLegacyHeight(json['handleHeight']),
+      ),
+      collapsedHandleOpacity: _normalizeHandleOpacity(
+        (json['collapsedHandleOpacity'] as num?)?.toDouble() ??
+            (json['opacity'] as num?)?.toDouble(),
       ),
       accentColor: _normalizeString(
         json['accentColor'],
@@ -105,6 +122,11 @@ class TasbeehSettings {
   static const minSizeScale = 0.80;
   static const defaultSizeScale = 1.00;
   static const maxSizeScale = 2.20;
+  static const minCounterScale = 0.75;
+  static const maxCounterScale = 1.40;
+  static const minCollapsedHandleScale = 0.75;
+  static const maxCollapsedHandleScale = 1.35;
+  static const minCollapsedHandleOpacity = 0.25;
 
   static const _legacySizeSmall = 'small';
   static const _legacySizeMedium = 'medium';
@@ -170,6 +192,9 @@ class TasbeehSettings {
 
   final double opacity;
   final double sizeScale;
+  final double counterScale;
+  final double collapsedHandleScale;
+  final double collapsedHandleOpacity;
   final String accentColor;
   final String backgroundIntensity;
   final String borderStyle;
@@ -204,6 +229,9 @@ class TasbeehSettings {
       'type': 'settings_update',
       'opacity': opacity,
       'sizeScale': sizeScale,
+      'counterScale': counterScale,
+      'collapsedHandleScale': collapsedHandleScale,
+      'collapsedHandleOpacity': collapsedHandleOpacity,
       'accentColor': accentColor,
       'backgroundIntensity': backgroundIntensity,
       'borderStyle': borderStyle,
@@ -225,6 +253,9 @@ class TasbeehSettings {
   TasbeehSettings copyWith({
     double? opacity,
     double? sizeScale,
+    double? counterScale,
+    double? collapsedHandleScale,
+    double? collapsedHandleOpacity,
     String? accentColor,
     String? backgroundIntensity,
     String? borderStyle,
@@ -244,6 +275,13 @@ class TasbeehSettings {
     return TasbeehSettings(
       opacity: _normalizeOpacity(opacity ?? this.opacity),
       sizeScale: _normalizeSizeScale(sizeScale ?? this.sizeScale),
+      counterScale: _normalizeCounterScale(counterScale ?? this.counterScale),
+      collapsedHandleScale: _normalizeHandleScale(
+        collapsedHandleScale ?? this.collapsedHandleScale,
+      ),
+      collapsedHandleOpacity: _normalizeHandleOpacity(
+        collapsedHandleOpacity ?? this.collapsedHandleOpacity,
+      ),
       accentColor: _normalizeString(
         accentColor ?? this.accentColor,
         validAccentColors,
@@ -309,6 +347,28 @@ class TasbeehSettings {
     return (scale ?? defaultSizeScale)
         .clamp(minSizeScale, maxSizeScale)
         .toDouble();
+  }
+
+  static double _normalizeCounterScale(double? scale) {
+    return (scale ?? 1).clamp(minCounterScale, maxCounterScale).toDouble();
+  }
+
+  static double _normalizeHandleScale(double? scale) {
+    return (scale ?? 1)
+        .clamp(minCollapsedHandleScale, maxCollapsedHandleScale)
+        .toDouble();
+  }
+
+  static double _normalizeHandleOpacity(double? opacity) {
+    return (opacity ?? .8).clamp(minCollapsedHandleOpacity, 1).toDouble();
+  }
+
+  static double? _handleScaleFromLegacyHeight(Object? height) {
+    return switch (height) {
+      handleShort => .8,
+      handleTall => 1.2,
+      _ => null,
+    };
   }
 
   static double? _scaleFromLegacyPreset(Object? preset) {

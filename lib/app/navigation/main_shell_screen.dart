@@ -39,13 +39,25 @@ class _MainShellScreenState extends State<MainShellScreen>
     with WidgetsBindingObserver {
   final _tasbeeh = TasbeehController();
   int _tabIndex = 0;
+  bool _tasbeehInitialized = false;
+  Future<void>? _tasbeehInitialization;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _tasbeeh.addListener(_onTasbeehChanged);
-    _tasbeeh.initialize();
+  }
+
+  Future<void> _ensureTasbeehInitialized() {
+    return _tasbeehInitialization ??= _tasbeeh.initialize().then((_) {
+      _tasbeehInitialized = true;
+    });
+  }
+
+  void _selectTab(int index) {
+    setState(() => _tabIndex = index);
+    if (index == 2) _ensureTasbeehInitialized();
   }
 
   void _onTasbeehChanged() {
@@ -62,7 +74,7 @@ class _MainShellScreenState extends State<MainShellScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed && _tasbeehInitialized) {
       _tasbeeh.reload();
     }
   }
@@ -74,6 +86,7 @@ class _MainShellScreenState extends State<MainShellScreen>
   }
 
   Future<void> _startFloatingTasbeeh() async {
+    await _ensureTasbeehInitialized();
     final result = await _tasbeeh.startFloating();
     if (!mounted) return;
     if (result == FloatingTasbeehStartResult.permissionDenied) {
@@ -109,7 +122,7 @@ class _MainShellScreenState extends State<MainShellScreen>
   Widget build(BuildContext context) {
     final pages = [
       HomeScreen(
-        onOpenTasbeeh: () => setState(() => _tabIndex = 2),
+        onOpenTasbeeh: () => _selectTab(2),
         onOpenAdhkar: _openAdhkarReader,
       ),
       AdhkarCategoriesScreen(
@@ -122,16 +135,12 @@ class _MainShellScreenState extends State<MainShellScreen>
         onResetSession: _tasbeeh.resetSession,
         onStartFloating: _startFloatingTasbeeh,
         onStopFloating: _stopFloatingTasbeeh,
+        onOpenSettings: _openTasbeehSettings,
       ),
       const JourneyScreen(),
       MoreScreen(
         isDarkMode: widget.isDarkMode,
         onThemeChanged: widget.onThemeChanged,
-        adhkarVibrationEnabled: widget.adhkarVibrationEnabled,
-        onAdhkarVibrationChanged: widget.onAdhkarVibrationChanged,
-        adhkarSoundEnabled: widget.adhkarSoundEnabled,
-        onAdhkarSoundChanged: widget.onAdhkarSoundChanged,
-        onOpenTasbeehSettings: _openTasbeehSettings,
       ),
     ];
 
@@ -173,7 +182,7 @@ class _MainShellScreenState extends State<MainShellScreen>
                 top: false,
                 child: AppBottomNavBar(
                   currentIndex: _tabIndex,
-                  onChanged: (index) => setState(() => _tabIndex = index),
+                  onChanged: _selectTab,
                 ),
               ),
             ),
@@ -184,11 +193,21 @@ class _MainShellScreenState extends State<MainShellScreen>
   }
 
   Future<void> _openTasbeehSettings() async {
-    final result = await Navigator.of(context).push<TasbeehSettings>(
-      MaterialPageRoute(
-        builder: (_) => FloatingTasbeehSettingsScreen(
-          initialSettings: _tasbeeh.settings,
-          state: _tasbeeh.state,
+    await _ensureTasbeehInitialized();
+    if (!mounted) return;
+    final result = await showModalBottomSheet<TasbeehSettings>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: .94,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: FloatingTasbeehSettingsScreen(
+            initialSettings: _tasbeeh.settings,
+            state: _tasbeeh.state,
+          ),
         ),
       ),
     );

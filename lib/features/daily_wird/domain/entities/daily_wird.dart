@@ -5,19 +5,28 @@ class DailyTask {
     required this.type,
     this.goal,
     this.isBase = false,
+    this.taskType = manualTaskType,
+    this.collectionId,
   });
+
+  static const manualTaskType = 'manual';
+  static const adhkarCollectionTaskType = 'adhkarCollection';
 
   final String id;
   final String title;
   final String type;
   final int? goal;
   final bool isBase;
+  final String taskType;
+  final String? collectionId;
 
   factory DailyTask.fromJson(Map<String, dynamic> json) => DailyTask(
     id: json['id'] as String,
     title: json['title'] as String,
     type: json['type'] as String,
     goal: json['goal'] as int?,
+    taskType: json['taskType'] as String? ?? manualTaskType,
+    collectionId: json['collectionId'] as String?,
   );
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +34,8 @@ class DailyTask {
     'title': title,
     'type': type,
     'goal': goal,
+    'taskType': taskType,
+    'collectionId': collectionId,
   };
 }
 

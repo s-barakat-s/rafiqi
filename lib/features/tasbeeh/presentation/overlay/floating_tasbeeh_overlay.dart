@@ -176,7 +176,7 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
                         height: handleHeight,
                         decoration: BoxDecoration(
                           color: handleColor.withValues(
-                            alpha: settings.opacity.clamp(0.4, 1),
+                            alpha: settings.collapsedHandleOpacity,
                           ),
                           borderRadius: BorderRadius.circular(999),
                         ),
@@ -272,7 +272,8 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
                       child: _CountText(
                         value: widget.state.currentCount,
                         color: accentColor,
-                        fontSize: config.currentFontSize,
+                        fontSize:
+                            config.currentFontSize * settings.counterScale,
                       ),
                     ),
                     if (showDivider)
@@ -300,7 +301,8 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
                   child: _CountText(
                     value: widget.state.currentCount,
                     color: accentColor,
-                    fontSize: config.currentFontSize * 1.08,
+                    fontSize:
+                        config.currentFontSize * settings.counterScale * 1.08,
                   ),
                 ),
         ),
@@ -484,11 +486,12 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
 
   double _handleThickness(TasbeehSettings settings, OverlaySizeConfig config) {
     final scale = _scale(config);
-    return switch (settings.handleThickness) {
+    final base = switch (settings.handleThickness) {
       TasbeehSettings.handleThin => 4 * scale,
       TasbeehSettings.handleThick => 8 * scale,
       _ => 6 * scale,
     };
+    return base * settings.collapsedHandleScale;
   }
 
   double _handleHeight(TasbeehSettings settings, OverlaySizeConfig config) {
@@ -498,7 +501,9 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
       TasbeehSettings.handleTall => 230 * scale,
       _ => config.collapsedHandleHeight,
     };
-    return height.clamp(120, _collapsedWindowHeight(settings, config) - 16);
+    return (height * settings.collapsedHandleScale)
+        .clamp(90, _collapsedWindowHeight(settings, config) - 16)
+        .toDouble();
   }
 
   double _collapsedWindowHeight(
@@ -512,6 +517,8 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
       _ => config.collapsedHandleHeight,
     };
 
-    return (handleHeight + 32).clamp(180, 540).toDouble();
+    return (handleHeight * settings.collapsedHandleScale + 32)
+        .clamp(140, 620)
+        .toDouble();
   }
 }

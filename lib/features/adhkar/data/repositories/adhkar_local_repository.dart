@@ -1,13 +1,73 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:tasbeh/features/adhkar/data/repositories/adhkar_collection_overrides_repository.dart';
+import 'package:tasbeh/features/adhkar/data/repositories/custom_adhkar_collections_repository.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 
 abstract final class AdhkarLocalRepository {
-  static Future<List<AdhkarCategory>>? _cache;
+  static Future<List<AdhkarCategory>>? _canonicalCache;
 
-  static Future<List<AdhkarCategory>> loadCategories() =>
-      _cache ??= _loadCategories();
+  static Future<List<AdhkarCategory>> loadCategories() async {
+    final canonical = await loadCanonicalCategories();
+    final builtIn = await Future.wait(canonical.map(_applyOverrides));
+    final custom = await CustomAdhkarCollectionsRepository.instance.load();
+    return [
+      ...builtIn,
+      ...custom.map((collection) => collection.toAdhkarCategory()),
+    ];
+  }
+
+  static Future<List<AdhkarCategory>> loadCanonicalCategories() =>
+      _canonicalCache ??= _loadCategories();
+
+  static Future<AdhkarCategory> loadCanonicalCategory(String id) async {
+    final categories = await loadCanonicalCategories();
+    return categories.firstWhere((category) => category.id == id);
+  }
+
+  static Future<AdhkarCategory> _applyOverrides(
+    AdhkarCategory category,
+  ) async {
+    final overrides = await AdhkarCollectionOverridesRepository.instance.load(
+      category.id,
+    );
+    final combined = <DhikrItem>[
+      ...category.items,
+      ...overrides.addedDhikrItems.map(
+        (item) => DhikrItem(
+          id: item.id,
+          order: category.items.length * 100 +
+              overrides.addedDhikrItems.indexOf(item),
+          category: category.id,
+          text: item.text,
+          repeatCount: item.repeatCount,
+          entryType: DhikrEntryType.single,
+        ),
+      ),
+    ];
+    final byId = {for (final item in combined) item.id: item};
+    final ordered = <DhikrItem>[
+      for (final id in overrides.customOrder)
+        if (byId.containsKey(id)) byId.remove(id)!,
+      ...byId.values,
+    ];
+    final items = ordered
+        .where((item) => !overrides.hiddenDhikrIds.contains(item.id))
+        .map(
+          (item) => item.withRepeatCount(
+            overrides.repeatCountOverrides[item.id] ?? item.repeatCount,
+          ),
+        )
+        .toList(growable: false);
+    return AdhkarCategory(
+      id: category.id,
+      title: category.title,
+      subtitle: category.subtitle,
+      kind: category.kind,
+      items: List.unmodifiable(items),
+    );
+  }
 
   static Future<List<AdhkarCategory>> _loadCategories() async {
     final definitions = [
