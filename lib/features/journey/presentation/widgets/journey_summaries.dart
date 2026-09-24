@@ -48,9 +48,9 @@ class _WeekConsistency extends StatelessWidget {
                       : null,
                 ),
                 child: completed
-                    ? const Icon(
+                    ? Icon(
                         Icons.check_rounded,
-                        color: AppPalette.dustGrey,
+                        color: colors.onPrimary,
                         size: 17,
                       )
                     : isGrace

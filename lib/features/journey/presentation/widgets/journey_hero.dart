@@ -29,19 +29,19 @@ class _JourneyHero extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             ArabicNumerals.integer(current),
-            style: const TextStyle(
-              color: AppPalette.dustGrey,
+            style: TextStyle(
+              color: colors.onPrimary,
               fontSize: 52,
               height: 1,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 7),
-          const Text(
+          Text(
             'يومًا متواصلًا',
             style: TextStyle(
               fontFamily: AppFonts.display,
-              color: AppPalette.dustGrey,
+              color: colors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
@@ -83,15 +83,18 @@ class _HeroDetail extends StatelessWidget {
     children: [
       Text(
         value,
-        style: const TextStyle(
-          color: AppPalette.dustGrey,
+        style: TextStyle(
+          color: context.appColors.onPrimary,
           fontWeight: FontWeight.w700,
         ),
       ),
       const SizedBox(height: 3),
       Text(
         label,
-        style: const TextStyle(color: Color(0xFFCDC5B8), fontSize: 12),
+        style: TextStyle(
+          color: context.appColors.onPrimaryMuted,
+          fontSize: 12,
+        ),
       ),
     ],
   );

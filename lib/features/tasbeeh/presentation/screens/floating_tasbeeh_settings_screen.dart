@@ -7,16 +7,21 @@ import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dar
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/widgets/auto_hide_selector.dart';
+import 'package:tasbeh/features/tasbeeh/presentation/widgets/floating_controls_card.dart';
 
 class FloatingTasbeehSettingsScreen extends StatefulWidget {
   const FloatingTasbeehSettingsScreen({
     required this.initialSettings,
     required this.state,
+    this.onStartOverlay,
+    this.onStopOverlay,
     super.key,
   });
 
   final TasbeehSettings initialSettings;
   final TasbeehState state;
+  final Future<void> Function()? onStartOverlay;
+  final Future<void> Function()? onStopOverlay;
 
   @override
   State<FloatingTasbeehSettingsScreen> createState() =>
@@ -65,7 +70,7 @@ class _FloatingTasbeehSettingsScreenState
         if (!didPop) Navigator.of(context).pop(_settings);
       },
       child: Scaffold(
-        backgroundColor: colors.background,
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
@@ -94,6 +99,14 @@ class _FloatingTasbeehSettingsScreenState
                   style: TextStyle(color: colors.textSecondary, fontSize: 15),
                 ),
                 const SizedBox(height: 28),
+                if (widget.onStartOverlay != null &&
+                    widget.onStopOverlay != null) ...[
+                  FloatingControlsCard(
+                    onStart: widget.onStartOverlay!,
+                    onStop: widget.onStopOverlay!,
+                  ),
+                  const SizedBox(height: 26),
+                ],
                 _SettingsSection(
                   title: 'الظهور',
                   children: [

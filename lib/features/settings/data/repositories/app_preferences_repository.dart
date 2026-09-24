@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tasbeh/core/theme/rafiqi_palette.dart';
 import 'package:tasbeh/features/settings/domain/app_preferences.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/wird_reader_mode.dart';
 
@@ -9,6 +10,7 @@ class AppPreferencesRepository extends ChangeNotifier {
   static final instance = AppPreferencesRepository._();
 
   static const _themeKey = 'app_dark_theme';
+  static const _paletteKey = 'app_color_palette';
   static const _adhkarVibrationKey = 'adhkar_tap_vibration';
   static const _adhkarSoundKey = 'adhkar_tap_sound';
   static const _readerModeKey = 'adhkar_reader_mode';
@@ -26,6 +28,7 @@ class AppPreferencesRepository extends ChangeNotifier {
       themeMode: (storage.getBool(_themeKey) ?? false)
           ? ThemeMode.dark
           : ThemeMode.light,
+      palette: RafiqiPalette.fromStorage(storage.getString(_paletteKey)),
       adhkarVibrationEnabled: storage.getBool(_adhkarVibrationKey) ?? true,
       adhkarSoundEnabled: storage.getBool(_adhkarSoundKey) ?? true,
       readerMode: WirdReaderMode.values.firstWhere(
@@ -43,6 +46,13 @@ class AppPreferencesRepository extends ChangeNotifier {
     notifyListeners();
     final storage = await SharedPreferences.getInstance();
     await storage.setBool(_themeKey, enabled);
+  }
+
+  Future<void> setPalette(RafiqiPalette palette) async {
+    _value = _value.copyWith(palette: palette);
+    notifyListeners();
+    final storage = await SharedPreferences.getInstance();
+    await storage.setString(_paletteKey, palette.name);
   }
 
   Future<void> setAdhkarVibration(bool enabled) async {

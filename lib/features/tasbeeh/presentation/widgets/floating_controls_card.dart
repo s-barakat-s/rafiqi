@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
+import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 class FloatingControlsCard extends StatefulWidget {
   const FloatingControlsCard({
@@ -63,43 +65,73 @@ class _FloatingControlsCardState extends State<FloatingControlsCard>
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: colors.outline.withValues(alpha: .7)),
-          bottom: BorderSide(color: colors.outline.withValues(alpha: .7)),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Semantics(
+      button: true,
+      toggled: _isActive,
+      label: 'السبحة العائمة',
+      value: _isActive ? 'نشطة' : 'متوقفة',
+      child: Material(
+        color: colors.surfaceElevated.withValues(alpha: .82),
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          onTap: _isChanging ? null : () => _toggle(!_isActive),
+          borderRadius: BorderRadius.circular(22),
+          child: Container(
+            height: 88,
+            padding: const EdgeInsets.symmetric(horizontal: 13),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: _isActive
+                    ? colors.primary.withValues(alpha: .32)
+                    : colors.border.withValues(alpha: .56),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'السبحة العائمة',
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                RafiqiSvgIcon(
+                  RafiqiIcons.tasbeeh,
+                  size: 27,
+                  color: _isActive ? colors.primary : colors.textSecondary,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _isActive
-                      ? 'نشطة فوق التطبيقات'
-                      : 'عدّاد صغير أثناء استخدام هاتفك',
-                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                const SizedBox(width: 9),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'السبحة العائمة',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _isChanging
+                            ? 'جارٍ التحديث…'
+                            : _isActive
+                            ? 'نشطة الآن'
+                            : 'اضغط للتشغيل',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-          Switch.adaptive(
-            value: _isActive,
-            onChanged: _isChanging ? null : _toggle,
-          ),
-        ],
+        ),
       ),
     );
   }

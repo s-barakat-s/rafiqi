@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/core/time/hijri_date.dart';
 import 'package:tasbeh/core/time/local_day.dart';
 import 'package:tasbeh/features/calendar/presentation/screens/hijri_calendar_screen.dart';
-import 'package:tasbeh/shared/widgets/calligraphy_title.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_progress_repository.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar_progress.dart';
@@ -13,6 +13,12 @@ import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_reposito
 import 'package:tasbeh/features/daily_wird/domain/entities/daily_wird.dart';
 import 'package:tasbeh/features/home/data/repositories/daily_dhikr_repository.dart';
 import 'package:tasbeh/features/home/domain/adhkar_time_period.dart';
+import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_phrase.dart';
+import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
+import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_task_context.dart';
+import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_task_session_screen.dart';
+import 'package:tasbeh/shared/widgets/app_glass_surface.dart';
+import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 part '../../daily_wird/presentation/widgets/add_daily_task_sheet.dart';
 part 'widgets/daily_wird_section.dart';
@@ -23,10 +29,12 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.onOpenTasbeeh,
     required this.onOpenAdhkar,
+    this.onOpenJourney,
     super.key,
   });
   final VoidCallback onOpenTasbeeh;
   final Future<void> Function(String categoryId) onOpenAdhkar;
+  final VoidCallback? onOpenJourney;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -117,16 +125,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
+  Future<void> _openTasbeehTask(DailyTask task) async {
+    final todayItem = _store.todayRecord.items
+        .where((item) => item.id == task.id)
+        .firstOrNull;
+    final context = TasbeehTaskContext(
+      taskId: task.id,
+      phraseId: task.tasbeehPhraseId ?? 'subhan_allah',
+      phraseText: task.tasbeehPhraseText ?? task.title,
+      targetCount: task.tasbeehTargetCount ?? task.goal ?? 33,
+      initialProgress: todayItem?.progress ?? 0,
+    );
+    await Navigator.of(this.context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TasbeehTaskSessionScreen(taskContext: context),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _onTaskTap(DailyTask task) async {
+    if (task.taskType == DailyTask.adhkarCollectionTaskType &&
+        task.collectionId != null) {
+      await _openHeroAdhkar(task.collectionId!);
+      return;
+    }
+    if (task.taskType == DailyTask.tasbeehTargetTaskType) {
+      await _openTasbeehTask(task);
+      return;
+    }
+    await _toggleTask(task);
+  }
+
   Future<void> _toggleTask(DailyTask task) async {
     if (_completedIds.contains(task.id)) {
       await _store.setCompleted(task.id, false);
       return;
     }
-    if (task.isBase) {
+    if (task.isBase || task.taskType == DailyTask.tasbeehTargetTaskType) {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('هل أتممت هذا الورد خارج التطبيق؟'),
+          title: Text(
+            task.taskType == DailyTask.tasbeehTargetTaskType
+                ? 'هل أتممت هذه المهمة خارج رفيقي؟'
+                : 'هل أتممت هذا الورد خارج التطبيق؟',
+          ),
           content: const Text(
             'إذا كنت قد أتممته خارج التطبيق، يمكنك تسجيله منجزًا لليوم.',
           ),
@@ -171,28 +215,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _showReadyTaskPicker() async {
     final categories = await AdhkarLocalRepository.loadCategories();
     if (!mounted) return;
-    final category = await showModalBottomSheet<AdhkarCategory>(
+    final task = await showModalBottomSheet<DailyTask>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => _ReadyTaskPickerSheet(categories: categories),
     );
-    if (category == null || !mounted) return;
-    if (_store.hasLinkedCollection(category.id)) {
+    if (task == null || !mounted) return;
+    if (task.taskType == DailyTask.adhkarCollectionTaskType &&
+        task.collectionId != null &&
+        _store.hasLinkedCollection(task.collectionId!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('هذا الورد مضاف بالفعل إلى وردك اليومي')),
       );
       return;
     }
-    await _store.addTask(
-      DailyTask(
-        id: 'linked_adhkar_${category.id}',
-        title: category.title,
-        type: 'ذكر',
-        taskType: DailyTask.adhkarCollectionTaskType,
-        collectionId: category.id,
-      ),
-    );
+    if (task.taskType == DailyTask.tasbeehTargetTaskType &&
+        task.tasbeehPhraseId != null &&
+        task.tasbeehTargetCount != null &&
+        _store.hasLinkedTasbeehTask(
+          task.tasbeehPhraseId!,
+          task.tasbeehTargetCount!,
+        )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('هذا العمل مضاف بالفعل إلى وردك اليومي')),
+      );
+      return;
+    }
+    await _store.addTask(task);
   }
 
   Future<void> _openHijriCalendar() async {
@@ -206,156 +256,96 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('قريبًا في رفيقي'),
+          action: SnackBarAction(label: 'حسنًا', onPressed: () {}),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final text = Theme.of(context).textTheme;
     final currentPeriod = AdhkarTimePeriod.now();
+    final completedCount = _completedIds.length.clamp(0, _tasks.length);
+    final overallProgress = _tasks.isEmpty ? 0.0 : completedCount / _tasks.length;
+    final weekStart = _today.subtract(Duration(days: _today.weekday - 1));
+    final weekCompleted = _store.initialized
+        ? _store.completedBetween(
+            weekStart,
+            weekStart.add(const Duration(days: 6)),
+          )
+        : 0;
     return SafeArea(
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 34),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 36),
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: _openHijriCalendar,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 4,
-                      horizontal: 2,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _hijriToday.formatFull(),
-                          style: text.bodyMedium?.copyWith(
-                            color: colors.secondaryText,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          HijriDate.formatGregorianDayMonth(_today),
-                          style: text.labelLarge?.copyWith(
-                            color: colors.secondaryText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: colors.outline.withValues(alpha: .8),
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.local_fire_department_outlined,
-                      size: 18,
-                      color: colors.secondary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${ArabicNumerals.integer(_store.currentStreak)} يومًا',
-                      style: text.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          _HomeHeader(
+            hijriDate: _hijriToday.formatFull(),
+            gregorianDate: HijriDate.formatGregorianFull(_today),
+            streak: _store.currentStreak,
+            onDateTap: _openHijriCalendar,
           ),
-          const SizedBox(height: 24),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Transform.translate(
-              offset: const Offset(30, 0),
-              child: SizedBox(
-                width: 260,
-                child: Column(
-                  children: [
-                    const CalligraphyTitle(
-                      asset: 'assets/calligraphy/salam_alaykum.png',
-                      semanticLabel: 'السلام عليكم',
-                      height: 76,
-                      alignment: Alignment.center,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'جعل الله يومك عامرًا بذكره',
-                      textAlign: TextAlign.center,
-                      style: text.titleMedium?.copyWith(
-                        color: colors.secondaryText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           _MorningHero(
             categoryId: currentPeriod.categoryId,
             complete: _completedIds.contains(currentPeriod.dailyTaskId),
             progress: _adhkarProgress[currentPeriod.categoryId],
             onOpen: _openHeroAdhkar,
           ),
-          const SizedBox(height: 30),
-          Row(
-            children: [
-              const Expanded(child: _SectionTitle('وردك اليوم')),
-              IconButton.filledTonal(
-                onPressed: _showAddTaskSheet,
-                tooltip: 'إضافة عمل يومي',
-                icon: const Icon(Icons.add_rounded),
-              ),
-            ],
+          const SizedBox(height: 18),
+          _QuickActions(
+            onOpenAdhkar: () => widget.onOpenAdhkar(currentPeriod.categoryId),
+            onOpenTasbeeh: widget.onOpenTasbeeh,
+            onOpenJourney: widget.onOpenJourney ?? () {},
+            onComingSoon: _showComingSoon,
           ),
-          Text(
-            _readyForStreak
-                ? 'أتممت أعمال اليوم، بارك الله في مداومتك'
-                : 'تُحتسب جاهزية يومك بإتمام كل الأعمال أدناه',
-            style: text.bodySmall?.copyWith(
-              color: _readyForStreak ? colors.progress : colors.textSecondary,
-            ),
+          const SizedBox(height: 18),
+          _DailyWirdCard(
+            tasks: _tasks,
+            completedIds: _completedIds,
+            progress: overallProgress,
+            readyForStreak: _readyForStreak,
+            progressFor: _taskProgress,
+            tasbeehProgressFor: _taskTasbeehProgress,
+            onTapTask: _onTaskTap,
+            onToggleCheckbox: _toggleTask,
+            onAdd: _showAddTaskSheet,
           ),
-          const SizedBox(height: 8),
-          ..._tasks.map(
-            (task) => _DailyTaskRow(
-              task: task,
-              complete: _completedIds.contains(task.id),
-              progress: _taskProgress(task),
-              onTap: () => _toggleTask(task),
-            ),
-          ),
-          const SizedBox(height: 28),
-          const _SectionTitle('ذكر اليوم'),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           const _DhikrOfTheDay(),
+          const SizedBox(height: 18),
+          _JourneyStrip(
+            streak: _store.currentStreak,
+            weekCompleted: weekCompleted,
+            onTap: widget.onOpenJourney ?? () {},
+          ),
         ],
       ),
     );
   }
 
   AdhkarProgressSummary? _taskProgress(DailyTask task) {
+    if (task.taskType == DailyTask.adhkarCollectionTaskType &&
+        task.collectionId != null) {
+      return _adhkarProgress[task.collectionId!];
+    }
     return switch (task.id) {
       'morning_adhkar' => _adhkarProgress['morning'],
       'evening_adhkar' => _adhkarProgress['evening'],
       _ => null,
     };
+  }
+
+  int? _taskTasbeehProgress(DailyTask task) {
+    if (task.taskType != DailyTask.tasbeehTargetTaskType) return null;
+    final item = _store.todayRecord.items
+        .where((entry) => entry.id == task.id)
+        .firstOrNull;
+    return item?.progress ?? 0;
   }
 }

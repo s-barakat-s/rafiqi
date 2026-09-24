@@ -121,20 +121,18 @@ class _ListDhikrCardState extends State<_ListDhikrCard>
         opacity: _remainingSize,
         child: SlideTransition(
           position: _exitPosition,
-          child: Material(
-            color: colors.surfaceElevated,
+          child: AppGlassSurface(
             borderRadius: BorderRadius.circular(18),
+            level: AppGlassSurfaceLevel.reader,
+            grouped: true,
+            borderColor: colors.outlineStrong,
             child: InkWell(
               onTap: widget.enabled ? _tap : null,
               splashFactory: NoSplash.splashFactory,
               overlayColor: const WidgetStatePropertyAll(Colors.transparent),
               borderRadius: BorderRadius.circular(18),
-              child: Container(
+              child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: colors.outlineStrong),
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

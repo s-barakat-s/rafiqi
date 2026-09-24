@@ -251,6 +251,7 @@ class _AnimatedDeckLayer extends StatelessWidget {
                   : offset;
 
               final surface = Color.lerp(beginSurface, endSurface, progress)!;
+              final brightness = Theme.of(context).brightness;
 
               return Transform.translate(
                 offset: translatedOffset,
@@ -261,7 +262,12 @@ class _AnimatedDeckLayer extends StatelessWidget {
                     opacity: _lerp(beginOpacity, endOpacity, progress),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: surface,
+                        color: surface.withValues(
+                          alpha: AppGlassSurface.opacityFor(
+                            brightness,
+                            AppGlassSurfaceLevel.reader,
+                          ),
+                        ),
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(
                           color: Color.lerp(

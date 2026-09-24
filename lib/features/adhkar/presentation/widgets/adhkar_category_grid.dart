@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/wird_reader_screen.dart';
+import 'package:tasbeh/shared/widgets/app_glass_surface.dart';
+import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 class AdhkarCategoryGrid extends StatelessWidget {
   const AdhkarCategoryGrid({
@@ -22,31 +25,33 @@ class AdhkarCategoryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final aspectRatio = constraints.maxWidth < 360 ? .9 : .96;
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 14,
-            mainAxisSpacing: 14,
-            childAspectRatio: aspectRatio,
-          ),
-          itemCount: categories.length + 1,
-          itemBuilder: (context, index) {
-            if (index == categories.length) {
-              return _CreateCustomCollectionCard(onTap: onCreateCustom);
-            }
-            return _CategoryContainer(
-              category: categories[index],
-              vibrationEnabled: vibrationEnabled,
-              soundEnabled: soundEnabled,
-              onCustomize: onCustomize,
-            );
-          },
-        );
-      },
+    return BackdropGroup(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final aspectRatio = constraints.maxWidth < 360 ? .9 : .96;
+          return GridView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: aspectRatio,
+            ),
+            itemCount: categories.length + 1,
+            itemBuilder: (context, index) {
+              if (index == categories.length) {
+                return _CreateCustomCollectionCard(onTap: onCreateCustom);
+              }
+              return _CategoryContainer(
+                category: categories[index],
+                vibrationEnabled: vibrationEnabled,
+                soundEnabled: soundEnabled,
+                onCustomize: onCustomize,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -73,15 +78,9 @@ class _CategoryContainerState extends State<_CategoryContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colors.outline.withValues(alpha: .65)),
-      ),
-      clipBehavior: Clip.antiAlias,
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(20),
+      grouped: true,
       child: _AdhkarCategoryTile(
         category: widget.category,
         onTap: _openReader,
@@ -187,7 +186,7 @@ class _AdhkarCategoryTile extends StatelessWidget {
                 color: colors.emerald.withValues(alpha: .1),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
+              child: RafiqiSvgIcon(
                 _categoryIcon(category.kind),
                 color: colors.secondary,
                 size: 24,
@@ -222,12 +221,12 @@ class _AdhkarCategoryTile extends StatelessWidget {
   }
 }
 
-IconData _categoryIcon(AdhkarCategoryKind kind) => switch (kind) {
-  AdhkarCategoryKind.morning => Icons.wb_sunny_outlined,
-  AdhkarCategoryKind.evening => Icons.nightlight_outlined,
-  AdhkarCategoryKind.afterPrayer => Icons.mosque_outlined,
-  AdhkarCategoryKind.sleep => Icons.bedtime_outlined,
-  AdhkarCategoryKind.custom => Icons.auto_awesome_motion_outlined,
+String _categoryIcon(AdhkarCategoryKind kind) => switch (kind) {
+  AdhkarCategoryKind.morning => RafiqiIcons.morningAdhkar,
+  AdhkarCategoryKind.evening => RafiqiIcons.eveningAdhkar,
+  AdhkarCategoryKind.afterPrayer => RafiqiIcons.afterPrayerAdhkar,
+  AdhkarCategoryKind.sleep => RafiqiIcons.sleepAdhkar,
+  AdhkarCategoryKind.custom => RafiqiIcons.customWird,
 };
 
 class _CreateCustomCollectionCard extends StatelessWidget {
@@ -238,13 +237,9 @@ class _CreateCustomCollectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    return Material(
-      color: colors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colors.outline),
-      ),
-      clipBehavior: Clip.antiAlias,
+    return AppGlassSurface(
+      borderRadius: BorderRadius.circular(20),
+      grouped: true,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -252,7 +247,10 @@ class _CreateCustomCollectionCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_circle_outline_rounded, color: colors.secondary),
+              RafiqiSvgIcon(
+                RafiqiIcons.customWird,
+                color: colors.secondary,
+              ),
               const SizedBox(height: 12),
               const Text(
                 'إنشاء ورد خاص',

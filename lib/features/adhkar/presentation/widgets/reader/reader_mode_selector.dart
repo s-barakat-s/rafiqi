@@ -157,10 +157,16 @@ class _ReaderModeButtonState extends State<_ReaderModeButton> {
         onLongPressMoveUpdate: _trackQuickSelection,
         onLongPressEnd: (_) => _finishQuickSelection(),
         onLongPressCancel: _closeQuickSelector,
-        child: const SizedBox(
+        child: SizedBox(
           width: 40,
           height: 40,
-          child: Icon(Icons.view_agenda_outlined, size: 21),
+          child: Center(
+            child: RafiqiSvgIcon(
+              _readerModeIcon(widget.selected),
+              size: 21,
+              color: context.appColors.textPrimary,
+            ),
+          ),
         ),
       ),
     );
@@ -242,11 +248,6 @@ class _ModeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final icon = switch (mode) {
-      WirdReaderMode.focus => Icons.view_carousel_outlined,
-      WirdReaderMode.list => Icons.view_agenda_outlined,
-      WirdReaderMode.reading => Icons.menu_book_outlined,
-    };
     return Semantics(
       selected: selected,
       button: true,
@@ -255,7 +256,10 @@ class _ModeOption extends StatelessWidget {
         minVerticalPadding: 12,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         tileColor: selected ? colors.selected.withValues(alpha: .7) : null,
-        leading: Icon(icon, color: selected ? colors.secondary : null),
+        leading: RafiqiSvgIcon(
+          _readerModeIcon(mode),
+          color: selected ? colors.secondary : colors.textSecondary,
+        ),
         title: Text(
           mode.label,
           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -268,3 +272,9 @@ class _ModeOption extends StatelessWidget {
     );
   }
 }
+
+String _readerModeIcon(WirdReaderMode mode) => switch (mode) {
+  WirdReaderMode.focus => RafiqiIcons.cardView,
+  WirdReaderMode.list => RafiqiIcons.listView,
+  WirdReaderMode.reading => RafiqiIcons.readingView,
+};

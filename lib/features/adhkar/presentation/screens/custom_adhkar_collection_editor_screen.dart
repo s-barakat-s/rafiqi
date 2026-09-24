@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/custom_adhkar_collections_repository.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/custom_adhkar_collection.dart';
 import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_repository.dart';
+import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 class CustomAdhkarCollectionEditorScreen extends StatefulWidget {
   const CustomAdhkarCollectionEditorScreen({this.collection, super.key});
@@ -124,6 +126,7 @@ class _CustomAdhkarCollectionEditorScreenState
   Widget build(BuildContext context) {
     final colors = context.appColors;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(widget.collection == null ? 'إنشاء ورد خاص' : 'تعديل الورد'),
         actions: [
@@ -131,7 +134,7 @@ class _CustomAdhkarCollectionEditorScreenState
             IconButton(
               onPressed: _delete,
               tooltip: 'حذف الورد',
-              icon: const Icon(Icons.delete_outline_rounded),
+              icon: const RafiqiSvgIcon(RafiqiIcons.delete, size: 22),
             ),
         ],
       ),
@@ -200,7 +203,7 @@ class _CustomAdhkarCollectionEditorScreenState
                       IconButton(
                         onPressed: () =>
                             setState(() => _items[index].count++),
-                        icon: const Icon(Icons.add_rounded),
+                        icon: const RafiqiSvgIcon(RafiqiIcons.add, size: 20),
                       ),
                     ],
                   ),
@@ -211,7 +214,7 @@ class _CustomAdhkarCollectionEditorScreenState
           ],
           OutlinedButton.icon(
             onPressed: _addItem,
-            icon: const Icon(Icons.add_rounded),
+            icon: const RafiqiSvgIcon(RafiqiIcons.add, size: 20),
             label: const Text('إضافة ذكر آخر'),
           ),
           const SizedBox(height: 18),

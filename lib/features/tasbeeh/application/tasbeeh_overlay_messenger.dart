@@ -116,6 +116,9 @@ class TasbeehOverlayMessenger {
         'dailyTotal': message['dailyTotal'],
         'dailyDateKey': message['dailyDateKey'],
         'targetMode': message['targetMode'],
+        'selectedDhikrId': message['selectedDhikrId'],
+        'selectedDhikrText': message['selectedDhikrText'],
+        'sessionCounts': message['sessionCounts'],
       }),
       source: source is String ? source : '',
     );

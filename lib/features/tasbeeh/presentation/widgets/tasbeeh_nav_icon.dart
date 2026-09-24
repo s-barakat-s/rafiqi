@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 
 class TasbeehNavIcon extends StatelessWidget {
   const TasbeehNavIcon({this.size = 23, this.selected = false, super.key});
@@ -16,7 +17,7 @@ class TasbeehNavIcon extends StatelessWidget {
         color:
             IconTheme.of(context).color ??
             Theme.of(context).iconTheme.color ??
-            Colors.black,
+            context.appColors.textPrimary,
         selected: selected,
       ),
     );

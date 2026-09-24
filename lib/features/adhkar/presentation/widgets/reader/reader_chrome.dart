@@ -63,7 +63,7 @@ class _CompletionState extends StatelessWidget {
                 ),
                 TextButton.icon(
                   onPressed: () {},
-                  icon: const Icon(Icons.add_circle_outline_rounded),
+                  icon: const RafiqiSvgIcon(RafiqiIcons.add, size: 20),
                   label: const Text('إضافة إلى وردك اليومي'),
                 ),
               ],

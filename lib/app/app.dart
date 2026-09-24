@@ -3,6 +3,7 @@ import 'package:tasbeh/app/navigation/main_shell_screen.dart';
 import 'package:tasbeh/app/widgets/rafiqi_startup_intro.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/settings/data/repositories/app_preferences_repository.dart';
+import 'package:tasbeh/shared/widgets/app_decorative_background.dart';
 
 class TasbeehApp extends StatefulWidget {
   const TasbeehApp({super.key});
@@ -37,18 +38,28 @@ class _TasbeehAppState extends State<TasbeehApp> {
     return MaterialApp(
       title: 'رفيقي',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: buildRafiqiTheme(
+        palette: preferences.palette,
+        brightness: Brightness.light,
+      ),
+      darkTheme: buildRafiqiTheme(
+        palette: preferences.palette,
+        brightness: Brightness.dark,
+      ),
       themeMode: preferences.themeMode,
       builder: (context, child) => RafiqiStartupIntro(
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: child ?? const SizedBox.shrink(),
+        child: AppDecorativeBackground(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
       home: MainShellScreen(
         isDarkMode: preferences.isDarkMode,
         onThemeChanged: _preferences.setDarkMode,
+        selectedPalette: preferences.palette,
+        onPaletteChanged: _preferences.setPalette,
         adhkarVibrationEnabled: preferences.adhkarVibrationEnabled,
         onAdhkarVibrationChanged: _preferences.setAdhkarVibration,
         adhkarSoundEnabled: preferences.adhkarSoundEnabled,

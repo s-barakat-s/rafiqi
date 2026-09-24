@@ -101,7 +101,7 @@ class _CalendarDay extends StatelessWidget {
           ArabicNumerals.integer(date.day),
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: completed
-                ? AppPalette.dustGrey
+                ? colors.onPrimary
                 : isGrace
                 ? colors.secondary
                 : (future ? colors.secondaryText.withValues(alpha: .42) : null),

@@ -256,10 +256,28 @@ class _FloatingTasbeehOverlayState extends State<FloatingTasbeehOverlay>
               ),
             ),
           ),
+        Positioned(
+          top: 24 * _scale(config),
+          left: 20 * _scale(config),
+          right: 20 * _scale(config),
+          child: Text(
+            widget.state.selectedDhikrText,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              color: const Color(0xFFD8E0E6),
+              fontSize: 10 * _scale(config),
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+        ),
         Padding(
           padding: EdgeInsets.fromLTRB(
             18 * _scale(config),
-            settings.showTotal ? 42 * _scale(config) : 34 * _scale(config),
+            settings.showTotal ? 54 * _scale(config) : 48 * _scale(config),
             18 * _scale(config),
             settings.showTotal ? 32 * _scale(config) : 34 * _scale(config),
           ),

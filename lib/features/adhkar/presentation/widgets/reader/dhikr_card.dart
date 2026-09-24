@@ -18,14 +18,13 @@ class _DhikrCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final isLight = Theme.of(context).brightness == Brightness.light;
     final conciseSource = _conciseSource(item);
     final virtuePreview = item.virtuePreview ?? _virtuePreview(item.virtue);
     final hasMetadata = conciseSource.isNotEmpty || virtuePreview != null;
-    final card = Material(
-      color: Colors.transparent,
+    final card = AppGlassSurface(
       borderRadius: BorderRadius.circular(22),
-      clipBehavior: Clip.antiAlias,
+      level: AppGlassSurfaceLevel.reader,
+      borderColor: colors.outlineStrong,
       child: InkWell(
         onTap: enabled ? onTap : null,
         splashFactory: NoSplash.splashFactory,
@@ -36,10 +35,6 @@ class _DhikrCard extends StatelessWidget {
           width: double.infinity,
           height: double.infinity,
           padding: const EdgeInsets.fromLTRB(24, 26, 24, 22),
-          decoration: BoxDecoration(
-            border: Border.all(color: colors.outlineStrong),
-            borderRadius: BorderRadius.circular(22),
-          ),
           child: Column(
             children: [
               Align(
@@ -61,7 +56,7 @@ class _DhikrCard extends StatelessWidget {
                         ? 'مقدمة الورد'
                         : '${ArabicNumerals.integer(remaining)} ${remaining == 1 ? 'مرة متبقية' : 'مرات متبقية'}',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: isLight ? colors.secondary : AppPalette.drySage,
+                      color: colors.secondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:flutter/services.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
@@ -8,6 +9,8 @@ import 'package:tasbeh/features/adhkar/domain/entities/wird_reader_mode.dart';
 import 'package:tasbeh/features/adhkar/presentation/controllers/wird_reader_controller.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/dhikr_details_screen.dart';
 import 'package:tasbeh/features/settings/data/repositories/app_preferences_repository.dart';
+import 'package:tasbeh/shared/widgets/app_glass_surface.dart';
+import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 part '../widgets/reader/dhikr_card.dart';
 part '../widgets/reader/dhikr_deck.dart';
@@ -182,24 +185,24 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
           onPressed: _toggleHaptic,
           tooltip: _hapticEnabled ? 'إيقاف الاهتزاز' : 'تشغيل الاهتزاز',
           visualDensity: VisualDensity.compact,
-          icon: Icon(
-            _hapticEnabled
-                ? Icons.vibration_rounded
-                : Icons.mobile_off_rounded,
+          icon: RafiqiSvgIcon(
+            RafiqiIcons.vibration,
             size: 21,
-            color: _hapticEnabled ? colors.secondary : null,
+            color: _hapticEnabled
+                ? colors.secondary
+                : colors.navigationInactive,
           ),
         ),
         IconButton(
           onPressed: _toggleAudio,
           tooltip: _audioEnabled ? 'إيقاف الصوت' : 'تشغيل الصوت',
           visualDensity: VisualDensity.compact,
-          icon: Icon(
-            _audioEnabled
-                ? Icons.volume_up_outlined
-                : Icons.volume_off_outlined,
+          icon: RafiqiSvgIcon(
+            RafiqiIcons.sound,
             size: 21,
-            color: _audioEnabled ? colors.secondary : null,
+            color: _audioEnabled
+                ? colors.secondary
+                : colors.navigationInactive,
           ),
         ),
         _ReaderModeButton(
@@ -214,11 +217,15 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
   @override
   Widget build(BuildContext context) {
     if (_reader.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
     final colors = context.appColors;
     final total = _reader.total;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
@@ -260,9 +267,10 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 180),
-                  child: _reader.isComplete
+                child: BackdropGroup(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: _reader.isComplete
                       ? _CompletionState(
                           key: const ValueKey('reader-complete'),
                           total: total,
@@ -293,7 +301,8 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
                             },
                             onComplete: _reader.completeFromReading,
                           ),
-                        },
+                          },
+                  ),
                 ),
               ),
               if (_mode == WirdReaderMode.focus && !_reader.isComplete) ...[

@@ -134,10 +134,9 @@ class AdhkarProgressRepository extends ChangeNotifier {
       );
     }
 
-    final nextItem = category.items.cast<DhikrItem?>().firstWhere(
-      (item) => item != null && !completed.contains(item.id),
-      orElse: () => null,
-    );
+    final nextItem = category.items
+        .where((item) => !completed.contains(item.id))
+        .firstOrNull;
     if (nextItem == null) {
       final now = DateTime.now();
       return AdhkarReadingProgress(

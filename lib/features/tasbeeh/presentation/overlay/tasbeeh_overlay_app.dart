@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:tasbeh/features/tasbeeh/application/tasbeeh_counter_logic.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_layout_controller.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_messenger.dart';
+import 'package:tasbeh/features/tasbeeh/application/tasbeeh_recording_service.dart';
 import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
+import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_daily_record.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/overlay/floating_tasbeeh_overlay.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/overlay/overlay_dimensions.dart';
 
@@ -37,11 +38,13 @@ class _TasbeehOverlayStateHost extends StatefulWidget {
 
 class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
   final _storage = TasbeehRepository();
+  late final _recording = TasbeehRecordingService(repository: _storage);
   TasbeehState _state = TasbeehState.initial();
   TasbeehSettings _settings = TasbeehSettings.initial();
   StreamSubscription<TasbeehStateMessage>? _mainAppStateSubscription;
   StreamSubscription<TasbeehSettingsMessage>? _mainAppSettingsSubscription;
   Timer? _collapseTimer;
+  Future<void> _recordingQueue = Future<void>.value();
   bool _isCollapsed = false;
   bool _useEdgeGestureInsetFallback = false;
   String _windowAnchorSide = TasbeehSettings.sideRight;
@@ -142,13 +145,8 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
       return;
     }
 
-    final nextState = TasbeehCounterLogic.increment(_state);
-    await _storage.save(nextState);
-    if (!mounted) return;
-
-    setState(() {
-      _state = nextState;
-    });
+    final nextState = _recording.nextState(_state);
+    setState(() => _state = nextState);
 
     _restartInactivityTimer();
     TasbeehOverlayMessenger.sendStateToMainApp(nextState);
@@ -156,6 +154,17 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
       nextState,
       source: TasbeehOverlayMessenger.sourceOverlay,
     );
+    _recordingQueue = _recordingQueue.then((_) async {
+      final result = await _recording.recordIncrement(
+        nextState,
+        source: TasbeehActivitySource.overlay,
+      );
+      TasbeehOverlayMessenger.sendStateToMainApp(result.state);
+      await TasbeehOverlayMessenger.sendStateUpdate(
+        result.state,
+        source: TasbeehOverlayMessenger.sourceOverlay,
+      );
+    });
   }
 
   void _restartInactivityTimer() {

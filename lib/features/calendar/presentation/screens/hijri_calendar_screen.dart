@@ -88,6 +88,7 @@ class _HijriCalendarScreenState extends State<HijriCalendarScreen> {
         _viewYear == _todayHijri.year && _viewMonth == _todayHijri.month;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('التقويم الهجري'),
         leading: IconButton(
@@ -379,7 +380,7 @@ class _HijriDayCell extends StatelessWidget {
         ? colors.selected.withValues(alpha: .35)
         : Colors.transparent;
 
-    final textColor = isSelected ? AppPalette.dustGrey : colors.textPrimary;
+    final textColor = isSelected ? colors.onPrimary : colors.textPrimary;
 
     final border = isToday && !isSelected
         ? Border.all(color: colors.progress, width: 1.5)

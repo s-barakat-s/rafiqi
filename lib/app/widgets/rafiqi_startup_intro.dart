@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/theme/app_theme.dart';
 
 class RafiqiStartupIntro extends StatefulWidget {
   const RafiqiStartupIntro({required this.child, super.key});
@@ -38,6 +39,7 @@ class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.appColors;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -53,9 +55,7 @@ class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
                 duration: _fadeDuration,
                 curve: Curves.easeInOutCubic,
                 child: ColoredBox(
-                  color: isDark
-                      ? const Color(0xFF151A18)
-                      : const Color(0xFFF2F0E9),
+                  color: colors.background,
                   child: Image.asset(
                     isDark
                         ? 'assets/branding/splash_dark.png'

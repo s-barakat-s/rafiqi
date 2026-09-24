@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasbeh/core/time/local_day.dart';
 import 'package:tasbeh/features/daily_wird/domain/entities/daily_wird.dart';
 import 'package:tasbeh/features/daily_wird/domain/services/daily_streak_calculator.dart';
+import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 
 class DailyWirdRepository extends ChangeNotifier {
   DailyWirdRepository._();
@@ -41,8 +42,14 @@ class DailyWirdRepository extends ChangeNotifier {
   bool get initialized => _initialized;
   List<DailyTask> get tasks => [...baseTasks, ..._customTasks];
   Map<String, DailyHistoryRecord> get history => Map.unmodifiable(_history);
-  DailyHistoryRecord get todayRecord => _history[LocalDay.key(DateTime.now())]!;
+  DailyHistoryRecord get todayRecord => _ensureTodayRecord();
   bool get readyForStreak => todayRecord.completed;
+
+  DailyHistoryRecord _ensureTodayRecord() {
+    final today = LocalDay.date(DateTime.now());
+    final todayKey = LocalDay.key(today);
+    return _history.putIfAbsent(todayKey, () => _snapshotFor(today));
+  }
 
   Future<void> initialize() {
     return _initialization ??= _initialize().whenComplete(() {
@@ -99,7 +106,7 @@ class DailyWirdRepository extends ChangeNotifier {
       _history[LocalDay.key(cursor)] = _snapshotFor(cursor);
       cursor = cursor.add(const Duration(days: 1));
     }
-    _history.putIfAbsent(LocalDay.key(today), () => _snapshotFor(today));
+    _ensureTodayRecord();
   }
 
   DailyHistoryRecord _snapshotFor(
@@ -114,6 +121,13 @@ class DailyWirdRepository extends ChangeNotifier {
             title: task.title,
             type: task.type,
             goal: task.goal,
+            taskType: task.taskType,
+            collectionId: task.collectionId,
+            tasbeehPhraseId: task.tasbeehPhraseId,
+            tasbeehPhraseText: task.tasbeehPhraseText,
+            tasbeehTargetCount: task.tasbeehTargetCount,
+            baselineTotalCount: 0,
+            progress: 0,
             completed: completedIds.contains(task.id),
             completionSource: completedIds.contains(task.id) ? 'manual' : null,
           ),
@@ -122,6 +136,23 @@ class DailyWirdRepository extends ChangeNotifier {
   );
 
   Future<void> addTask(DailyTask task) async {
+    if (task.taskType == DailyTask.tasbeehTargetTaskType &&
+        task.tasbeehPhraseId != null &&
+        hasLinkedTasbeehTask(task.tasbeehPhraseId!, task.tasbeehTargetCount ?? 0)) {
+      await updateTasbeehTaskTarget(
+        phraseId: task.tasbeehPhraseId!,
+        targetCount: task.tasbeehTargetCount ?? task.goal ?? 33,
+        title: task.title,
+      );
+      return;
+    }
+    final baseline = task.taskType == DailyTask.tasbeehTargetTaskType &&
+            task.tasbeehPhraseId != null
+        ? await TasbeehRepository().eligibleCountForDay(
+            LocalDay.key(DateTime.now()),
+            task.tasbeehPhraseId!,
+          )
+        : 0;
     _customTasks = [..._customTasks, task];
     final todayKey = LocalDay.key(DateTime.now());
     final current = _history[todayKey] ?? _snapshotFor(DateTime.now());
@@ -134,6 +165,13 @@ class DailyWirdRepository extends ChangeNotifier {
             title: task.title,
             type: task.type,
             goal: task.goal,
+            taskType: task.taskType,
+            collectionId: task.collectionId,
+            tasbeehPhraseId: task.tasbeehPhraseId,
+            tasbeehPhraseText: task.tasbeehPhraseText,
+            tasbeehTargetCount: task.tasbeehTargetCount,
+            baselineTotalCount: baseline,
+            progress: 0,
             completed: false,
           ),
         ],
@@ -148,10 +186,79 @@ class DailyWirdRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateTasbeehTaskTarget({
+    required String phraseId,
+    required int targetCount,
+    required String title,
+  }) async {
+    final taskIndex = _customTasks.indexWhere(
+      (task) =>
+          task.taskType == DailyTask.tasbeehTargetTaskType &&
+          task.tasbeehPhraseId == phraseId,
+    );
+    if (taskIndex < 0 || targetCount <= 0) return;
+    final oldTask = _customTasks[taskIndex];
+    final updatedTask = DailyTask(
+      id: oldTask.id,
+      title: title,
+      type: oldTask.type,
+      goal: targetCount,
+      isBase: oldTask.isBase,
+      taskType: oldTask.taskType,
+      collectionId: oldTask.collectionId,
+      tasbeehPhraseId: oldTask.tasbeehPhraseId,
+      tasbeehPhraseText: oldTask.tasbeehPhraseText,
+      tasbeehTargetCount: targetCount,
+    );
+    _customTasks = [
+      for (var i = 0; i < _customTasks.length; i++)
+        if (i == taskIndex) updatedTask else _customTasks[i],
+    ];
+
+    final todayKey = LocalDay.key(DateTime.now());
+    final current = _history[todayKey] ?? _snapshotFor(DateTime.now());
+    final currentEligible = await TasbeehRepository().eligibleCountForDay(
+      todayKey,
+      phraseId,
+    );
+    final items = current.items.map((item) {
+      if (item.id != oldTask.id) return item;
+      final eligibleProgress = (currentEligible - item.baselineTotalCount)
+          .clamp(0, targetCount)
+          .toInt();
+      final progress = (eligibleProgress + item.externalContribution)
+          .clamp(0, targetCount)
+          .toInt();
+      final completed = progress >= targetCount;
+      return item.copyWith(
+        title: title,
+        goal: targetCount,
+        tasbeehTargetCount: targetCount,
+        progress: progress,
+        completed: completed,
+        completionSource: completed ? item.completionSource ?? 'tasbeeh' : null,
+        clearCompletionSource: !completed,
+      );
+    }).toList();
+    _history[todayKey] = _evaluateCompletion(current.copyWith(items: items));
+    final preferences = await SharedPreferences.getInstance();
+    await _saveTasks(preferences);
+    await _saveHistory(preferences);
+    notifyListeners();
+  }
+
   bool hasLinkedCollection(String collectionId) => tasks.any(
     (task) =>
-        task.taskType == DailyTask.adhkarCollectionTaskType &&
-        task.collectionId == collectionId,
+        (task.taskType == DailyTask.adhkarCollectionTaskType &&
+            task.collectionId == collectionId) ||
+        (collectionId == 'morning' && task.id == 'morning_adhkar') ||
+        (collectionId == 'evening' && task.id == 'evening_adhkar'),
+  );
+
+  bool hasLinkedTasbeehTask(String phraseId, int targetCount) => tasks.any(
+    (task) =>
+        task.taskType == DailyTask.tasbeehTargetTaskType &&
+        task.tasbeehPhraseId == phraseId,
   );
 
   Future<void> renameLinkedCollectionTask(
@@ -168,6 +275,10 @@ class DailyWirdRepository extends ChangeNotifier {
                   goal: task.goal,
                   taskType: task.taskType,
                   collectionId: task.collectionId,
+                  tasbeehPhraseId: task.tasbeehPhraseId,
+                  tasbeehPhraseText: task.tasbeehPhraseText,
+                  tasbeehTargetCount: task.tasbeehTargetCount,
+                  baselineTotalCount: task.baselineTotalCount,
                 )
               : task,
         )
@@ -254,17 +365,52 @@ class DailyWirdRepository extends ChangeNotifier {
     final date = LocalDay.date(day ?? DateTime.now());
     final key = LocalDay.key(date);
     final current = _history[key] ?? _snapshotFor(date);
+    final existing = current.items.where((item) => item.id == itemId).firstOrNull;
+    final isTasbeeh = existing?.taskType == DailyTask.tasbeehTargetTaskType &&
+        existing?.tasbeehPhraseId != null;
+    final currentEligible = isTasbeeh
+        ? await TasbeehRepository().eligibleCountForDay(
+            key,
+            existing!.tasbeehPhraseId!,
+          )
+        : 0;
     _history[key] = _evaluateCompletion(
       current.copyWith(
         items: current.items
             .map(
-              (item) => item.id == itemId
-                  ? item.copyWith(
-                      completed: completed,
-                      completionSource: completed ? source : null,
-                      clearCompletionSource: !completed,
-                    )
-                  : item,
+              (item) {
+                if (item.id != itemId) return item;
+                if (item.taskType != DailyTask.tasbeehTargetTaskType) {
+                  return item.copyWith(
+                    completed: completed,
+                    completionSource: completed ? source : null,
+                    clearCompletionSource: !completed,
+                  );
+                }
+                final target = item.tasbeehTargetCount ?? item.goal ?? 33;
+                if (!completed) {
+                  return item.copyWith(
+                    completed: false,
+                    progress: 0,
+                    baselineTotalCount: currentEligible,
+                    externalContribution: 0,
+                    clearCompletionSource: true,
+                  );
+                }
+                final eligibleProgress =
+                    (currentEligible - item.baselineTotalCount)
+                    .clamp(0, target)
+                    .toInt();
+                final missing = (target - eligibleProgress)
+                    .clamp(0, target)
+                    .toInt();
+                return item.copyWith(
+                  completed: true,
+                  progress: target,
+                  externalContribution: missing,
+                  completionSource: source,
+                );
+              },
             )
             .toList(),
       ),
@@ -274,6 +420,75 @@ class DailyWirdRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> syncTasbeehProgress({
+    required String dhikrId,
+    required int currentEligibleTotal,
+    DateTime? day,
+  }) async {
+    final date = LocalDay.date(day ?? DateTime.now());
+    final key = LocalDay.key(date);
+    final current = _history[key] ?? _snapshotFor(date);
+    var newlyCompleted = false;
+    final items = current.items.map((item) {
+      if (item.taskType != DailyTask.tasbeehTargetTaskType ||
+          item.tasbeehPhraseId != dhikrId) {
+        return item;
+      }
+      final target = item.tasbeehTargetCount ?? item.goal ?? 33;
+      final eligibleProgress =
+          (currentEligibleTotal - item.baselineTotalCount)
+          .clamp(0, target)
+          .toInt();
+      final calculatedProgress =
+          (eligibleProgress + item.externalContribution).clamp(
+        0,
+        target,
+      ).toInt();
+      final manuallyCompleted =
+          item.completed && item.completionSource == 'manual';
+      final progress = manuallyCompleted ? target : calculatedProgress;
+      final finished = progress >= target;
+      if (finished && !item.completed) newlyCompleted = true;
+      return item.copyWith(
+        progress: progress,
+        completed: finished || manuallyCompleted,
+        completionSource: manuallyCompleted
+            ? 'manual'
+            : finished
+            ? 'tasbeeh'
+            : null,
+        clearCompletionSource: !finished && !manuallyCompleted,
+      );
+    }).toList();
+    final updated = _evaluateCompletion(current.copyWith(items: items));
+    if (_sameRecord(current, updated)) return newlyCompleted;
+    _history[key] = updated;
+    final preferences = await SharedPreferences.getInstance();
+    await _saveHistory(preferences);
+    notifyListeners();
+    return newlyCompleted;
+  }
+
+  Map<String, int> externalContributionsBetween(
+    DateTime start,
+    DateTime end,
+  ) {
+    final result = <String, int>{};
+    for (final record in _history.values) {
+      final day = LocalDay.parse(record.dateKey);
+      if (day.isBefore(LocalDay.date(start)) ||
+          day.isAfter(LocalDay.date(end))) {
+        continue;
+      }
+      for (final item in record.items) {
+        final id = item.tasbeehPhraseId;
+        if (id == null || item.externalContribution <= 0) continue;
+        result[id] = (result[id] ?? 0) + item.externalContribution;
+      }
+    }
+    return result;
+  }
+
   Future<void> setAdhkarReaderCompletion(
     String categoryId,
     bool completed, {
@@ -281,12 +496,6 @@ class DailyWirdRepository extends ChangeNotifier {
     String source = 'reader',
   }) async {
     if (!completed) return;
-    final itemId = switch (categoryId) {
-      'morning' => 'morning_adhkar',
-      'evening' => 'evening_adhkar',
-      _ => null,
-    };
-    if (itemId == null) return;
     if (!_initialized) await initialize();
 
     final recordDate = LocalDay.date(day ?? DateTime.now());
@@ -295,7 +504,12 @@ class DailyWirdRepository extends ChangeNotifier {
     final updated = _evaluateCompletion(
       current.copyWith(
         items: current.items.map((item) {
-          if (item.id != itemId || item.completed) {
+          final matchesCategory = (categoryId == 'morning' &&
+                  item.id == 'morning_adhkar') ||
+              (categoryId == 'evening' && item.id == 'evening_adhkar') ||
+              (item.taskType == DailyTask.adhkarCollectionTaskType &&
+                  item.collectionId == categoryId);
+          if (!matchesCategory || item.completed) {
             return item;
           }
           return item.copyWith(completed: true, completionSource: source);
@@ -351,7 +565,10 @@ class DailyWirdRepository extends ChangeNotifier {
       final right = b.items[index];
       if (left.id != right.id ||
           left.completed != right.completed ||
-          left.completionSource != right.completionSource) {
+          left.completionSource != right.completionSource ||
+          left.progress != right.progress ||
+          left.baselineTotalCount != right.baselineTotalCount ||
+          left.externalContribution != right.externalContribution) {
         return false;
       }
     }

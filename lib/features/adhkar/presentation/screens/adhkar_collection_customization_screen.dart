@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_collection_overrides_repository.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar_collection_overrides.dart';
+import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 class AdhkarCollectionCustomizationScreen extends StatefulWidget {
   const AdhkarCollectionCustomizationScreen({
@@ -167,7 +169,7 @@ class _AdhkarCollectionCustomizationScreenState
                   Text(ArabicNumerals.integer(count)),
                   IconButton(
                     onPressed: () => setDialogState(() => count++),
-                    icon: const Icon(Icons.add_rounded),
+                    icon: const RafiqiSvgIcon(RafiqiIcons.add, size: 20),
                   ),
                 ],
               ),
@@ -276,6 +278,7 @@ class _AdhkarCollectionCustomizationScreenState
     final colors = context.appColors;
     final overrides = _overrides;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(title: Text('تخصيص ${widget.category.title}')),
       body: overrides == null
           ? const Center(child: CircularProgressIndicator())
@@ -330,8 +333,9 @@ class _AdhkarCollectionCustomizationScreenState
                                     IconButton(
                                       onPressed: () => _removeAdded(item),
                                       tooltip: 'حذف الذكر المضاف',
-                                      icon: const Icon(
-                                        Icons.delete_outline_rounded,
+                                      icon: const RafiqiSvgIcon(
+                                        RafiqiIcons.delete,
+                                        size: 20,
                                       ),
                                     )
                                   else
@@ -373,7 +377,10 @@ class _AdhkarCollectionCustomizationScreenState
                                     IconButton(
                                       onPressed: () =>
                                           _setRepeatCount(item, count + 1),
-                                      icon: const Icon(Icons.add_rounded),
+                                      icon: const RafiqiSvgIcon(
+                                        RafiqiIcons.add,
+                                        size: 20,
+                                      ),
                                       visualDensity: VisualDensity.compact,
                                     ),
                                     if (count != _originalCount(item))
@@ -402,14 +409,20 @@ class _AdhkarCollectionCustomizationScreenState
                         Expanded(
                           child: FilledButton.icon(
                             onPressed: _addDhikr,
-                            icon: const Icon(Icons.add_rounded),
+                            icon: const RafiqiSvgIcon(
+                              RafiqiIcons.add,
+                              size: 20,
+                            ),
                             label: const Text('إضافة ذكر'),
                           ),
                         ),
                         const SizedBox(width: 10),
                         OutlinedButton.icon(
                           onPressed: overrides.isEmpty ? null : _reset,
-                          icon: const Icon(Icons.restore_rounded),
+                          icon: const RafiqiSvgIcon(
+                            RafiqiIcons.reset,
+                            size: 20,
+                          ),
                           label: const Text('استعادة'),
                         ),
                       ],

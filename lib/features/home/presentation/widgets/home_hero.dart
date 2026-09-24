@@ -18,10 +18,13 @@ class _MorningHero extends StatelessWidget {
     final colors = context.appColors;
     final theme = Theme.of(context);
     final text = theme.textTheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final backgroundAsset = isDark
-        ? 'assets/image/ChatGPT Image Aug 22, 2026, 09_26_58 PM.png'
-        : 'assets/image/ChatGPT Image Aug 22, 2026, 09_16_46 PM.png';
+    final isMorning = categoryId == 'morning';
+    final foreground = colors.imageForeground;
+    final mutedForeground = colors.imageForegroundMuted;
+    final backgroundAsset = colors.heroAsset(
+      isMorning: isMorning,
+      brightness: theme.brightness,
+    );
     final title = complete
         ? categoryId == 'morning'
               ? 'قرأت أذكار الصباح'
@@ -37,47 +40,72 @@ class _MorningHero extends StatelessWidget {
     final completedSteps = progress?.completedSteps ?? 0;
     final totalSteps = progress?.totalSteps ?? 0;
     return Container(
-      padding: const EdgeInsets.all(22),
+      constraints: const BoxConstraints(minHeight: 250),
       decoration: BoxDecoration(
-        color: colors.primary,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: colors.outline.withValues(alpha: .7)),
+        borderRadius: BorderRadius.circular(28),
         image: DecorationImage(
           image: AssetImage(backgroundAsset),
           fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            isDark
-                ? colors.background.withValues(alpha: .42)
-                : AppPalette.hunterGreen.withValues(alpha: .28),
-            BlendMode.srcOver,
-          ),
+          alignment: colors.usesExplicitControlRoles ? Alignment.centerLeft : Alignment.center,
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    colors.imageScrim.withValues(alpha: 0),
+                    colors.imageScrim.withValues(alpha: .12),
+                    colors.imageScrim.withValues(alpha: colors.heroScrimOpacity(
+                      isMorning: isMorning,
+                      brightness: theme.brightness,
+                    )),
+                  ],
+                  stops: const [0, .48, 1],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              Row(children: [
+                RafiqiSvgIcon(
+                  RafiqiIcons.notification,
+                  size: 20,
+                  color: foreground,
+                ),
+                const SizedBox(width: 7),
+                Text('حان الآن وقت', style: text.labelLarge?.copyWith(color: mutedForeground)),
+              ]),
+              const SizedBox(height: 12),
               Text(
                 title,
                 style: TextStyle(
                   fontFamily: AppFonts.display,
-                  color: AppPalette.dustGrey,
-                  fontSize: 29,
+                  color: foreground,
+                  fontSize: 36,
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: text.bodyLarge?.copyWith(color: AppPalette.dustGrey),
+                style: text.bodyLarge?.copyWith(color: mutedForeground),
               ),
               if (complete) ...[
                 const SizedBox(height: 24),
-                const Icon(
+                Icon(
                   Icons.check_circle_outline_rounded,
-                  color: AppPalette.dustGrey,
                   size: 34,
+                  color: foreground,
                 ),
               ] else ...[
                 const SizedBox(height: 24),
@@ -91,10 +119,8 @@ class _MorningHero extends StatelessWidget {
                               ? 0
                               : completedSteps / totalSteps,
                           minHeight: 7,
-                          backgroundColor: AppPalette.dustGrey.withValues(
-                            alpha: .2,
-                          ),
-                          color: colors.progress,
+                          backgroundColor: foreground.withValues(alpha: .2),
+                          color: foreground,
                         ),
                       ),
                     ),
@@ -102,7 +128,7 @@ class _MorningHero extends StatelessWidget {
                     Text(
                       '${ArabicNumerals.integer(completedSteps)} من ${ArabicNumerals.integer(totalSteps)}',
                       style: text.labelLarge?.copyWith(
-                        color: AppPalette.dustGrey,
+                        color: foreground,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -111,6 +137,10 @@ class _MorningHero extends StatelessWidget {
                 const SizedBox(height: 20),
                 FilledButton(
                   onPressed: () => onOpen(categoryId),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colors.imageActionBackground,
+                    foregroundColor: colors.imageActionForeground,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -125,7 +155,8 @@ class _MorningHero extends StatelessWidget {
                   ),
                 ),
               ],
-            ],
+              ],
+            ),
           ),
         ],
       ),

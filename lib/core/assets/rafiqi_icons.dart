@@ -1,0 +1,34 @@
+abstract final class RafiqiIcons {
+  static const _root = 'assets/icons/svg';
+
+  static const home = '$_root/home.svg';
+  static const adhkar = '$_root/adhkar.svg';
+  static const tasbeeh = '$_root/tasbeeh.svg';
+  static const quran = '$_root/quran.svg';
+  static const journey = '$_root/journey.svg';
+  static const more = '$_root/more.svg';
+  static const community = '$_root/community.svg';
+  static const calendar = '$_root/calendar.svg';
+  static const adhan = '$_root/adhan.svg';
+  static const qibla = '$_root/qibla.svg';
+  static const morningAdhkar = '$_root/morning_adhkar.svg';
+  static const eveningAdhkar = '$_root/evening_adhkar.svg';
+  static const afterPrayerAdhkar = '$_root/after_prayer_adhkar.svg';
+  static const sleepAdhkar = '$_root/sleep_adhkar.svg';
+  static const customWird = '$_root/custom_wird.svg';
+  static const dailyWird = '$_root/daily_wird.svg';
+  static const bookmark = '$_root/bookmark.svg';
+  static const share = '$_root/share.svg';
+  static const notification = '$_root/notification.svg';
+  static const settings = '$_root/settings.svg';
+  static const themePalette = '$_root/theme_palette.svg';
+  static const sound = '$_root/sound.svg';
+  static const vibration = '$_root/vibration.svg';
+  static const add = '$_root/add.svg';
+  static const edit = '$_root/edit.svg';
+  static const delete = '$_root/delete.svg';
+  static const reset = '$_root/reset.svg';
+  static const listView = '$_root/list_view.svg';
+  static const cardView = '$_root/card_view.svg';
+  static const readingView = '$_root/reading_view.svg';
+}

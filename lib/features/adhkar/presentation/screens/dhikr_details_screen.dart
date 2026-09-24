@@ -15,6 +15,7 @@ class DhikrDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sections = _sections(item);
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [

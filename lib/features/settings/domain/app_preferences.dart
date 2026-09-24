@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:tasbeh/core/theme/rafiqi_palette.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/wird_reader_mode.dart';
 
 @immutable
 class AppPreferences {
   const AppPreferences({
     this.themeMode = ThemeMode.light,
+    this.palette = RafiqiPalette.rafiqi,
     this.adhkarVibrationEnabled = true,
     this.adhkarSoundEnabled = true,
     this.readerMode = WirdReaderMode.focus,
   });
 
   final ThemeMode themeMode;
+  final RafiqiPalette palette;
   final bool adhkarVibrationEnabled;
   final bool adhkarSoundEnabled;
   final WirdReaderMode readerMode;
@@ -19,11 +22,13 @@ class AppPreferences {
 
   AppPreferences copyWith({
     ThemeMode? themeMode,
+    RafiqiPalette? palette,
     bool? adhkarVibrationEnabled,
     bool? adhkarSoundEnabled,
     WirdReaderMode? readerMode,
   }) => AppPreferences(
     themeMode: themeMode ?? this.themeMode,
+    palette: palette ?? this.palette,
     adhkarVibrationEnabled:
         adhkarVibrationEnabled ?? this.adhkarVibrationEnabled,
     adhkarSoundEnabled: adhkarSoundEnabled ?? this.adhkarSoundEnabled,
