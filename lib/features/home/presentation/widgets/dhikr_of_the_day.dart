@@ -65,14 +65,11 @@ class _DhikrOfTheDayState extends State<_DhikrOfTheDay> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26),
           border: Border.all(color: colors.outline.withValues(alpha: .65)),
-          image: DecorationImage(
-            image: AssetImage(bgAsset),
-            fit: BoxFit.cover,
-          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
+            Positioned.fill(child: AppThemeArtwork(asset: bgAsset)),
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -125,12 +122,13 @@ class _DhikrOfTheDayState extends State<_DhikrOfTheDay> {
                           const SizedBox(height: 12),
                           Text(
                             '${ArabicNumerals.integer(_repository.remainingCount)} ${_repository.remainingCount == 1 ? 'مرة متبقية' : 'مرات متبقية'}',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: isDark
-                                  ? const Color(0xFFF1F5F9)
-                                  : colors.primary,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: isDark
+                                      ? const Color(0xFFF1F5F9)
+                                      : colors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ],
                       ),
@@ -153,11 +151,12 @@ class _DhikrOfTheDayState extends State<_DhikrOfTheDay> {
                       Expanded(
                         child: Text(
                           dhikr.sourceShort,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? const Color(0xFFCBD5E1)
-                                : colors.secondaryText,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: isDark
+                                    ? const Color(0xFFCBD5E1)
+                                    : colors.secondaryText,
+                              ),
                         ),
                       ),
                       IconButton(

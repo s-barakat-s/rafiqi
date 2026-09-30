@@ -87,24 +87,27 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color imageActionForeground;
 
   bool get isRafiqi => morningHeroAsset.startsWith('assets/image/home/rafiqi/');
-  bool get isShafaq => morningHeroAsset.startsWith('assets/image/home/shfaq/');
   bool get isWard => morningHeroAsset.startsWith('assets/image/home/ward/');
-  bool get isAmethyst => morningHeroAsset.startsWith('assets/image/home/amethyst/');
-  bool get isMahogany => morningHeroAsset.startsWith('assets/image/home/mahogany/');
+  bool get isAmethyst =>
+      morningHeroAsset.startsWith('assets/image/home/amethyst/');
   // Reserved for warning messages; never reuse the burgundy action color.
-  Color? get warning => (isMahogany || isLinen || isOcean)
+  Color? get warning => (isLinen || isOcean)
       ? (morningHeroAsset.endsWith('_dark.webp')
-          ? const Color(0xFFE5BE78)
-          : const Color(0xFF805400))
+            ? const Color(0xFFE5BE78)
+            : const Color(0xFF805400))
       : null;
   bool get isLinen => morningHeroAsset.startsWith('assets/image/home/linen/');
   bool get isOcean => morningHeroAsset.startsWith('assets/image/home/ocean/');
-  bool get usesExplicitControlRoles => isRafiqi || isWard || isAmethyst || isMahogany || isLinen || isOcean;
+  bool get usesExplicitControlRoles =>
+      isRafiqi || isWard || isAmethyst || isLinen || isOcean;
   Color get imageForeground =>
       usesExplicitControlRoles ? Colors.white : const Color(0xFFF8FAF7);
   Color get imageForegroundMuted => const Color(0xFFDDE3DF);
 
-  double heroScrimOpacity({required bool isMorning, required Brightness brightness}) {
+  double heroScrimOpacity({
+    required bool isMorning,
+    required Brightness brightness,
+  }) {
     if (isOcean) {
       return brightness == Brightness.light
           ? (isMorning ? .66 : .60)
@@ -114,11 +117,6 @@ class AppColors extends ThemeExtension<AppColors> {
       return brightness == Brightness.light
           ? (isMorning ? .72 : .66)
           : (isMorning ? .46 : .42);
-    }
-    if (isMahogany) {
-      return brightness == Brightness.light
-          ? (isMorning ? .64 : .58)
-          : (isMorning ? .40 : .32);
     }
     if (isAmethyst) {
       return brightness == Brightness.light
@@ -136,10 +134,7 @@ class AppColors extends ThemeExtension<AppColors> {
         : (isMorning ? .40 : .36);
   }
 
-  String heroAsset({
-    required bool isMorning,
-    required Brightness brightness,
-  }) {
+  String heroAsset({required bool isMorning, required Brightness brightness}) {
     final themedAsset = isMorning ? morningHeroAsset : eveningHeroAsset;
     if (themedAsset.isNotEmpty) return themedAsset;
     return switch ((isMorning, brightness)) {
@@ -152,11 +147,6 @@ class AppColors extends ThemeExtension<AppColors> {
 
   String dailyDhikrBackground(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    if (isShafaq) {
-      return isDark
-          ? 'assets/image/zekr/shfaq_zekr_dark.png'
-          : 'assets/image/zekr/shfaq_zekr_light.png';
-    }
     if (isWard) {
       return isDark
           ? 'assets/image/zekr/ward_zekr_dark.png'
@@ -166,11 +156,6 @@ class AppColors extends ThemeExtension<AppColors> {
       return isDark
           ? 'assets/image/zekr/amethyst_zekr_dark.png'
           : 'assets/image/zekr/amethyst_zekr_light.png';
-    }
-    if (isMahogany) {
-      return isDark
-          ? 'assets/image/zekr/mahogany_zekr_dark.png'
-          : 'assets/image/zekr/mahogany_zekr_light.png';
     }
     if (isLinen) {
       return isDark
@@ -254,15 +239,12 @@ class AppColors extends ThemeExtension<AppColors> {
     onPrimaryContainer: onPrimaryContainer ?? this.onPrimaryContainer,
     onSecondary: onSecondary ?? this.onSecondary,
     secondaryContainer: secondaryContainer ?? this.secondaryContainer,
-    onSecondaryContainer:
-        onSecondaryContainer ?? this.onSecondaryContainer,
+    onSecondaryContainer: onSecondaryContainer ?? this.onSecondaryContainer,
     morningHeroAsset: morningHeroAsset ?? this.morningHeroAsset,
     eveningHeroAsset: eveningHeroAsset ?? this.eveningHeroAsset,
     imageScrim: imageScrim ?? this.imageScrim,
-    imageActionBackground:
-        imageActionBackground ?? this.imageActionBackground,
-    imageActionForeground:
-        imageActionForeground ?? this.imageActionForeground,
+    imageActionBackground: imageActionBackground ?? this.imageActionBackground,
+    imageActionForeground: imageActionForeground ?? this.imageActionForeground,
   );
 
   @override
@@ -320,8 +302,10 @@ class AppColors extends ThemeExtension<AppColors> {
         other.onSecondaryContainer,
         t,
       ),
-      morningHeroAsset: t < .5 ? morningHeroAsset : other.morningHeroAsset,
-      eveningHeroAsset: t < .5 ? eveningHeroAsset : other.eveningHeroAsset,
+      // Select the destination artwork at the start of the theme animation.
+      // AppThemeArtwork cross-fades it while the color roles interpolate.
+      morningHeroAsset: t <= 0 ? morningHeroAsset : other.morningHeroAsset,
+      eveningHeroAsset: t <= 0 ? eveningHeroAsset : other.eveningHeroAsset,
       imageScrim: Color.lerp(imageScrim, other.imageScrim, t)!,
       imageActionBackground: Color.lerp(
         imageActionBackground,
@@ -551,76 +535,6 @@ abstract final class AppTheme {
     eveningHeroAsset: 'assets/image/home/linen/evening_dark.webp',
   );
 
-  static const _mahoganyLight = AppColors(
-    background: Color(0xFFFCF6F2),
-    surface: Color(0xFFFFFCFA),
-    surfaceSoft: Color(0xFFF3E5E1),
-    primary: Color(0xFF800E13),
-    onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFF2DAD8),
-    onPrimaryContainer: Color(0xFF640D14),
-    secondary: Color(0xFF75564B),
-    onSecondary: Color(0xFFFFFFFF),
-    secondaryContainer: Color(0xFFEFE2D9),
-    onSecondaryContainer: Color(0xFF422D24),
-    textPrimary: Color(0xFF30211F),
-    textSecondary: Color(0xFF735E59),
-    outline: Color(0xFFE7D8D2),
-    outlineStrong: Color(0xFF92756D),
-    surfaceElevated: Color(0xFFFFFFFF),
-    previewSurface: Color(0xFFF3E5E1),
-    previewSurfaceBack: Color(0xFFEFE2D9),
-    onPrimaryMuted: Color(0xFFF2DAD8),
-    accent: Color(0xFFAD2831),
-    border: Color(0xFFE7D8D2),
-    selected: Color(0xFFF2DAD8),
-    counterSurface: Color(0xFFF3E5E1),
-    progress: Color(0xFF800E13),
-    progressTrack: Color(0xFFE7D8D2),
-    success: Color(0xFF326747),
-    navigationInactive: Color(0xFF735E59),
-    imageScrim: Color(0xFF250902),
-    imageActionBackground: Color(0xFFFFFCFA),
-    imageActionForeground: Color(0xFF800E13),
-    morningHeroAsset: 'assets/image/home/mahogany/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/mahogany/evening_light.webp',
-  );
-
-  static const _mahoganyDark = AppColors(
-    background: Color(0xFF1A1110),
-    surface: Color(0xFF281A19),
-    surfaceSoft: Color(0xFF382523),
-    primary: Color(0xFFE8A39E),
-    onPrimary: Color(0xFF38040E),
-    primaryContainer: Color(0xFF55282B),
-    onPrimaryContainer: Color(0xFFFFDAD6),
-    secondary: Color(0xFFD9B6A4),
-    onSecondary: Color(0xFF352219),
-    secondaryContainer: Color(0xFF49342B),
-    onSecondaryContainer: Color(0xFFF6DFD0),
-    textPrimary: Color(0xFFFAEFEB),
-    textSecondary: Color(0xFFCCB5AD),
-    outline: Color(0xFF503A35),
-    outlineStrong: Color(0xFFA88C82),
-    surfaceElevated: Color(0xFF382523),
-    previewSurface: Color(0xFF382523),
-    previewSurfaceBack: Color(0xFF49342B),
-    onPrimaryMuted: Color(0xFF55282B),
-    accent: Color(0xFFD9B6A4),
-    border: Color(0xFF503A35),
-    selected: Color(0xFF55282B),
-    counterSurface: Color(0xFF382523),
-    progress: Color(0xFFE8A39E),
-    progressTrack: Color(0xFF503A35),
-    success: Color(0xFF9AC9AC),
-    navigationInactive: Color(0xFFCCB5AD),
-    imageScrim: Color(0xFF250902),
-    imageActionBackground: Color(0xFFE8A39E),
-    imageActionForeground: Color(0xFF38040E),
-    morningHeroAsset: 'assets/image/home/mahogany/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/mahogany/evening_dark.webp',
-  );
-
   static const _amethystLight = AppColors(
     background: Color(0xFFF8F5FC),
     surface: Color(0xFFFFFCFF),
@@ -761,182 +675,50 @@ abstract final class AppTheme {
     eveningHeroAsset: 'assets/image/home/ward/evening_dark.webp',
   );
 
-  static const _shafaqLight = AppColors(
-    background: Color(0xFFFFF9F1),
-    surface: Color(0xFFFFFEFC),
-    surfaceElevated: Color(0xFFFFFFFF),
-    previewSurface: Color(0xFFF6EFE5),
-    previewSurfaceBack: Color(0xFFE2EDF3),
-    primary: Color(0xFF780000),
-    onPrimary: Color(0xFFFFFFFF),
-    onPrimaryMuted: Color(0xFFF4D6D3),
-    primaryContainer: Color(0xFFF5E3E1),
-    onPrimaryContainer: Color(0xFF780000),
-    accent: Color(0xFFC1121F),
-    secondary: Color(0xFF003049),
-    onSecondary: Color(0xFFFFFFFF),
-    secondaryContainer: Color(0xFFE2EDF3),
-    onSecondaryContainer: Color(0xFF003049),
-    textPrimary: Color(0xFF182D3B),
-    textSecondary: Color(0xFF596775),
-    outline: Color(0xFFE8DCD5),
-    border: Color(0xFFE8DCD5),
-    outlineStrong: Color(0xFF92777A),
-    selected: Color(0xFFF5E3E1),
-    counterSurface: Color(0xFFE2EDF3),
-    progress: Color(0xFF669BBC),
-    progressTrack: Color(0xFFD8E3E8),
-    surfaceSoft: Color(0xFFF6EFE5),
-    success: Color(0xFF477A68),
-    navigationInactive: Color(0xFF596775),
-    morningHeroAsset: 'assets/image/home/shfaq/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/shfaq/evening_light.webp',
-    imageScrim: Color(0xFF003049),
-    imageActionBackground: Color(0xFFFDF0D5),
-    imageActionForeground: Color(0xFF780000),
-  );
-
-  static const _shafaqDark = AppColors(
-    background: Color(0xFF101E2B),
-    surface: Color(0xFF192B3A),
-    surfaceElevated: Color(0xFF2B4558),
-    previewSurface: Color(0xFF233B4D),
-    previewSurfaceBack: Color(0xFF26475A),
-    primary: Color(0xFFF0A398),
-    onPrimary: Color(0xFF101E2B),
-    onPrimaryMuted: Color(0xFF5A4045),
-    primaryContainer: Color(0xFF49333B),
-    onPrimaryContainer: Color(0xFFFFDAD4),
-    accent: Color(0xFFF0A398),
-    secondary: Color(0xFF9CC8DF),
-    onSecondary: Color(0xFF003049),
-    secondaryContainer: Color(0xFF26475A),
-    onSecondaryContainer: Color(0xFFD9EEF8),
-    textPrimary: Color(0xFFF5F1EA),
-    textSecondary: Color(0xFFB8C5CF),
-    outline: Color(0xFF344B5C),
-    border: Color(0xFF344B5C),
-    outlineStrong: Color(0xFF8FA6B7),
-    selected: Color(0xFF49333B),
-    counterSurface: Color(0xFF233B4D),
-    progress: Color(0xFF9CC8DF),
-    progressTrack: Color(0xFF344B5C),
-    surfaceSoft: Color(0xFF233B4D),
-    success: Color(0xFF8FC6A9),
-    navigationInactive: Color(0xFFB8C5CF),
-    morningHeroAsset: 'assets/image/home/shfaq/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/shfaq/evening_dark.webp',
-    imageScrim: Color(0xFF003049),
-    imageActionBackground: Color(0xFFF0A398),
-    imageActionForeground: Color(0xFF101E2B),
-  );
-
-  static const _safaLight = AppColors(
-    background: Color(0xFFF4F8FA),
-    surface: Color(0xFFFFFFFF),
-    surfaceElevated: Color(0xFFFFFFFF),
-    previewSurface: Color(0xFFEAF3F7),
-    previewSurfaceBack: Color(0xFFD9EDF5),
-    primary: Color(0xFF245B78),
-    onPrimary: Color(0xFFFFFFFF),
-    onPrimaryMuted: Color(0xFFD4E2E8),
-    primaryContainer: Color(0xFFD9EDF5),
-    accent: Color(0xFF4FA3C7),
-    secondary: Color(0xFF4FA3C7),
-    textPrimary: Color(0xFF18313D),
-    textSecondary: Color(0xFF617985),
-    outline: Color(0xFFD4E2E8),
-    border: Color(0xFFD4E2E8),
-    outlineStrong: Color(0xFFD4E2E8),
-    selected: Color(0xFFD9EDF5),
-    counterSurface: Color(0xFFEAF3F7),
-    progress: Color(0xFF4FA3C7),
-    progressTrack: Color(0xFFD9E7EC),
-    surfaceSoft: Color(0xFFEAF3F7),
-    success: Color(0xFF477A68),
-    navigationInactive: Color(0xFF617985),
-  );
-
-  static const _safaDark = AppColors(
-    background: Color(0xFF10181D),
-    surface: Color(0xFF162127),
-    surfaceElevated: Color(0xFF1D2B32),
-    previewSurface: Color(0xFF1A2930),
-    previewSurfaceBack: Color(0xFF1F465A),
-    primary: Color(0xFF7BC4E3),
-    onPrimary: Color(0xFF10181D),
-    onPrimaryMuted: Color(0xFF30434C),
-    primaryContainer: Color(0xFF1F465A),
-    accent: Color(0xFF55B8D8),
-    secondary: Color(0xFF55B8D8),
-    textPrimary: Color(0xFFEAF4F8),
-    textSecondary: Color(0xFFA8BCC6),
-    outline: Color(0xFF30434C),
-    border: Color(0xFF30434C),
-    outlineStrong: Color(0xFF30434C),
-    selected: Color(0xFF1F465A),
-    counterSurface: Color(0xFF1A2930),
-    progress: Color(0xFF55B8D8),
-    progressTrack: Color(0xFF2A3B43),
-    surfaceSoft: Color(0xFF1A2930),
-    success: Color(0xFF7EB69F),
-    navigationInactive: Color(0xFFA8BCC6),
-  );
-
-
   static AppColors _derivedColors(
     RafiqiPalette palette,
     Brightness brightness,
   ) {
     final swatches = palette.canonicalSwatches;
-    final (lightPrimary, darkPrimary, accent, lightest, darkest) =
-        switch (palette) {
-          RafiqiPalette.shafaq => (
-            swatches[0],
-            swatches[1],
-            swatches[4],
-            swatches[2],
-            swatches[3],
-          ),
-          RafiqiPalette.blush => (
-            Color.lerp(swatches[4], Colors.black, .38)!,
-            swatches[2],
-            swatches[3],
-            swatches[0],
-            Color.lerp(swatches[4], Colors.black, .78)!,
-          ),
-          RafiqiPalette.amethyst => (
-            swatches[1],
-            swatches[3],
-            swatches[2],
-            swatches[4],
-            swatches[0],
-          ),
-          RafiqiPalette.mahogany => (
-            swatches[2],
-            swatches[4],
-            swatches[3],
-            swatches[4],
-            swatches[0],
-          ),
-          RafiqiPalette.linen => (
-            Color.lerp(swatches[4], Colors.black, .58)!,
-            swatches[4],
-            swatches[3],
-            swatches[2],
-            Color.lerp(swatches[4], Colors.black, .82)!,
-          ),
-          RafiqiPalette.ocean => (
-            swatches[1],
-            swatches[3],
-            swatches[2],
-            swatches[4],
-            swatches[0],
-          ),
-          RafiqiPalette.rafiqi => throw StateError(
-            'The Rafiqi palette uses its original fixed mapping.',
-          ),
-        };
+    final (
+      lightPrimary,
+      darkPrimary,
+      accent,
+      lightest,
+      darkest,
+    ) = switch (palette) {
+      RafiqiPalette.blush => (
+        Color.lerp(swatches[4], Colors.black, .38)!,
+        swatches[2],
+        swatches[3],
+        swatches[0],
+        Color.lerp(swatches[4], Colors.black, .78)!,
+      ),
+      RafiqiPalette.amethyst => (
+        swatches[1],
+        swatches[3],
+        swatches[2],
+        swatches[4],
+        swatches[0],
+      ),
+      RafiqiPalette.linen => (
+        Color.lerp(swatches[4], Colors.black, .58)!,
+        swatches[4],
+        swatches[3],
+        swatches[2],
+        Color.lerp(swatches[4], Colors.black, .82)!,
+      ),
+      RafiqiPalette.ocean => (
+        swatches[1],
+        swatches[3],
+        swatches[2],
+        swatches[4],
+        swatches[0],
+      ),
+      RafiqiPalette.rafiqi => throw StateError(
+        'The Rafiqi palette uses its original fixed mapping.',
+      ),
+    };
 
     if (brightness == Brightness.light) {
       final background = Color.lerp(lightest, Colors.white, .78)!;
@@ -947,8 +729,7 @@ abstract final class AppTheme {
       final textPrimary = Color.lerp(darkest, Colors.black, .68)!;
       final textSecondary = Color.lerp(darkest, Colors.black, .42)!;
       final onPrimary =
-          ThemeData.estimateBrightnessForColor(lightPrimary) ==
-              Brightness.dark
+          ThemeData.estimateBrightnessForColor(lightPrimary) == Brightness.dark
           ? Colors.white
           : Colors.black;
       return AppColors(
@@ -1027,24 +808,15 @@ abstract final class AppTheme {
     return _build(brightness, colorsFor(palette, brightness));
   }
 
-  static AppColors colorsFor(
-    RafiqiPalette palette,
-    Brightness brightness,
-  ) {
+  static AppColors colorsFor(RafiqiPalette palette, Brightness brightness) {
     if (palette == RafiqiPalette.rafiqi) {
       return brightness == Brightness.light ? _light : _dark;
-    }
-    if (palette == RafiqiPalette.shafaq) {
-      return brightness == Brightness.light ? _shafaqLight : _shafaqDark;
     }
     if (palette == RafiqiPalette.blush) {
       return brightness == Brightness.light ? _wardLight : _wardDark;
     }
     if (palette == RafiqiPalette.amethyst) {
       return brightness == Brightness.light ? _amethystLight : _amethystDark;
-    }
-    if (palette == RafiqiPalette.mahogany) {
-      return brightness == Brightness.light ? _mahoganyLight : _mahoganyDark;
     }
     if (palette == RafiqiPalette.linen) {
       return brightness == Brightness.light ? _linenLight : _linenDark;
@@ -1068,25 +840,32 @@ abstract final class AppTheme {
     final scheme = ColorScheme(
       brightness: brightness,
       primary: colors.primary,
-      onPrimary: colors.usesExplicitControlRoles ? colors.onPrimary : controlForeground,
+      onPrimary: colors.usesExplicitControlRoles
+          ? colors.onPrimary
+          : controlForeground,
       primaryContainer: colors.primaryContainer,
       onPrimaryContainer: colors.onPrimaryContainer ?? colors.textPrimary,
       secondary: colors.secondary,
       onSecondary: colors.onSecondary ?? controlForeground,
       secondaryContainer: colors.secondaryContainer ?? colors.surfaceSoft,
-      onSecondaryContainer:
-          colors.onSecondaryContainer ?? colors.textPrimary,
+      onSecondaryContainer: colors.onSecondaryContainer ?? colors.textPrimary,
       error: colors.usesExplicitControlRoles && brightness == Brightness.dark
-          ? const Color(0xFFFFB4AB) : const Color(0xFFBA1A1A),
+          ? const Color(0xFFFFB4AB)
+          : const Color(0xFFBA1A1A),
       onError: colors.usesExplicitControlRoles && brightness == Brightness.dark
-          ? const Color(0xFF690005) : Colors.white,
+          ? const Color(0xFF690005)
+          : Colors.white,
       surface: colors.surface,
       onSurface: colors.textPrimary,
       onSurfaceVariant: colors.textSecondary,
-      outline: colors.usesExplicitControlRoles ? colors.outlineStrong : colors.outline,
+      outline: colors.usesExplicitControlRoles
+          ? colors.outlineStrong
+          : colors.outline,
       outlineVariant: colors.border,
       surfaceContainerLow: colors.surfaceSoft,
-      surfaceContainer: colors.usesExplicitControlRoles ? colors.surfaceSoft : colors.surface,
+      surfaceContainer: colors.usesExplicitControlRoles
+          ? colors.surfaceSoft
+          : colors.surface,
       surfaceContainerHigh: colors.surfaceElevated,
       surfaceContainerHighest: colors.surfaceElevated,
     );
@@ -1097,24 +876,32 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: colors.background,
       canvasColor: colors.surface,
       cardColor: colors.surface,
-      iconTheme: IconThemeData(color: colors.usesExplicitControlRoles ? colors.primary : colors.textPrimary),
-      inputDecorationTheme: colors.usesExplicitControlRoles ? InputDecorationTheme(
-        filled: true,
-        fillColor: colors.surface,
-        hintStyle: TextStyle(color: colors.textSecondary),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colors.outlineStrong),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colors.primary, width: 2),
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ) : null,
-      bottomSheetTheme: colors.usesExplicitControlRoles ? BottomSheetThemeData(
-        backgroundColor: colors.surface,
-        surfaceTintColor: Colors.transparent,
-      ) : null,
+      iconTheme: IconThemeData(
+        color: colors.usesExplicitControlRoles
+            ? colors.primary
+            : colors.textPrimary,
+      ),
+      inputDecorationTheme: colors.usesExplicitControlRoles
+          ? InputDecorationTheme(
+              filled: true,
+              fillColor: colors.surface,
+              hintStyle: TextStyle(color: colors.textSecondary),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colors.outlineStrong),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colors.primary, width: 2),
+                borderRadius: BorderRadius.circular(14),
+              ),
+            )
+          : null,
+      bottomSheetTheme: colors.usesExplicitControlRoles
+          ? BottomSheetThemeData(
+              backgroundColor: colors.surface,
+              surfaceTintColor: Colors.transparent,
+            )
+          : null,
       extensions: [colors],
       fontFamily: AppFonts.ui,
       textTheme: base.apply(
@@ -1155,7 +942,9 @@ abstract final class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? (colors.usesExplicitControlRoles ? colors.onSecondary! : colors.surfaceElevated)
+              ? (colors.usesExplicitControlRoles
+                    ? colors.onSecondary!
+                    : colors.surfaceElevated)
               : colors.textSecondary,
         ),
         trackColor: WidgetStateProperty.resolveWith(

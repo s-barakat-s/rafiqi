@@ -11,6 +11,10 @@ class AdhkarProgressRepository extends ChangeNotifier {
   static final instance = AdhkarProgressRepository._();
 
   static const _keyPrefix = 'adhkar.readingProgress.';
+  final Map<String, ValueNotifier<int>> _categoryChanges = {};
+
+  ValueListenable<int> changesFor(String categoryId) =>
+      _categoryChanges.putIfAbsent(categoryId, () => ValueNotifier<int>(0));
 
   Future<AdhkarReadingProgress> load(
     AdhkarCategory category, {
@@ -38,7 +42,7 @@ class AdhkarProgressRepository extends ChangeNotifier {
       _storageKey(progress.categoryId, progress.dayKey),
       jsonEncode(progress.toJson()),
     );
-    notifyListeners();
+    _notifyCategory(progress.categoryId);
   }
 
   Future<AdhkarProgressSummary> loadSummary(
@@ -74,7 +78,15 @@ class AdhkarProgressRepository extends ChangeNotifier {
     await prefs.remove(
       _storageKey(categoryId, localDayKey(day ?? DateTime.now())),
     );
-    notifyListeners();
+    _notifyCategory(categoryId);
+  }
+
+  void _notifyCategory(String categoryId) {
+    final notifier = _categoryChanges.putIfAbsent(
+      categoryId,
+      () => ValueNotifier<int>(0),
+    );
+    notifier.value++;
   }
 
   AdhkarReadingProgress _validatedProgress(
@@ -99,7 +111,7 @@ class AdhkarProgressRepository extends ChangeNotifier {
         }
       }
     }
-    if (storedCompleted) {
+    if (storedCompleted && completed.length == itemsById.length) {
       return AdhkarReadingProgress(
         categoryId: category.id,
         dayKey: dayKey,

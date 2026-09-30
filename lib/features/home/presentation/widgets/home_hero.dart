@@ -1,5 +1,7 @@
 part of '../home_screen.dart';
 
+/// Image-led Hero for the Adhkar collection relevant right now
+/// (أذكار الصباح / أذكار المساء).
 class _MorningHero extends StatelessWidget {
   const _MorningHero({
     required this.categoryId,
@@ -25,136 +27,169 @@ class _MorningHero extends StatelessWidget {
       isMorning: isMorning,
       brightness: theme.brightness,
     );
-    final title = complete
-        ? categoryId == 'morning'
-              ? 'قرأت أذكار الصباح'
-              : 'قرأت أذكار المساء'
-        : categoryId == 'morning'
-        ? 'أذكار الصباح'
-        : 'أذكار المساء';
-    final subtitle = complete
-        ? 'تقبّل الله منك وبارك في ذكرك'
-        : categoryId == 'morning'
-        ? 'بداية مطمئنة ليومك'
-        : 'سكينة المساء وخاتمة هادئة ليومك';
+    final title = isMorning ? 'أذكار الصباح' : 'أذكار المساء';
+    final subtitle = isMorning
+        ? 'ابدأ يومك بذكر الله وطمأنينة'
+        : 'اختم يومك بذكر الله وسكينة';
     final completedSteps = progress?.completedSteps ?? 0;
     final totalSteps = progress?.totalSteps ?? 0;
+    final hasProgress = (progress?.hasProgress ?? false) && !complete;
+    final ctaLabel = complete
+        ? 'أعد قراءة الورد'
+        : hasProgress
+        ? 'أكمل وردك'
+        : 'ابدأ الورد';
+
     return Container(
-      constraints: const BoxConstraints(minHeight: 250),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        image: DecorationImage(
-          image: AssetImage(backgroundAsset),
-          fit: BoxFit.cover,
-          alignment: colors.usesExplicitControlRoles ? Alignment.centerLeft : Alignment.center,
-        ),
-      ),
+      // Fixed height: the hero lives in a ListView (unbounded height), so a
+      // Spacer inside needs a bounded parent to lay out against.
+      height: 192,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(28)),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
           Positioned.fill(
+            child: AppThemeArtwork(
+              asset: backgroundAsset,
+              alignment: colors.usesExplicitControlRoles
+                  ? Alignment.centerLeft
+                  : Alignment.center,
+            ),
+          ),
+          // Subtle readability overlay only — no heavy dark gradient.
+          Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
                   colors: [
+                    colors.imageScrim.withValues(
+                      alpha: colors.heroScrimOpacity(
+                        isMorning: isMorning,
+                        brightness: theme.brightness,
+                      ),
+                    ),
                     colors.imageScrim.withValues(alpha: 0),
-                    colors.imageScrim.withValues(alpha: .12),
-                    colors.imageScrim.withValues(alpha: colors.heroScrimOpacity(
-                      isMorning: isMorning,
-                      brightness: theme.brightness,
-                    )),
                   ],
-                  stops: const [0, .48, 1],
+                  stops: const [0, .62],
                 ),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24),
+            // +2 horizontal so the CTA's ink/rounding never nudges the
+            // column past the clip edge; removes the 1px overflow.
+            padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Row(children: [
-                RafiqiSvgIcon(
-                  RafiqiIcons.notification,
-                  size: 20,
-                  color: foreground,
-                ),
-                const SizedBox(width: 7),
-                Text('حان الآن وقت', style: text.labelLarge?.copyWith(color: mutedForeground)),
-              ]),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  color: foreground,
-                  fontSize: 36,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: text.bodyLarge?.copyWith(color: mutedForeground),
-              ),
-              if (complete) ...[
-                const SizedBox(height: 24),
-                Icon(
-                  Icons.check_circle_outline_rounded,
-                  size: 34,
-                  color: foreground,
-                ),
-              ] else ...[
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: totalSteps == 0
-                              ? 0
-                              : completedSteps / totalSteps,
-                          minHeight: 7,
-                          backgroundColor: foreground.withValues(alpha: .2),
-                          color: foreground,
-                        ),
-                      ),
+                // Compact "حان الآن وقته" badge.
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: foreground.withValues(alpha: .14),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: foreground.withValues(alpha: .28),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${ArabicNumerals.integer(completedSteps)} من ${ArabicNumerals.integer(totalSteps)}',
-                      style: text.labelLarge?.copyWith(
-                        color: foreground,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                FilledButton(
-                  onPressed: () => onOpen(categoryId),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: colors.imageActionBackground,
-                    foregroundColor: colors.imageActionForeground,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        progress?.hasProgress ?? false
-                            ? 'متابعة الورد'
-                            : 'ابدأ الورد',
+                      RafiqiSvgIcon(
+                        RafiqiIcons.notification,
+                        size: 14,
+                        color: foreground,
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.arrow_back_rounded, size: 19),
+                      const SizedBox(width: 5),
+                      Text(
+                        'حان الآن وقته',
+                        style: text.labelSmall?.copyWith(
+                          color: foreground,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ],
+                const Spacer(),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    color: foreground,
+                    fontSize: 32,
+                    height: 1.15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.bodyMedium?.copyWith(color: mutedForeground),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    FilledButton(
+                      onPressed: () => onOpen(categoryId),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colors.imageActionBackground,
+                        foregroundColor: colors.imageActionForeground,
+                        minimumSize: const Size(0, 42),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(ctaLabel),
+                          const SizedBox(width: 7),
+                          const Icon(Icons.arrow_back_rounded, size: 17),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    if (hasProgress) ...[
+                      Text(
+                        '${ArabicNumerals.integer(completedSteps)} من ${ArabicNumerals.integer(totalSteps)}',
+                        style: text.labelMedium?.copyWith(
+                          color: foreground,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    if (hasProgress)
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: totalSteps == 0
+                                ? 0
+                                : completedSteps / totalSteps,
+                            minHeight: 4,
+                            backgroundColor: foreground.withValues(alpha: .22),
+                            color: foreground,
+                          ),
+                        ),
+                      )
+                    else if (complete)
+                      Icon(
+                        Icons.check_circle_outline_rounded,
+                        size: 26,
+                        color: foreground,
+                      ),
+                  ],
+                ),
               ],
             ),
           ),

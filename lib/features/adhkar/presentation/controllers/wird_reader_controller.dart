@@ -44,6 +44,7 @@ class WirdReaderController extends ChangeNotifier {
   String _activeDayKey = AdhkarProgressRepository.localDayKey(DateTime.now());
 
   Future<void> _pendingProgressWrite = Future.value();
+  bool _disposed = false;
 
   final List<ReaderUndoSnapshot> _undoStack = [];
 
@@ -114,7 +115,7 @@ class WirdReaderController extends ChangeNotifier {
     _clearUndo();
     _isLoading = false;
 
-    notifyListeners();
+    _notifyIfActive();
   }
 
   Future<void> decrement({
@@ -160,7 +161,7 @@ class WirdReaderController extends ChangeNotifier {
       _remainingCounts[itemId] = itemRemaining - 1;
       if (itemIndex == _index) _remaining = itemRemaining - 1;
 
-      notifyListeners();
+      _notifyIfActive();
 
       await _persist(_progressForSession());
 
@@ -172,7 +173,7 @@ class WirdReaderController extends ChangeNotifier {
     final completedIds = {..._completedStepIds, currentItem.id};
     final finished = completedIds.length >= total;
     _isTransitioning = true;
-    notifyListeners();
+    _notifyIfActive();
 
     // Start persistence immediately, but do not make the visual
     // transition wait for storage to finish.
@@ -226,7 +227,7 @@ class WirdReaderController extends ChangeNotifier {
 
     _isTransitioning = false;
 
-    notifyListeners();
+    _notifyIfActive();
 
     // Persistence is allowed to finish after the visible deck
     // transition has already completed.
@@ -243,7 +244,7 @@ class WirdReaderController extends ChangeNotifier {
     _completedStepIds = {...snapshot.completedStepIds};
     _remainingCounts = {...snapshot.remainingCounts};
 
-    notifyListeners();
+    _notifyIfActive();
 
     await _persist(_progressForSession());
   }
@@ -264,7 +265,7 @@ class WirdReaderController extends ChangeNotifier {
 
     _clearUndo();
 
-    notifyListeners();
+    _notifyIfActive();
   }
 
   AdhkarReadingProgress _progressForSession() {
@@ -294,7 +295,7 @@ class WirdReaderController extends ChangeNotifier {
     final completedIds = category.items.map((item) => item.id).toSet();
 
     _isTransitioning = true;
-    notifyListeners();
+    _notifyIfActive();
 
     await _persist(
       AdhkarReadingProgress(
@@ -322,15 +323,28 @@ class WirdReaderController extends ChangeNotifier {
     _remaining = 0;
     _isTransitioning = false;
     _clearUndo();
-    notifyListeners();
+    _notifyIfActive();
   }
 
   Future<void> _persist(AdhkarReadingProgress progress) {
-    _pendingProgressWrite = _pendingProgressWrite.then(
+    final operation = _pendingProgressWrite.then(
       (_) => _progressRepository.save(progress),
     );
+    _pendingProgressWrite = operation.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return operation;
+  }
 
-    return _pendingProgressWrite;
+  void _notifyIfActive() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   void _clearUndo() {

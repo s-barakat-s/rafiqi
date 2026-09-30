@@ -67,4 +67,23 @@ class AdhkarProgressSummary {
   final int totalSteps;
   final bool isCompleted;
   final bool hasProgress;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdhkarProgressSummary &&
+          categoryId == other.categoryId &&
+          completedSteps == other.completedSteps &&
+          totalSteps == other.totalSteps &&
+          isCompleted == other.isCompleted &&
+          hasProgress == other.hasProgress;
+
+  @override
+  int get hashCode => Object.hash(
+    categoryId,
+    completedSteps,
+    totalSteps,
+    isCompleted,
+    hasProgress,
+  );
 }

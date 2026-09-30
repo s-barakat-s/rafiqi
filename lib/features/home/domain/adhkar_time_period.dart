@@ -11,6 +11,14 @@ enum AdhkarTimePeriod {
 
   static AdhkarTimePeriod now() => at(DateTime.now());
 
+  static DateTime nextBoundaryAfter(DateTime dateTime) {
+    final local = dateTime.toLocal();
+    if (local.hour < eveningStartsAtHour) {
+      return DateTime(local.year, local.month, local.day, eveningStartsAtHour);
+    }
+    return DateTime(local.year, local.month, local.day + 1);
+  }
+
   String get categoryId => switch (this) {
     morning => 'morning',
     evening => 'evening',

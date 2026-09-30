@@ -1,59 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
 
-class AppDecorativeBackground extends StatefulWidget {
+/// Global app background rendered as one calm, vertical gradient.
+class AppDecorativeBackground extends StatelessWidget {
   const AppDecorativeBackground({required this.child, super.key});
-
-  static const _image = AssetImage('assets/image/home/backgroung.png');
 
   final Widget child;
 
   @override
-  State<AppDecorativeBackground> createState() => _AppDecorativeBackgroundState();
-}
-
-class _AppDecorativeBackgroundState extends State<AppDecorativeBackground> {
-  bool _precached = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_precached) return;
-    _precached = true;
-    // Warm the same cache key used below while the startup intro is visible.
-    precacheImage(AppDecorativeBackground._image, context);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final gradient = _buildGradient(context.appColors, theme.brightness);
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(
-          child: ColoredBox(color: colors.background),
-        ),
-        Positioned.fill(
-          child: IgnorePointer(
-            child: ExcludeSemantics(
-              child: RepaintBoundary(
-                child: Image(
-                      image: AppDecorativeBackground._image,
-                      color: colors.primary.withValues(alpha: isDark ? .32 : .40),
-                      colorBlendMode: BlendMode.srcIn,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      excludeFromSemantics: true,
-                      gaplessPlayback: true,
-                    ),
-              ),
-            ),
-          ),
-        ),
-        Positioned.fill(child: widget.child),
-      ],
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: gradient),
+      child: child,
     );
   }
+}
+
+LinearGradient _buildGradient(AppColors colors, Brightness brightness) {
+  final isDark = brightness == Brightness.dark;
+  final topTint = Color.alphaBlend(
+    colors.primary.withValues(alpha: isDark ? .16 : .28),
+    colors.background,
+  );
+  final middleTint = Color.alphaBlend(
+    colors.primary.withValues(alpha: isDark ? .07 : .09),
+    colors.background,
+  );
+
+  return LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [topTint, middleTint, colors.background],
+    stops: isDark ? const [0.0, 0.42, 1.0] : const [0.0, 0.45, 1.0],
+  );
 }

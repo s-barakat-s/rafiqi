@@ -48,7 +48,10 @@ class _JourneyScreenState extends State<JourneyScreen>
   @override
   Widget build(BuildContext context) {
     if (!_store.initialized) {
-      return const Center(child: CircularProgressIndicator());
+      return const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
     final colors = context.appColors;
     final now = LocalDay.date(DateTime.now());
@@ -57,7 +60,12 @@ class _JourneyScreenState extends State<JourneyScreen>
       weekStart,
       weekStart.add(const Duration(days: 6)),
     );
-    return SafeArea(
+    // Transparent Scaffold: Journey is opened as a pushed route (it left the
+    // bottom navigation), so it needs a Material ancestor for its InkWells
+    // while letting the global gradient background show through.
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
       bottom: false,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 26, 20, 30),
@@ -111,6 +119,7 @@ class _JourneyScreenState extends State<JourneyScreen>
           const SizedBox(height: 14),
           _Milestones(store: _store),
         ],
+      ),
       ),
     );
   }

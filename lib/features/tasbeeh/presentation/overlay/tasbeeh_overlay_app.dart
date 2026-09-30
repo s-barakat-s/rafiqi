@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
@@ -45,6 +46,12 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
   StreamSubscription<TasbeehSettingsMessage>? _mainAppSettingsSubscription;
   Timer? _collapseTimer;
   Future<void> _recordingQueue = Future<void>.value();
+
+  int _revision = 0;
+  int _localOpSeq = 0;
+  late final String _operationPrefix =
+      'overlay-${DateTime.now().microsecondsSinceEpoch}-'
+      '${Random.secure().nextInt(1 << 32)}';
   bool _isCollapsed = false;
   bool _useEdgeGestureInsetFallback = false;
   String _windowAnchorSide = TasbeehSettings.sideRight;
@@ -72,6 +79,7 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
   Future<void> _loadSavedData() async {
     final loadedState = await _storage.load();
     final loadedSettings = await _storage.loadSettings();
+    final loadedRevision = await _storage.loadRevision();
     if (!mounted) return;
 
     debugPrint(
@@ -84,6 +92,7 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
 
     setState(() {
       _state = loadedState;
+      _revision = loadedRevision;
       _settings = loadedSettings;
       _isCollapsed =
           loadedSettings.overlayMode == TasbeehSettings.overlayModeCollapsed;
@@ -105,7 +114,11 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
       return;
     }
 
-    await _storage.save(message.state);
+    // Persisted revisions, rather than timestamps, order state snapshots.
+    if (message.revision <= _revision) return;
+    _revision = message.revision;
+
+    await _storage.save(message.state, revision: message.revision);
     if (!mounted) return;
 
     setState(() {
@@ -146,25 +159,60 @@ class _TasbeehOverlayStateHostState extends State<_TasbeehOverlayStateHost> {
     }
 
     final nextState = _recording.nextState(_state);
+    _localOpSeq += 1;
+    final operationSequence = _localOpSeq;
+    final opId = '$_operationPrefix-$operationSequence';
     setState(() => _state = nextState);
 
     _restartInactivityTimer();
-    TasbeehOverlayMessenger.sendStateToMainApp(nextState);
-    await TasbeehOverlayMessenger.sendStateUpdate(
-      nextState,
-      source: TasbeehOverlayMessenger.sourceOverlay,
-    );
-    _recordingQueue = _recordingQueue.then((_) async {
-      final result = await _recording.recordIncrement(
-        nextState,
-        source: TasbeehActivitySource.overlay,
-      );
-      TasbeehOverlayMessenger.sendStateToMainApp(result.state);
-      await TasbeehOverlayMessenger.sendStateUpdate(
-        result.state,
-        source: TasbeehOverlayMessenger.sourceOverlay,
-      );
-    });
+    // The display is optimistic. Durable acceptance is serialized below and
+    // uses the same opId for transport and any local fallback.
+    _recordingQueue = _recordingQueue
+        .then((_) async {
+          try {
+            final reply = await TasbeehOverlayMessenger.sendIncrementOperation(
+              opId,
+            );
+            if (reply != null && reply.accepted && reply.state != null) {
+              _adoptAcceptedState(
+                reply.state!,
+                reply.revision,
+                sequence: operationSequence,
+              );
+              return;
+            }
+          } catch (error) {
+            debugPrint(
+              'Overlay: main authority unavailable (opId=$opId): $error',
+            );
+          }
+
+          // The main engine is absent/unreachable. Commit the same idempotent
+          // operation locally so a lost reply cannot create a different mutation.
+          final result = await _recording.recordIncrementOperation(
+            operationId: opId,
+            source: TasbeehActivitySource.overlay,
+          );
+          _adoptAcceptedState(
+            result.state,
+            result.revision,
+            sequence: operationSequence,
+          );
+        })
+        .catchError((Object error) {
+          debugPrint('Overlay: queued increment failed (opId=$opId): $error');
+        });
+  }
+
+  void _adoptAcceptedState(
+    TasbeehState state,
+    int revision, {
+    required int sequence,
+  }) {
+    if (revision < _revision) return;
+    _revision = revision;
+    if (!mounted || sequence != _localOpSeq) return;
+    setState(() => _state = state);
   }
 
   void _restartInactivityTimer() {

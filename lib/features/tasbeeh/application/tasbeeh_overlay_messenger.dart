@@ -7,10 +7,38 @@ import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 
 class TasbeehStateMessage {
-  const TasbeehStateMessage({required this.state, required this.source});
+  const TasbeehStateMessage({
+    required this.state,
+    required this.source,
+    this.revision = 0,
+  });
 
   final TasbeehState state;
   final String source;
+
+  /// Persisted monotonic version of the accepted state. This orders snapshots;
+  /// operation identity is carried separately and is never inferred from time.
+  final int revision;
+}
+
+class TasbeehIncrementOperation {
+  const TasbeehIncrementOperation({required this.operationId});
+
+  final String operationId;
+}
+
+class TasbeehOperationReply {
+  const TasbeehOperationReply({
+    required this.accepted,
+    required this.duplicate,
+    required this.state,
+    required this.revision,
+  });
+
+  final bool accepted;
+  final bool duplicate;
+  final TasbeehState? state;
+  final int revision;
 }
 
 class TasbeehSettingsMessage {
@@ -47,8 +75,55 @@ class TasbeehOverlayMessenger {
   static Future<void> sendStateUpdate(
     TasbeehState state, {
     required String source,
+    int revision = 0,
   }) async {
-    await FlutterOverlayWindow.shareData(_stateUpdateMap(state, source));
+    await FlutterOverlayWindow.shareData(
+      _stateUpdateMap(state, source, revision: revision),
+    );
+  }
+
+  static Future<TasbeehOperationReply?> sendIncrementOperation(
+    String operationId,
+  ) async {
+    final rawReply = await FlutterOverlayWindow.shareData({
+      'type': 'increment_operation',
+      'source': sourceOverlay,
+      'opId': operationId,
+    });
+    if (rawReply is! Map || rawReply['type'] != 'operation_reply') {
+      return null;
+    }
+    final rawState = rawReply['state'];
+    return TasbeehOperationReply(
+      accepted: rawReply['accepted'] == true,
+      duplicate: rawReply['duplicate'] == true,
+      state: rawState is Map
+          ? TasbeehState.fromJson(Map<String, Object?>.from(rawState))
+          : null,
+      revision: rawReply['revision'] is int ? rawReply['revision'] as int : 0,
+    );
+  }
+
+  static void registerOperationProcessor(
+    Future<TasbeehOperationReply> Function(TasbeehIncrementOperation operation)
+    processor,
+  ) {
+    FlutterOverlayWindow.setMessageProcessor((message) async {
+      final operation = _incrementOperationFromObject(message);
+      if (operation == null) return null;
+      final reply = await processor(operation);
+      return {
+        'type': 'operation_reply',
+        'accepted': reply.accepted,
+        'duplicate': reply.duplicate,
+        'revision': reply.revision,
+        if (reply.state != null) 'state': reply.state!.toJson(),
+      };
+    });
+  }
+
+  static void unregisterOperationProcessor() {
+    FlutterOverlayWindow.setMessageProcessor(null);
   }
 
   static Future<void> sendSettingsUpdate(
@@ -80,16 +155,25 @@ class TasbeehOverlayMessenger {
     IsolateNameServer.removePortNameMapping(_mainAppPortName);
   }
 
-  static void sendStateToMainApp(TasbeehState state) {
-    final sendPort = IsolateNameServer.lookupPortByName(_mainAppPortName);
-    sendPort?.send(_stateUpdateMap(state, sourceOverlay));
-  }
-
   static Map<String, Object?> _stateUpdateMap(
     TasbeehState state,
-    String source,
+    String source, {
+    int revision = 0,
+  }) {
+    return {...state.toJson(), 'source': source, 'revision': revision};
+  }
+
+  static TasbeehIncrementOperation? _incrementOperationFromObject(
+    Object? message,
   ) {
-    return {...state.toJson(), 'source': source};
+    if (message is! Map ||
+        message['type'] != 'increment_operation' ||
+        message['source'] != sourceOverlay) {
+      return null;
+    }
+    final operationId = message['opId'];
+    if (operationId is! String || operationId.isEmpty) return null;
+    return TasbeehIncrementOperation(operationId: operationId);
   }
 
   static Map<String, Object?> _settingsUpdateMap(
@@ -109,6 +193,7 @@ class TasbeehOverlayMessenger {
     }
 
     final source = message['source'];
+    final rawRevision = message['revision'];
     return TasbeehStateMessage(
       state: TasbeehState.fromJson({
         'currentCount': message['currentCount'],
@@ -121,6 +206,7 @@ class TasbeehOverlayMessenger {
         'sessionCounts': message['sessionCounts'],
       }),
       source: source is String ? source : '',
+      revision: rawRevision is int ? rawRevision : 0,
     );
   }
 

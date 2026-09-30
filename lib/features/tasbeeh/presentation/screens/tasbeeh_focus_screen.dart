@@ -40,17 +40,13 @@ class _TasbeehFocusBehaviorState extends State<TasbeehFocusBehavior>
   bool _holdCompleted = false;
   bool _exiting = false;
 
-
   @override
   void initState() {
     super.initState();
     // Create the ticker while the element is active, never on first use in dispose.
-    _holdProgress = AnimationController(
-      vsync: this,
-      duration: _holdDuration,
-    )..addStatusListener(_onHoldStatusChanged);
+    _holdProgress = AnimationController(vsync: this, duration: _holdDuration)
+      ..addStatusListener(_onHoldStatusChanged);
     WidgetsBinding.instance.addObserver(this);
-    widget.controller.addListener(_onTasbeehChanged);
   }
 
   @override
@@ -80,10 +76,6 @@ class _TasbeehFocusBehaviorState extends State<TasbeehFocusBehavior>
     } else if (state == AppLifecycleState.detached) {
       unawaited(_restoreEnvironment());
     }
-  }
-
-  void _onTasbeehChanged() {
-    if (mounted) setState(() {});
   }
 
   Future<void> _applyFocusEnvironment() async {
@@ -184,8 +176,7 @@ class _TasbeehFocusBehaviorState extends State<TasbeehFocusBehavior>
     if (!mounted || _exiting) return;
     _exiting = true;
     _resetHold();
-    if (confirmWithHaptic &&
-        widget.controller.settings.hapticFeedbackEnabled) {
+    if (confirmWithHaptic && widget.controller.settings.hapticFeedbackEnabled) {
       await HapticFeedback.mediumImpact();
     }
     if (!mounted) return;
@@ -199,7 +190,6 @@ class _TasbeehFocusBehaviorState extends State<TasbeehFocusBehavior>
     _holdProgress
       ..removeStatusListener(_onHoldStatusChanged)
       ..dispose();
-    widget.controller.removeListener(_onTasbeehChanged);
     WidgetsBinding.instance.removeObserver(this);
     if (widget.active) unawaited(_restoreEnvironment());
     super.dispose();
@@ -224,10 +214,12 @@ class _TasbeehFocusBehaviorState extends State<TasbeehFocusBehavior>
             button: widget.active,
             excludeSemantics: widget.active,
             label: widget.active ? 'شاشة وضع التركيز للتسبيح' : null,
-            value: widget.active ? ArabicNumerals.integer(
-              widget.controller.state.currentCount,
-            ) : null,
-            hint: widget.active ? 'اضغط للتسبيح. استخدم زر الرجوع للخروج.' : null,
+            value: widget.active
+                ? ArabicNumerals.integer(widget.controller.state.currentCount)
+                : null,
+            hint: widget.active
+                ? 'اضغط للتسبيح. استخدم زر الرجوع للخروج.'
+                : null,
             onTap: widget.active ? _countOnce : null,
             child: Listener(
               behavior: HitTestBehavior.opaque,
@@ -238,63 +230,60 @@ class _TasbeehFocusBehaviorState extends State<TasbeehFocusBehavior>
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  IgnorePointer(
-                    ignoring: widget.active,
-                    child: widget.child,
-                  ),
+                  IgnorePointer(ignoring: widget.active, child: widget.child),
                   if (widget.active)
-                  Positioned(
-                    left: 24,
-                    right: 24,
-                    top: 40,
-                    child: IgnorePointer(
-                      child: ExcludeSemantics(
-                        excluding: !_showInstructions,
-                        child: AnimatedOpacity(
-                          opacity: _showInstructions ? 1 : 0,
-                          duration: const Duration(milliseconds: 420),
-                          curve: Curves.easeOutCubic,
-                          child: Text(
-                            'اضغط في أي مكان للتسبيح\n'
-                            'اضغط مطولًا ٣ ثوانٍ للخروج',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: colors.textSecondary,
-                              fontSize: 15,
-                              height: 1.7,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (widget.active)
-                  Positioned(
-                    left: 24,
-                    right: 24,
-                    bottom: 48,
-                    child: IgnorePointer(
-                      child: ExcludeSemantics(
-                        excluding: !_showCompletion,
-                        child: Semantics(
-                          liveRegion: true,
+                    Positioned(
+                      left: 24,
+                      right: 24,
+                      top: 40,
+                      child: IgnorePointer(
+                        child: ExcludeSemantics(
+                          excluding: !_showInstructions,
                           child: AnimatedOpacity(
-                            opacity: _showCompletion ? 1 : 0,
-                            duration: const Duration(milliseconds: 280),
+                            opacity: _showInstructions ? 1 : 0,
+                            duration: const Duration(milliseconds: 420),
+                            curve: Curves.easeOutCubic,
                             child: Text(
-                              'أحسنت، اكتمل ورد اليوم ✓',
+                              'اضغط في أي مكان للتسبيح\n'
+                              'اضغط مطولًا ٣ ثوانٍ للخروج',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: colors.success,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                                color: colors.textSecondary,
+                                fontSize: 15,
+                                height: 1.7,
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  if (widget.active)
+                    Positioned(
+                      left: 24,
+                      right: 24,
+                      bottom: 48,
+                      child: IgnorePointer(
+                        child: ExcludeSemantics(
+                          excluding: !_showCompletion,
+                          child: Semantics(
+                            liveRegion: true,
+                            child: AnimatedOpacity(
+                              opacity: _showCompletion ? 1 : 0,
+                              duration: const Duration(milliseconds: 280),
+                              child: Text(
+                                'أحسنت، اكتمل ورد اليوم ✓',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: colors.success,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   if (progressPosition != null)
                     Positioned(
                       left: (progressPosition.dx - 22)

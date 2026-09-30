@@ -10,6 +10,8 @@ class _ReaderDeck extends StatelessWidget {
     required this.remaining,
     required this.transition,
     required this.onTap,
+    required this.audio,
+    required this.onAudioPressed,
   });
 
   final String categoryId;
@@ -20,6 +22,8 @@ class _ReaderDeck extends StatelessWidget {
   final int remaining;
   final Animation<double> transition;
   final VoidCallback onTap;
+  final DhikrAudioController? audio;
+  final ValueChanged<DhikrItem> onAudioPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +176,8 @@ class _ReaderDeck extends StatelessWidget {
                     remaining: remaining,
                     enabled: true,
                     onTap: onTap,
+                    audio: audio,
+                    onAudioPressed: onAudioPressed,
                   ),
                 ),
               ],

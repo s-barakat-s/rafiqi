@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar_collection_overrides.dart';
 
@@ -9,7 +10,11 @@ class AdhkarCollectionOverridesRepository {
   static final instance = AdhkarCollectionOverridesRepository._();
   static const _keyPrefix = 'adhkar.collectionOverrides.';
   final Map<String, AdhkarCollectionOverrides> _memory = {};
+  final Map<String, ValueNotifier<int>> _collectionChanges = {};
   Future<void> _pendingWrite = Future.value();
+
+  ValueListenable<int> changesFor(String collectionId) =>
+      _collectionChanges.putIfAbsent(collectionId, () => ValueNotifier<int>(0));
 
   Future<AdhkarCollectionOverrides> load(String collectionId) async {
     final cached = _memory[collectionId];
@@ -45,6 +50,11 @@ class AdhkarCollectionOverridesRepository {
       }
     });
     await _pendingWrite;
+    final notifier = _collectionChanges.putIfAbsent(
+      collectionId,
+      () => ValueNotifier<int>(0),
+    );
+    notifier.value++;
   }
 
   Future<void> clear(String collectionId) async {

@@ -27,7 +27,6 @@ class TasbeehHomeScreen extends StatefulWidget {
     required this.focusController,
     required this.hapticEnabled,
     required this.onHapticChanged,
-    this.onFocusProgress,
     this.taskContext,
     this.taskProgress,
     this.onBack,
@@ -45,7 +44,6 @@ class TasbeehHomeScreen extends StatefulWidget {
   final VoidCallback onOpenStatistics;
   final VoidCallback onOpenManualLog;
   final TasbeehController focusController;
-  final ValueChanged<double>? onFocusProgress;
   final bool hapticEnabled;
   final ValueChanged<bool> onHapticChanged;
   final TasbeehTaskContext? taskContext;
@@ -68,41 +66,31 @@ class _TasbeehHomeScreenState extends State<TasbeehHomeScreen>
     vsync: this,
     duration: _chromeDuration,
     reverseDuration: _chromeReverseDuration,
-  )..addListener(_notifyFocusProgress);
-
-  void _notifyFocusProgress() {
-    widget.onFocusProgress?.call(_chrome.value);
-  }
-  late final Animation<Offset> _topOut = Tween<Offset>(
-    begin: Offset.zero,
-    end: const Offset(0, -1.15),
-  ).animate(
-    CurvedAnimation(
-      parent: _chrome,
-      curve: Curves.easeInCubic,
-      reverseCurve: Curves.easeOutCubic,
-    ),
   );
-  late final Animation<Offset> _bottomOut = Tween<Offset>(
-    begin: Offset.zero,
-    end: const Offset(0, 1.25),
-  ).animate(
-    CurvedAnimation(
-      parent: _chrome,
-      curve: Curves.easeInCubic,
-      reverseCurve: Curves.easeOutCubic,
-    ),
-  );
-  late final Animation<double> _chromeFade = Tween<double>(
-    begin: 1,
-    end: 0,
-  ).animate(
-    CurvedAnimation(
-      parent: _chrome,
-      curve: const Interval(0, 0.72, curve: Curves.easeOut),
-      reverseCurve: const Interval(0.28, 1, curve: Curves.easeIn),
-    ),
-  );
+  late final Animation<Offset> _topOut =
+      Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1.15)).animate(
+        CurvedAnimation(
+          parent: _chrome,
+          curve: Curves.easeInCubic,
+          reverseCurve: Curves.easeOutCubic,
+        ),
+      );
+  late final Animation<Offset> _bottomOut =
+      Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1.25)).animate(
+        CurvedAnimation(
+          parent: _chrome,
+          curve: Curves.easeInCubic,
+          reverseCurve: Curves.easeOutCubic,
+        ),
+      );
+  late final Animation<double> _chromeFade = Tween<double>(begin: 1, end: 0)
+      .animate(
+        CurvedAnimation(
+          parent: _chrome,
+          curve: const Interval(0, 0.72, curve: Curves.easeOut),
+          reverseCurve: const Interval(0.28, 1, curve: Curves.easeIn),
+        ),
+      );
 
   @override
   void didChangeDependencies() {
@@ -111,7 +99,42 @@ class _TasbeehHomeScreenState extends State<TasbeehHomeScreen>
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Phase 2A: the route subscribes to the application-owned controller so
+    // the visible count/phrase/haptic state stays live without being rebuilt
+    // by an ancestor. The controller is NOT disposed here — ownership stays
+    // with TasbeehAppScope.
+    widget.focusController.addListener(_onTasbeehChanged);
+  }
+
+  void _onTasbeehChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Live state from the subscribed authority (falls back to the injected
+  /// snapshot only for callers that pass a detached legacy state).
+  TasbeehState get _liveState =>
+      widget.taskContext == null ? widget.focusController.state : widget.state;
+
+  List<TasbeehPhrase> get _livePhrases => widget.focusController.phrases;
+
+  bool get _liveHaptic => widget.taskContext == null
+      ? widget.focusController.settings.hapticFeedbackEnabled
+      : widget.hapticEnabled;
+
+  @override
+  void didUpdateWidget(covariant TasbeehHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusController != oldWidget.focusController) {
+      oldWidget.focusController.removeListener(_onTasbeehChanged);
+      widget.focusController.addListener(_onTasbeehChanged);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.focusController.removeListener(_onTasbeehChanged);
     _chrome.dispose();
     super.dispose();
   }
@@ -140,180 +163,138 @@ class _TasbeehHomeScreenState extends State<TasbeehHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final dark = Theme.of(context).brightness == Brightness.dark;
     final isTaskMode = widget.taskContext != null;
     final target = isTaskMode ? widget.taskContext!.targetCount : null;
+    final topInset = _normalTopInset ?? MediaQuery.paddingOf(context).top;
+
+    final topChrome = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _TasbeehHeader(
+          isTaskMode: isTaskMode,
+          onBack: widget.onBack,
+          onOpenStatistics: widget.onOpenStatistics,
+          onOpenFocusMode: _openFocusMode,
+          hapticEnabled: _liveHaptic,
+          onHapticChanged: widget.onHapticChanged,
+        ),
+        if (isTaskMode) ...[
+          const SizedBox(height: 8),
+          _LinkedTaskProgress(
+            phrase: widget.taskContext!.phraseText,
+            progress:
+                widget.taskProgress ?? widget.taskContext!.initialProgress,
+            target: widget.taskContext!.targetCount,
+          ),
+        ],
+      ],
+    );
+
+    final bottomChrome = Padding(
+      padding: const EdgeInsets.only(bottom: 102, top: 4),
+      child: isTaskMode
+          ? Row(
+              children: [
+                if (widget.onDecrement != null) ...[
+                  Expanded(
+                    child: _TasbeehTextAction(
+                      title: 'تراجع',
+                      icon: const Icon(Icons.undo_rounded, size: 20),
+                      onTap: widget.onDecrement!,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: _TasbeehTextAction(
+                    title: 'جلسة جديدة',
+                    icon: const RafiqiSvgIcon(RafiqiIcons.reset, size: 20),
+                    onTap: widget.onResetSession,
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              children: [
+                _TasbeehActionCard(
+                  title: 'تسجيل من سبحة خارجية',
+                  description: 'أضف عددًا سجلته خارج التطبيق',
+                  icon: const RafiqiSvgIcon(RafiqiIcons.edit, size: 24),
+                  onTap: widget.onOpenManualLog,
+                ),
+                const SizedBox(height: 10),
+                _TasbeehActionCard(
+                  title: 'السبحة العائمة',
+                  description: 'استخدم عدادًا عائمًا فوق التطبيقات',
+                  icon: const RafiqiSvgIcon(RafiqiIcons.tasbeeh, size: 24),
+                  onTap: widget.onOpenSettings,
+                ),
+              ],
+            ),
+    );
 
     return TasbeehFocusBehavior(
       controller: widget.focusController,
       active: _focusActive,
       onExit: _exitFocusMode,
-      child: AnimatedBuilder(
-        animation: _chrome,
-        builder: (context, _) {
-          final t = Curves.easeInOutCubic.transform(_chrome.value);
-          return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              top: (_normalTopInset ?? MediaQuery.paddingOf(context).top) * (1 - t),
-            ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                child: Column(
-                  children: [
-                    ClipRect(
-                      child: Align(
-                        heightFactor: 1 - t,
-                        child: SlideTransition(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedBuilder(
+              animation: _chrome,
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                  child: Column(
+                    children: [
+                      _CollapsingTasbeehChrome(
+                        sectionKey: const ValueKey('tasbeeh-top-chrome'),
+                        progress: _chrome,
                         position: _topOut,
-                        child: FadeTransition(
-                          opacity: _chromeFade,
-                          child: AnimatedBuilder(
-                            animation: _chrome,
-                            builder: (context, child) {
-                              return IgnorePointer(
-                                ignoring: _chrome.value > 0.02,
-                                child: child,
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _TasbeehHeader(
-                                  isTaskMode: isTaskMode,
-                                  onBack: widget.onBack,
-                                  onOpenStatistics: widget.onOpenStatistics,
-                                  onOpenFocusMode: _openFocusMode,
-                                  hapticEnabled: widget.hapticEnabled,
-                                  onHapticChanged: widget.onHapticChanged,
-                                ),
-                                if (isTaskMode) ...[
-                                  const SizedBox(height: 8),
-                                  _LinkedTaskProgress(
-                                    phrase: widget.taskContext!.phraseText,
-                                    progress:
-                                        widget.taskProgress ??
-                                        widget.taskContext!.initialProgress,
-                                    target: widget.taskContext!.targetCount,
-                                  ),
-                                ],
-                              ],
-                            ),
+                        opacity: _chromeFade,
+                        child: topChrome,
+                      ),
+                      Expanded(
+                        child: RepaintBoundary(
+                          child: _CounterHero(
+                            phrase: _liveState.selectedDhikrText,
+                            count: _liveState.currentCount,
+                            dailyTotal: _liveState.dailyTotal,
+                            target: target,
+                            isTaskMode: isTaskMode,
+                            focusProgress: _chrome,
+                            hintsOpacity: _chromeFade,
+                            onTap: widget.onIncrement,
+                            onResetSession: widget.onResetSession,
+                            onOpenDhikrSelector: () =>
+                                _showDhikrSelector(context),
                           ),
                         ),
                       ),
-                    ),
-                    ),
-                    Expanded(
-                      child: _CounterHero(
-                        phrase: widget.state.selectedDhikrText,
-                        count: widget.state.currentCount,
-                        dailyTotal: widget.state.dailyTotal,
-                        target: target,
-                        isTaskMode: isTaskMode,
-                        focusProgress: _chrome,
-                        hintsOpacity: _chromeFade,
-                        onTap: widget.onIncrement,
-                        onResetSession: widget.onResetSession,
-                        onOpenDhikrSelector: () =>
-                            _showDhikrSelector(context),
-                      ),
-                    ),
-                    ClipRect(
-                      child: Align(
-                        heightFactor: 1 - t,
-                        child: SlideTransition(
+                      _CollapsingTasbeehChrome(
+                        sectionKey: const ValueKey('tasbeeh-bottom-chrome'),
+                        progress: _chrome,
                         position: _bottomOut,
-                        child: FadeTransition(
-                          opacity: _chromeFade,
-                          child: AnimatedBuilder(
-                            animation: _chrome,
-                            builder: (context, child) {
-                              return IgnorePointer(
-                                ignoring: _chrome.value > 0.02,
-                                child: child,
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: 102,
-                                top: 4,
-                              ),
-                              child: isTaskMode
-                                  ? Row(
-                                      children: [
-                                        if (widget.onDecrement != null) ...[
-                                          Expanded(
-                                            child: _TasbeehTextAction(
-                                              title: 'تراجع',
-                                              icon: const Icon(
-                                                Icons.undo_rounded,
-                                                size: 20,
-                                              ),
-                                              onTap: widget.onDecrement!,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                        ],
-                                        Expanded(
-                                          child: _TasbeehTextAction(
-                                            title: 'جلسة جديدة',
-                                            icon: const RafiqiSvgIcon(
-                                              RafiqiIcons.reset,
-                                              size: 20,
-                                            ),
-                                            onTap: widget.onResetSession,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      children: [
-                                        _TasbeehActionCard(
-                                          title: 'تسجيل من سبحة خارجية',
-                                          description:
-                                              'أضف عددًا سجلته خارج التطبيق',
-                                          icon: const RafiqiSvgIcon(
-                                            RafiqiIcons.edit,
-                                            size: 24,
-                                          ),
-                                          onTap: widget.onOpenManualLog,
-                                        ),
-                                        const SizedBox(height: 10),
-                                        _TasbeehActionCard(
-                                          title: 'السبحة العائمة',
-                                          description:
-                                              'استخدم عدادًا عائمًا فوق التطبيقات',
-                                          icon: const RafiqiSvgIcon(
-                                            RafiqiIcons.tasbeeh,
-                                            size: 24,
-                                          ),
-                                          onTap: widget.onOpenSettings,
-                                        ),
-                                      ],
-                                    ),
-                            ),
-                          ),
-                        ),
+                        opacity: _chromeFade,
+                        child: bottomChrome,
                       ),
-                    ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+              builder: (context, child) {
+                final t = Curves.easeInOutCubic.transform(_chrome.value);
+                return Padding(
+                  padding: EdgeInsets.only(top: topInset * (1 - t)),
+                  child: child,
+                );
+              },
             ),
-          ),
-        ],
-      ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -366,11 +347,11 @@ class _TasbeehHomeScreenState extends State<TasbeehHomeScreen>
                   child: ListView(
                     shrinkWrap: true,
                     children: [
-                      for (final phrase in widget.phrases)
+                      for (final phrase in _livePhrases)
                         Container(
                           margin: const EdgeInsets.only(bottom: 6),
                           decoration: BoxDecoration(
-                            color: phrase.id == widget.state.selectedDhikrId
+                            color: phrase.id == _liveState.selectedDhikrId
                                 ? colors.primaryContainer.withValues(alpha: .5)
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
@@ -386,15 +367,15 @@ class _TasbeehHomeScreenState extends State<TasbeehHomeScreen>
                                 fontFamily: AppFonts.display,
                                 fontSize: 17,
                                 fontWeight:
-                                    phrase.id == widget.state.selectedDhikrId
+                                    phrase.id == _liveState.selectedDhikrId
                                     ? FontWeight.w700
                                     : FontWeight.w500,
-                                color: phrase.id == widget.state.selectedDhikrId
+                                color: phrase.id == _liveState.selectedDhikrId
                                     ? colors.primary
                                     : colors.textPrimary,
                               ),
                             ),
-                            trailing: phrase.id == widget.state.selectedDhikrId
+                            trailing: phrase.id == _liveState.selectedDhikrId
                                 ? Icon(
                                     Icons.check_circle_rounded,
                                     color: colors.primary,
@@ -468,6 +449,51 @@ class _TasbeehHomeScreenState extends State<TasbeehHomeScreen>
     );
     controller.dispose();
     if (text != null && text.isNotEmpty) await widget.onAddCustomPhrase(text);
+  }
+}
+
+class _CollapsingTasbeehChrome extends StatelessWidget {
+  const _CollapsingTasbeehChrome({
+    required this.sectionKey,
+    required this.progress,
+    required this.position,
+    required this.opacity,
+    required this.child,
+  });
+
+  final Key sectionKey;
+  final Animation<double> progress;
+  final Animation<Offset> position;
+  final Animation<double> opacity;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: progress,
+      child: child,
+      builder: (context, child) {
+        final t = Curves.easeInOutCubic.transform(
+          progress.value.clamp(0.0, 1.0),
+        );
+        return ClipRect(
+          child: Align(
+            key: sectionKey,
+            heightFactor: 1 - t,
+            child: SlideTransition(
+              position: position,
+              child: FadeTransition(
+                opacity: opacity,
+                child: IgnorePointer(
+                  ignoring: progress.value > .02,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -764,9 +790,7 @@ class _TasbeehActionCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: colors.border.withValues(alpha: .55),
-              ),
+              border: Border.all(color: colors.border.withValues(alpha: .55)),
             ),
             child: Row(
               children: [
@@ -859,7 +883,10 @@ class _LinkedTaskProgress extends StatelessWidget {
           ),
           Text(
             'هدف الورد  ${ArabicNumerals.integer(capped)} / ${ArabicNumerals.integer(target)}',
-            style: TextStyle(color: colors.primary, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              color: colors.primary,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),

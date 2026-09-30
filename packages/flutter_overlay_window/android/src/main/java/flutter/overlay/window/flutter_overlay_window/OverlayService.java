@@ -86,7 +86,7 @@ public class OverlayService extends Service implements View.OnTouchListener {
     @Override
     public void onDestroy() {
         Log.d("OverLay", "Destroying the overlay window service");
-        if (windowManager != null) {
+        if (windowManager != null && flutterView != null) {
             updateSystemGestureExclusion(false, null, null);
             windowManager.removeView(flutterView);
             windowManager = null;
@@ -148,7 +148,17 @@ public class OverlayService extends Service implements View.OnTouchListener {
             }
         });
         overlayMessageChannel.setMessageHandler((message, reply) -> {
-            WindowSetup.messenger.send(message);
+            // The main Dart handler replies only after its application-level
+            // operation completes. Do not replace that with a transport ack.
+            if (WindowSetup.messenger == null) {
+                reply.reply(Collections.singletonMap("error", "MAIN_ENGINE_UNAVAILABLE"));
+                return;
+            }
+            try {
+                WindowSetup.messenger.send(message, reply::reply);
+            } catch (RuntimeException exception) {
+                reply.reply(Collections.singletonMap("error", "MAIN_FORWARD_FAILED"));
+            }
         });
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
@@ -436,6 +446,7 @@ public class OverlayService extends Service implements View.OnTouchListener {
                 .build();
         startForeground(OverlayConstants.NOTIFICATION_ID, notification);
         instance = this;
+        isRunning = true;
     }
 
     private void createNotificationChannel() {

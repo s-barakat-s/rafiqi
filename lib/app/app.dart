@@ -18,17 +18,17 @@ class _TasbeehAppState extends State<TasbeehApp> {
   @override
   void initState() {
     super.initState();
-    _preferences.addListener(_onPreferencesChanged);
+    _preferences.appearanceChanges.addListener(_onAppearanceChanged);
     _preferences.initialize();
   }
 
-  void _onPreferencesChanged() {
+  void _onAppearanceChanged() {
     if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _preferences.removeListener(_onPreferencesChanged);
+    _preferences.appearanceChanges.removeListener(_onAppearanceChanged);
     super.dispose();
   }
 
@@ -55,15 +55,17 @@ class _TasbeehAppState extends State<TasbeehApp> {
           ),
         ),
       ),
-      home: MainShellScreen(
-        isDarkMode: preferences.isDarkMode,
-        onThemeChanged: _preferences.setDarkMode,
-        selectedPalette: preferences.palette,
-        onPaletteChanged: _preferences.setPalette,
-        adhkarVibrationEnabled: preferences.adhkarVibrationEnabled,
-        onAdhkarVibrationChanged: _preferences.setAdhkarVibration,
-        adhkarSoundEnabled: preferences.adhkarSoundEnabled,
-        onAdhkarSoundChanged: _preferences.setAdhkarSound,
+      home: ValueListenableBuilder<int>(
+        valueListenable: _preferences.adhkarFeedbackChanges,
+        builder: (context, _, _) {
+          final feedback = _preferences.value;
+          return MainShellScreen(
+            adhkarVibrationEnabled: feedback.adhkarVibrationEnabled,
+            onAdhkarVibrationChanged: _preferences.setAdhkarVibration,
+            adhkarSoundEnabled: feedback.adhkarSoundEnabled,
+            onAdhkarSoundChanged: _preferences.setAdhkarSound,
+          );
+        },
       ),
     );
   }

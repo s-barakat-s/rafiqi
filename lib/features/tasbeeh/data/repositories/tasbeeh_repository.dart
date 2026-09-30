@@ -10,9 +10,14 @@ import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 
 class TasbeehRepository {
   static const _stateV2Key = 'tasbeeh.state.v2';
+  static const _stateRevisionKey = 'tasbeeh.stateRevision.v1';
+  static const _processedOperationIdsKey = 'tasbeeh.processedOperations.v1';
   static const _dailyRecordsKey = 'tasbeeh.dailyRecords.v1';
+  static const _dailyRecordIndexKey = 'tasbeeh.dailyRecords.v2.index';
+  static const _dailyRecordPrefix = 'tasbeeh.dailyRecords.v2.';
   static const _customPhrasesKey = 'tasbeeh.customPhrases.v1';
   static const _manualEntriesKey = 'tasbeeh.manualEntries.v1';
+  static const _manualCountPrefix = 'tasbeeh.manualCount.v1.';
   static const _currentCountKey = 'tasbeeh.currentCount';
   static const _totalCountKey = 'tasbeeh.totalCount';
   static const _dailyTotalKey = 'tasbeeh.dailyTotal';
@@ -62,7 +67,13 @@ class TasbeehRepository {
     });
   }
 
-  Future<void> save(TasbeehState state) async {
+  Future<int> loadRevision() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    return prefs.getInt(_stateRevisionKey) ?? 0;
+  }
+
+  Future<void> save(TasbeehState state, {int? revision}) async {
     final prefs = await SharedPreferences.getInstance();
 
     await Future.wait([
@@ -72,16 +83,36 @@ class TasbeehRepository {
       prefs.setInt(_dailyTotalKey, state.dailyTotal),
       prefs.setString(_dailyDateKey, state.dailyDateKey),
       prefs.setString(_targetModeKey, state.targetMode),
+      if (revision != null) prefs.setInt(_stateRevisionKey, revision),
     ]);
+  }
+
+  Future<bool> hasProcessedOperation(String operationId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    return (prefs.getStringList(_processedOperationIdsKey) ?? const <String>[])
+        .contains(operationId);
+  }
+
+  Future<void> markOperationProcessed(String operationId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final ids = prefs.getStringList(_processedOperationIdsKey) ?? <String>[];
+    if (ids.contains(operationId)) return;
+    const retainedOperationCount = 256;
+    final next = [...ids, operationId];
+    final trimmed = next.length <= retainedOperationCount
+        ? next
+        : next.sublist(next.length - retainedOperationCount);
+    await prefs.setStringList(_processedOperationIdsKey, trimmed);
   }
 
   Future<List<TasbeehPhrase>> loadPhrases() async {
     final prefs = await SharedPreferences.getInstance();
     final custom = (prefs.getStringList(_customPhrasesKey) ?? const [])
         .map(
-          (value) => TasbeehPhrase.fromJson(
-            jsonDecode(value) as Map<String, dynamic>,
-          ),
+          (value) =>
+              TasbeehPhrase.fromJson(jsonDecode(value) as Map<String, dynamic>),
         )
         .toList();
     return [...TasbeehPhrase.defaultPhrases, ...custom];
@@ -107,16 +138,19 @@ class TasbeehRepository {
       return json['id'] == phrase.id;
     });
     if (exists) return;
-    await prefs.setStringList(
-      _customPhrasesKey,
-      [...current, jsonEncode(phrase.toJson())],
-    );
+    await prefs.setStringList(_customPhrasesKey, [
+      ...current,
+      jsonEncode(phrase.toJson()),
+    ]);
   }
 
   Future<List<TasbeehDailyRecord>> loadDailyRecords() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.reload();
-    return (prefs.getStringList(_dailyRecordsKey) ?? const [])
+    final keys = await _ensureDailyRecordIndex(prefs);
+    return keys
+        .map((key) => prefs.getString('$_dailyRecordPrefix$key'))
+        .whereType<String>()
         .map(
           (value) => TasbeehDailyRecord.fromJson(
             jsonDecode(value) as Map<String, dynamic>,
@@ -132,12 +166,17 @@ class TasbeehRepository {
     DateTime? at,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final records = await loadDailyRecords();
+    await prefs.reload();
     final dayKey = LocalDay.key(at ?? DateTime.now());
-    final index = records.indexWhere(
-      (record) => record.dayKey == dayKey && record.dhikrId == dhikrId,
-    );
-    final updated = index < 0
+    final recordKey = _dailyRecordKey(dayKey, dhikrId);
+    final keys = await _ensureDailyRecordIndex(prefs);
+    final encoded = prefs.getString('$_dailyRecordPrefix$recordKey');
+    final current = encoded == null
+        ? null
+        : TasbeehDailyRecord.fromJson(
+            jsonDecode(encoded) as Map<String, dynamic>,
+          );
+    final updated = current == null
         ? TasbeehDailyRecord(
             dayKey: dayKey,
             dhikrId: dhikrId,
@@ -145,30 +184,94 @@ class TasbeehRepository {
             appCount: source == TasbeehActivitySource.app ? 1 : 0,
             overlayCount: source == TasbeehActivitySource.overlay ? 1 : 0,
           )
-        : records[index].copyWith(
-            appCount: records[index].appCount +
+        : current.copyWith(
+            appCount:
+                current.appCount +
                 (source == TasbeehActivitySource.app ? 1 : 0),
-            overlayCount: records[index].overlayCount +
+            overlayCount:
+                current.overlayCount +
                 (source == TasbeehActivitySource.overlay ? 1 : 0),
           );
-    if (index < 0) {
-      records.add(updated);
-    } else {
-      records[index] = updated;
-    }
-    await prefs.setStringList(
-      _dailyRecordsKey,
-      records.map((record) => jsonEncode(record.toJson())).toList(),
+    await Future.wait([
+      prefs.setString(
+        '$_dailyRecordPrefix$recordKey',
+        jsonEncode(updated.toJson()),
+      ),
+      if (!keys.contains(recordKey))
+        prefs.setStringList(_dailyRecordIndexKey, [...keys, recordKey]),
+    ]);
+    return updated;
+  }
+
+  Future<TasbeehDailyRecord?> removeRecordedIncrement({
+    required String dhikrId,
+    required TasbeehActivitySource source,
+    DateTime? at,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final dayKey = LocalDay.key(at ?? DateTime.now());
+    final recordKey = _dailyRecordKey(dayKey, dhikrId);
+    await _ensureDailyRecordIndex(prefs);
+    final encoded = prefs.getString('$_dailyRecordPrefix$recordKey');
+    if (encoded == null) return null;
+    final current = TasbeehDailyRecord.fromJson(
+      jsonDecode(encoded) as Map<String, dynamic>,
+    );
+    final canReverse = switch (source) {
+      TasbeehActivitySource.app => current.appCount > 0,
+      TasbeehActivitySource.overlay => current.overlayCount > 0,
+      _ => false,
+    };
+    if (!canReverse) return null;
+
+    final updated = current.copyWith(
+      appCount: source == TasbeehActivitySource.app
+          ? current.appCount - 1
+          : current.appCount,
+      overlayCount: source == TasbeehActivitySource.overlay
+          ? current.overlayCount - 1
+          : current.overlayCount,
+    );
+    await prefs.setString(
+      '$_dailyRecordPrefix$recordKey',
+      jsonEncode(updated.toJson()),
     );
     return updated;
   }
+
+  Future<List<String>> _ensureDailyRecordIndex(SharedPreferences prefs) async {
+    final existing = prefs.getStringList(_dailyRecordIndexKey);
+    if (existing != null) return existing;
+    final legacy = (prefs.getStringList(_dailyRecordsKey) ?? const <String>[])
+        .map(
+          (value) => TasbeehDailyRecord.fromJson(
+            jsonDecode(value) as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+    final keys = legacy
+        .map((record) => _dailyRecordKey(record.dayKey, record.dhikrId))
+        .toList();
+    await Future.wait([
+      for (var index = 0; index < legacy.length; index++)
+        prefs.setString(
+          '$_dailyRecordPrefix${keys[index]}',
+          jsonEncode(legacy[index].toJson()),
+        ),
+      prefs.setStringList(_dailyRecordIndexKey, keys),
+    ]);
+    return keys;
+  }
+
+  String _dailyRecordKey(String dayKey, String dhikrId) =>
+      '$dayKey.${Uri.encodeComponent(dhikrId)}';
 
   Future<int> inAppCountForDay(String dayKey, String dhikrId) async {
     final records = await loadDailyRecords();
     return records
             .where(
-              (record) =>
-                  record.dayKey == dayKey && record.dhikrId == dhikrId,
+              (record) => record.dayKey == dayKey && record.dhikrId == dhikrId,
             )
             .firstOrNull
             ?.inAppCount ??
@@ -205,6 +308,7 @@ class TasbeehRepository {
     final entries = await loadManualEntries();
     entries.add(entry);
     await _saveManualEntries(entries);
+    await _writeManualAggregate(entries, entry.dayKey, entry.dhikrId);
     return entry;
   }
 
@@ -212,23 +316,38 @@ class TasbeehRepository {
     final entries = await loadManualEntries();
     final index = entries.indexWhere((entry) => entry.id == updated.id);
     if (index < 0) return;
+    final previous = entries[index];
     entries[index] = updated;
     await _saveManualEntries(entries);
+    await _writeManualAggregate(entries, previous.dayKey, previous.dhikrId);
+    if (previous.dayKey != updated.dayKey ||
+        previous.dhikrId != updated.dhikrId) {
+      await _writeManualAggregate(entries, updated.dayKey, updated.dhikrId);
+    }
   }
 
   Future<void> deleteManualEntry(String id) async {
     final entries = await loadManualEntries();
+    final removed = entries.where((entry) => entry.id == id).firstOrNull;
     entries.removeWhere((entry) => entry.id == id);
     await _saveManualEntries(entries);
+    if (removed != null) {
+      await _writeManualAggregate(entries, removed.dayKey, removed.dhikrId);
+    }
   }
 
   Future<int> manualCountForDay(String dayKey, String dhikrId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final aggregateKey = _manualAggregateKey(dayKey, dhikrId);
+    final cached = prefs.getInt(aggregateKey);
+    if (cached != null) return cached;
     final entries = await loadManualEntries();
-    return entries
-        .where(
-          (entry) => entry.dayKey == dayKey && entry.dhikrId == dhikrId,
-        )
+    final total = entries
+        .where((entry) => entry.dayKey == dayKey && entry.dhikrId == dhikrId)
         .fold<int>(0, (total, entry) => total + entry.count);
+    await prefs.setInt(aggregateKey, total);
+    return total;
   }
 
   Future<int> eligibleCountForDay(String dayKey, String dhikrId) async {
@@ -246,6 +365,21 @@ class TasbeehRepository {
       entries.map((entry) => jsonEncode(entry.toJson())).toList(),
     );
   }
+
+  Future<void> _writeManualAggregate(
+    List<ManualTasbeehEntry> entries,
+    String dayKey,
+    String dhikrId,
+  ) async {
+    final total = entries
+        .where((entry) => entry.dayKey == dayKey && entry.dhikrId == dhikrId)
+        .fold<int>(0, (sum, entry) => sum + entry.count);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_manualAggregateKey(dayKey, dhikrId), total);
+  }
+
+  String _manualAggregateKey(String dayKey, String dhikrId) =>
+      '$_manualCountPrefix$dayKey.${Uri.encodeComponent(dhikrId)}';
 
   Future<TasbeehSettings> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();

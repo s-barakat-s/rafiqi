@@ -9,6 +9,8 @@ class FlutterOverlayWindow {
   FlutterOverlayWindow._();
 
   static final StreamController _controller = StreamController();
+  static FutureOr<dynamic> Function(dynamic message)? _messageProcessor;
+  static bool _messageHandlerInstalled = false;
   static const MethodChannel _channel =
       MethodChannel("x-slayer/overlay_channel");
   static const MethodChannel _overlayChannel =
@@ -100,13 +102,36 @@ class FlutterOverlayWindow {
     return await _overlayMessageChannel.send(data);
   }
 
+  /// Installs the durable receiver used by the main Flutter engine.
+  ///
+  /// The returned future is wired to the native BasicMessageChannel reply, so
+  /// callers can distinguish a completed application-level operation from a
+  /// transport-only acknowledgement.
+  static void setMessageProcessor(
+    FutureOr<dynamic> Function(dynamic message)? processor,
+  ) {
+    _messageProcessor = processor;
+    _ensureMessageHandler();
+  }
+
   /// Streams message shared between overlay and main app
   static Stream<dynamic> get overlayListener {
+    _ensureMessageHandler();
+    return _controller.stream;
+  }
+
+  static void _ensureMessageHandler() {
+    if (_messageHandlerInstalled) return;
+    _messageHandlerInstalled = true;
     _overlayMessageChannel.setMessageHandler((message) async {
+      final processor = _messageProcessor;
+      if (processor != null) {
+        final reply = await processor(message);
+        if (reply != null) return reply;
+      }
       _controller.add(message);
       return message;
     });
-    return _controller.stream;
   }
 
   /// Update the overlay flag while the overlay in action

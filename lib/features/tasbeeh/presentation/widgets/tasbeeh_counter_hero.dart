@@ -65,124 +65,135 @@ class _CounterHero extends StatelessWidget {
                   // Continuous normal -> focus interpolation
                   // --------------------------------------------------
 
-                  final phraseFontSize = _lerp(isTaskMode ? 34 : 36,
-                      (MediaQuery.sizeOf(context).width * .18).clamp(54.0, 84.0).toDouble(), t);
+                  final phraseFontSize = _lerp(
+                    isTaskMode ? 34 : 36,
+                    (MediaQuery.sizeOf(context).width * .18)
+                        .clamp(54.0, 84.0)
+                        .toDouble(),
+                    t,
+                  );
 
-                  final countFontSize = _lerp(118,
-                      (MediaQuery.sizeOf(context).width * .40).clamp(118.0, 180.0).toDouble(), t);
+                  final countFontSize = _lerp(
+                    118,
+                    (MediaQuery.sizeOf(context).width * .40)
+                        .clamp(118.0, 180.0)
+                        .toDouble(),
+                    t,
+                  );
 
                   final phraseToCountSpacing = _lerp(18, 0, t);
 
                   return Align(
                     alignment: Alignment(0, _lerp(-.2, 0, t)),
                     child: Transform.translate(
-                        offset: Offset(0, _lerp(0, -10, t)),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // -------------------------------
-                            // CURRENT DHIKR
-                            // -------------------------------
-                            if (isTaskMode)
-                              Text(
-                                phrase,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: AppFonts.display,
-                                  color: colors.textPrimary,
-                                  fontSize: phraseFontSize,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.2,
-                                ),
-                              )
-                            else
-                              _InlineDhikrSelector(
-                                phrase: phrase,
-                                focusProgress: t,
+                      offset: Offset(0, _lerp(0, -10, t)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // -------------------------------
+                          // CURRENT DHIKR
+                          // -------------------------------
+                          if (isTaskMode)
+                            Text(
+                              phrase,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: AppFonts.display,
+                                color: colors.textPrimary,
                                 fontSize: phraseFontSize,
-                                onTap: onOpenDhikrSelector,
+                                fontWeight: FontWeight.w700,
+                                height: 1.2,
                               ),
-
-                            SizedBox(height: phraseToCountSpacing),
-
-                            // -------------------------------
-                            // MAIN COUNTER
-                            // -------------------------------
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                ArabicNumerals.integer(count),
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontFamily: AppFonts.ui,
-                                  color: Color.lerp(
-                                    colors.textPrimary,
-                                    colors.primary,
-                                    t * .22,
-                                  ),
-                                  fontSize: countFontSize,
-                                  fontWeight: FontWeight.w400,
-                                  height: .92,
-                                  letterSpacing: _lerp(-1, -2, t),
-                                ),
-                              ),
+                            )
+                          else
+                            _InlineDhikrSelector(
+                              phrase: phrase,
+                              focusProgress: t,
+                              fontSize: phraseFontSize,
+                              onTap: onOpenDhikrSelector,
                             ),
 
-                            // -------------------------------
-                            // NORMAL-MODE SECONDARY CONTENT
-                            // -------------------------------
-                            ClipRect(
-                              child: Align(
-                                heightFactor: 1 - t,
-                                child: FadeTransition(
-                              opacity: hintsOpacity,
-                              child: IgnorePointer(
-                                ignoring: rawProgress > .05,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (target != null) ...[
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'هدف الورد  '
-                                        '${ArabicNumerals.integer(count.clamp(0, target!).toInt())} / '
-                                        '${ArabicNumerals.integer(target!)}',
-                                        style: TextStyle(
-                                          color: colors.primary,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ],
+                          SizedBox(height: phraseToCountSpacing),
 
-                                    const SizedBox(height: 18),
+                          // -------------------------------
+                          // MAIN COUNTER
+                          // -------------------------------
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              ArabicNumerals.integer(count),
+                              key: const ValueKey('tasbeeh-focus-count'),
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontFamily: AppFonts.ui,
+                                color: Color.lerp(
+                                  colors.textPrimary,
+                                  colors.primary,
+                                  t * .22,
+                                ),
+                                fontSize: countFontSize,
+                                fontWeight: FontWeight.w400,
+                                height: .92,
+                                letterSpacing: _lerp(-1, -2, t),
+                              ),
+                            ),
+                          ),
 
-                                    _TodayTotalLabel(total: dailyTotal),
-
-                                    if (!isTaskMode) ...[
-                                      const SizedBox(height: 8),
-                                      Center(
-                                        child: _TasbeehTextAction(
-                                          title: 'تصفير العداد',
-                                          icon: const RafiqiSvgIcon(
-                                            RafiqiIcons.reset,
-                                            size: 20,
+                          // -------------------------------
+                          // NORMAL-MODE SECONDARY CONTENT
+                          // -------------------------------
+                          ClipRect(
+                            child: Align(
+                              heightFactor: 1 - t,
+                              child: FadeTransition(
+                                opacity: hintsOpacity,
+                                child: IgnorePointer(
+                                  ignoring: rawProgress > .05,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (target != null) ...[
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'هدف الورد  '
+                                          '${ArabicNumerals.integer(count.clamp(0, target!).toInt())} / '
+                                          '${ArabicNumerals.integer(target!)}',
+                                          style: TextStyle(
+                                            color: colors.primary,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
                                           ),
-                                          onTap: onResetSession,
                                         ),
-                                      ),
+                                      ],
+
+                                      const SizedBox(height: 18),
+
+                                      _TodayTotalLabel(total: dailyTotal),
+
+                                      if (!isTaskMode) ...[
+                                        const SizedBox(height: 8),
+                                        Center(
+                                          child: _TasbeehTextAction(
+                                            title: 'تصفير العداد',
+                                            icon: const RafiqiSvgIcon(
+                                              RafiqiIcons.reset,
+                                              size: 20,
+                                            ),
+                                            onTap: onResetSession,
+                                          ),
+                                        ),
+                                      ],
                                     ],
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                    ),
                   );
                 },
               ),
@@ -255,15 +266,15 @@ class _InlineDhikrSelector extends StatelessWidget {
               Align(
                 heightFactor: 1 - progress,
                 child: Opacity(
-                opacity: (1 - progress).clamp(0.0, 1.0),
-                child: ExcludeSemantics(
-                  child: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: colors.textPrimary.withValues(alpha: .72),
-                    size: _lerp(26, 20, progress),
+                  opacity: (1 - progress).clamp(0.0, 1.0),
+                  child: ExcludeSemantics(
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: colors.textPrimary.withValues(alpha: .72),
+                      size: _lerp(26, 20, progress),
+                    ),
                   ),
                 ),
-              ),
               ),
             ],
           ),

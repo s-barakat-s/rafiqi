@@ -31,13 +31,13 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
   flutter_overlay_window:
     path: packages/flutter_overlay_window
   shared_preferences: ^2.5.5
-  animations: ^2.2.0
+  just_audio: ^0.10.6
+  audio_service: ^0.18.19
+  background_downloader: 9.5.9
+  path_provider: ^2.1.6
   hijri: ^3.0.1
   flutter_svg: ^2.3.0
 
@@ -75,19 +75,28 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/image/home/
-    - assets/calligraphy/
     - assets/branding/
     - assets/icons/svg/
     - assets/data/adhkar/
     - assets/data/adhkar/normalized/
-    - assets/image/home/shfaq/
+    - assets/data/adhkar/manifests/
+    # Temporary bundled recording for local Dhikr Audio development only.
+    - assets/audio/adhkar/mishary_alafasy/
     - assets/image/home/rafiqi/
     - assets/image/home/ward/
     - assets/image/home/amethyst/
-    - assets/image/home/mahogany/
     - assets/image/home/linen/
     - assets/image/home/ocean/
-    - assets/image/zekr/
+    - assets/image/zekr/rafiqi_zekr_light.png
+    - assets/image/zekr/rafiqi_zekr_dark.png
+    - assets/image/zekr/ward_zekr_light.png
+    - assets/image/zekr/ward_zekr_dark.png
+    - assets/image/zekr/amethyst_zekr_light.png
+    - assets/image/zekr/amethyst_zekr_dark.png
+    - assets/image/zekr/linen_zekr_light.png
+    - assets/image/zekr/linen_zekr_dark.png
+    - assets/image/zekr/ocean_zekr_light.png
+    - assets/image/zekr/ocean_zekr_dark.png
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

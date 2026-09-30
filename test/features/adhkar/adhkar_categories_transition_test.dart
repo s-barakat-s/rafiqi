@@ -36,6 +36,8 @@ void main() {
               categories: [category],
               vibrationEnabled: false,
               soundEnabled: false,
+              onCustomize: (_) async {},
+              onCreateCustom: () {},
             ),
           ),
         ),
@@ -52,7 +54,14 @@ void main() {
 
     expect(find.byTooltip('رجوع'), findsOneWidget);
     await tester.tap(find.byTooltip('رجوع'));
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text('أذكار الصباح'), findsOneWidget);
+    await tester.pumpAndSettle();
+    // After the pop completes only the grid tile remains; the reader also
+    // shows the category title, so assert on the tile's own widget.
+    expect(find.byTooltip('رجوع'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('adhkar-category-morning')),
+      findsOneWidget,
+    );
+    expect(find.text('أذكار الصباح'), findsWidgets);
   });
 }

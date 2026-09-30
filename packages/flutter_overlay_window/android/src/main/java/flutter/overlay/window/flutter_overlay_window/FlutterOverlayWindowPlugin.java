@@ -38,7 +38,13 @@ public class FlutterOverlayWindowPlugin implements
     private Context context;
     private Activity mActivity;
     private BasicMessageChannel<Object> messenger;
-    private Result pendingResult;
+    /**
+     * Pending reply of the in-flight permission request, if any.
+     * Kept separate from unrelated method-call results so that any other
+     * method call can never overwrite or swallow a permission result.
+     */
+    private Result pendingPermissionResult;
+    private ActivityPluginBinding activityBinding;
     final int REQUEST_CODE_FOR_OVERLAY_PERMISSION = 1248;
 
     @Override
@@ -51,24 +57,52 @@ public class FlutterOverlayWindowPlugin implements
                 JSONMessageCodec.INSTANCE);
         messenger.setMessageHandler(this);
 
-        WindowSetup.messenger = messenger;
-        WindowSetup.messenger.setMessageHandler(this);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    /**
+     * Permission-request handling kept separate from unrelated method calls.
+     * <p>
+     * - A repeated request while one is outstanding resolves only the newest
+     *   pending reply; the superseded one completes with an explicit error so
+     *   no accepted request is ever left unresolved.
+     * - On permission return the ACTUAL permission state is checked rather
+     *   than trusting the activity result code.
+     */
+    private void handlePermissionRequest(@NonNull Result result) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            result.success(true);
+            return;
+        }
+        if (mActivity == null) {
+            result.error("NO_ACTIVITY", "overlay permission requires a foreground activity", null);
+            return;
+        }
+        if (checkOverlayPermission()) {
+            // Already granted; short-circuit without opening settings.
+            result.success(true);
+            return;
+        }
+        if (pendingPermissionResult != null) {
+            result.error("REQUEST_IN_PROGRESS", "an overlay permission request is already pending", null);
+            return;
+        }
+        pendingPermissionResult = result;
+        try {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setData(Uri.parse("package:" + mActivity.getPackageName()));
+            mActivity.startActivityForResult(intent, REQUEST_CODE_FOR_OVERLAY_PERMISSION);
+        } catch (Exception exception) {
+            pendingPermissionResult = null;
+            result.error("START_FAILED", "could not open overlay permission settings", exception);
+        }
+    }
+
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        pendingResult = result;
         if (call.method.equals("checkPermission")) {
             result.success(checkOverlayPermission());
         } else if (call.method.equals("requestPermission")) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                intent.setData(Uri.parse("package:" + mActivity.getPackageName()));
-                mActivity.startActivityForResult(intent, REQUEST_CODE_FOR_OVERLAY_PERMISSION);
-            } else {
-                result.success(true);
-            }
+            handlePermissionRequest(result);
         } else if (call.method.equals("showOverlay")) {
             if (!checkOverlayPermission()) {
                 result.error("PERMISSION", "overlay permission is not enabled", null);
@@ -108,9 +142,6 @@ public class FlutterOverlayWindowPlugin implements
         } else if (call.method.equals("isOverlayActive")) {
             result.success(OverlayService.isRunning);
             return;
-        } else if (call.method.equals("isOverlayActive")) {
-            result.success(OverlayService.isRunning);
-            return;
         } else if (call.method.equals("moveOverlay")) {
             int x = call.argument("x");
             int y = call.argument("y");
@@ -135,10 +166,14 @@ public class FlutterOverlayWindowPlugin implements
         } else if (call.method.equals("getOverlayPosition")) {
             result.success(OverlayService.getCurrentPosition());
         } else if (call.method.equals("closeOverlay")) {
+            // Closing an already-stopped overlay completes predictably
+            // instead of leaving the Dart await hanging forever.
             if (OverlayService.isRunning) {
                 final Intent i = new Intent(context, OverlayService.class);
                 context.stopService(i);
                 result.success(true);
+            } else {
+                result.success(false);
             }
             return;
         } else {
@@ -149,35 +184,74 @@ public class FlutterOverlayWindowPlugin implements
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        channel.setMethodCallHandler(null);
-        WindowSetup.messenger.setMessageHandler(null);
+        if (pendingPermissionResult != null) {
+            pendingPermissionResult.error("ENGINE_DETACHED", "plugin detached before permission completed", null);
+            pendingPermissionResult = null;
+        }
+        if (channel != null) channel.setMethodCallHandler(null);
+        if (messenger != null) messenger.setMessageHandler(null);
+        if (WindowSetup.messenger == messenger) WindowSetup.messenger = null;
+        channel = null;
+        messenger = null;
+        context = null;
     }
 
     @Override
     public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
         mActivity = binding.getActivity();
+        activityBinding = binding;
+        // Only the activity-backed (main) engine is the overlay operation
+        // authority. The headless overlay engine must never replace it.
+        WindowSetup.messenger = messenger;
+        // Register (once per binding) so the permission flow can complete
+        // after returning from the system settings screen. Re-attachment
+        // after configuration changes restores the listener as well.
+        binding.addActivityResultListener(this);
     }
 
     @Override
     public void onDetachedFromActivityForConfigChanges() {
+        detachActivityBinding(false);
     }
 
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
-        this.mActivity = binding.getActivity();
+        onAttachedToActivity(binding);
     }
 
     @Override
     public void onDetachedFromActivity() {
+        detachActivityBinding(true);
+    }
+
+    private void detachActivityBinding(boolean terminal) {
+        if (activityBinding != null) {
+            activityBinding.removeActivityResultListener(this);
+            activityBinding = null;
+        }
+        mActivity = null;
+        if (terminal && pendingPermissionResult != null) {
+            pendingPermissionResult.error("ACTIVITY_DETACHED", "activity detached before permission completed", null);
+            pendingPermissionResult = null;
+        }
     }
 
     @Override
     public void onMessage(@Nullable Object message, @NonNull BasicMessageChannel.Reply reply) {
-        BasicMessageChannel overlayMessageChannel = new BasicMessageChannel(
-                FlutterEngineCache.getInstance().get(OverlayConstants.CACHED_TAG)
-                        .getDartExecutor(),
-                OverlayConstants.MESSENGER_TAG, JSONMessageCodec.INSTANCE);
-        overlayMessageChannel.send(message, reply);
+        final io.flutter.embedding.engine.FlutterEngine overlayEngine =
+                FlutterEngineCache.getInstance().get(OverlayConstants.CACHED_TAG);
+        if (overlayEngine == null) {
+            reply.reply(java.util.Collections.singletonMap("error", "OVERLAY_ENGINE_UNAVAILABLE"));
+            return;
+        }
+        try {
+            BasicMessageChannel<Object> overlayMessageChannel = new BasicMessageChannel<>(
+                    overlayEngine.getDartExecutor(),
+                    OverlayConstants.MESSENGER_TAG, JSONMessageCodec.INSTANCE);
+            overlayMessageChannel.send(message, reply);
+        } catch (RuntimeException exception) {
+            reply.reply(java.util.Collections.singletonMap("error", "OVERLAY_FORWARD_FAILED"));
+        }
     }
 
     private boolean checkOverlayPermission() {
@@ -189,11 +263,15 @@ public class FlutterOverlayWindowPlugin implements
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_FOR_OVERLAY_PERMISSION) {
-            pendingResult.success(checkOverlayPermission());
-            return true;
+        if (requestCode != REQUEST_CODE_FOR_OVERLAY_PERMISSION) {
+            return false;
         }
-        return false;
+        if (pendingPermissionResult != null) {
+            // Check the ACTUAL permission state, not the result code.
+            pendingPermissionResult.success(checkOverlayPermission());
+            pendingPermissionResult = null;
+        }
+        return true;
     }
 
 }

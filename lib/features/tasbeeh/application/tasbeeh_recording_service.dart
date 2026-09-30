@@ -9,10 +9,26 @@ class TasbeehIncrementResult {
   const TasbeehIncrementResult({
     required this.state,
     required this.completedTask,
+    this.revision = 0,
+    this.duplicate = false,
   });
 
   final TasbeehState state;
   final bool completedTask;
+  final int revision;
+  final bool duplicate;
+}
+
+class TasbeehUndoResult {
+  const TasbeehUndoResult({
+    required this.state,
+    required this.revision,
+    required this.reversed,
+  });
+
+  final TasbeehState state;
+  final int revision;
+  final bool reversed;
 }
 
 /// Coordinates compact Tasbeeh activity storage with Daily Wird progress.
@@ -32,20 +48,20 @@ class TasbeehRecordingService {
   Future<TasbeehIncrementResult> recordIncrement(
     TasbeehState next, {
     required TasbeehActivitySource source,
+    int? revision,
   }) async {
-    await _repository.save(next);
+    await _repository.save(next, revision: revision);
     final daily = await _repository.recordIncrement(
       dhikrId: next.selectedDhikrId,
       dhikrText: next.selectedDhikrText,
       source: source,
     );
-    // Reload before projecting so a concurrently running overlay cannot
-    // overwrite a manual completion/uncheck made by the main app isolate.
-    await _dailyWird.initialize();
-    final eligibleTotal = daily.inAppCount + await _repository.manualCountForDay(
-      daily.dayKey,
-      next.selectedDhikrId,
-    );
+    // Refresh only today's indexed record. This preserves cross-engine
+    // correctness without decoding/rebuilding the whole Journey history.
+    await _dailyWird.refreshDayForTasbeeh();
+    final eligibleTotal =
+        daily.inAppCount +
+        await _repository.manualCountForDay(daily.dayKey, next.selectedDhikrId);
     final completedTask = await _dailyWird.syncTasbeehProgress(
       dhikrId: next.selectedDhikrId,
       currentEligibleTotal: eligibleTotal,
@@ -53,7 +69,79 @@ class TasbeehRecordingService {
     return TasbeehIncrementResult(
       state: next,
       completedTask: completedTask,
+      revision: revision ?? await _repository.loadRevision(),
     );
+  }
+
+  /// Applies one retriable increment operation at most once.
+  ///
+  /// The operation id is persisted only after state, activity and linked-task
+  /// projection complete. This makes a repeated delivery after a lost reply a
+  /// no-op. Full multi-engine transactional storage remains a Phase 3 concern.
+  Future<TasbeehIncrementResult> recordIncrementOperation({
+    required String operationId,
+    required TasbeehActivitySource source,
+  }) async {
+    if (await _repository.hasProcessedOperation(operationId)) {
+      return TasbeehIncrementResult(
+        state: await _repository.load(),
+        completedTask: false,
+        revision: await _repository.loadRevision(),
+        duplicate: true,
+      );
+    }
+
+    final current = await _repository.load();
+    final revision = await _repository.loadRevision() + 1;
+    final result = await recordIncrement(
+      nextState(current),
+      source: source,
+      revision: revision,
+    );
+    await _repository.markOperationProcessed(operationId);
+    return result;
+  }
+
+  Future<TasbeehUndoResult> undoIncrement({
+    required TasbeehActivitySource source,
+  }) async {
+    final current = await _repository.load();
+    final currentRevision = await _repository.loadRevision();
+    if (current.currentCount <= 0) {
+      return TasbeehUndoResult(
+        state: current,
+        revision: currentRevision,
+        reversed: false,
+      );
+    }
+
+    final daily = await _repository.removeRecordedIncrement(
+      dhikrId: current.selectedDhikrId,
+      source: source,
+    );
+    if (daily == null) {
+      return TasbeehUndoResult(
+        state: current,
+        revision: currentRevision,
+        reversed: false,
+      );
+    }
+
+    final next = TasbeehCounterLogic.decrement(current);
+    final revision = currentRevision + 1;
+    await _repository.save(next, revision: revision);
+    await _dailyWird.refreshDayForTasbeeh();
+    final eligibleTotal =
+        daily.inAppCount +
+        await _repository.manualCountForDay(
+          daily.dayKey,
+          current.selectedDhikrId,
+        );
+    await _dailyWird.syncTasbeehProgress(
+      dhikrId: current.selectedDhikrId,
+      currentEligibleTotal: eligibleTotal,
+    );
+    return TasbeehUndoResult(state: next, revision: revision, reversed: true);
   }
 
   Future<({ManualTasbeehEntry entry, bool completedTask})> addPhysicalManual({
@@ -72,12 +160,15 @@ class TasbeehRecordingService {
 
   Future<bool> updatePhysicalManual(ManualTasbeehEntry updated) async {
     final entries = await _repository.loadManualEntries();
-    final previous = entries.where((entry) => entry.id == updated.id).firstOrNull;
+    final previous = entries
+        .where((entry) => entry.id == updated.id)
+        .firstOrNull;
     if (previous == null) return false;
     await _repository.updateManualEntry(updated);
     var completed = await _reconcile(previous.dayKey, previous.dhikrId);
     if (previous.dhikrId != updated.dhikrId) {
-      completed = await _reconcile(updated.dayKey, updated.dhikrId) || completed;
+      completed =
+          await _reconcile(updated.dayKey, updated.dhikrId) || completed;
     }
     return completed;
   }
@@ -89,7 +180,10 @@ class TasbeehRecordingService {
 
   Future<bool> _reconcile(String dayKey, String dhikrId) async {
     await _dailyWird.initialize();
-    final eligibleTotal = await _repository.eligibleCountForDay(dayKey, dhikrId);
+    final eligibleTotal = await _repository.eligibleCountForDay(
+      dayKey,
+      dhikrId,
+    );
     return _dailyWird.syncTasbeehProgress(
       dhikrId: dhikrId,
       currentEligibleTotal: eligibleTotal,

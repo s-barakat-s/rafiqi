@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_repository.dart';
-import 'package:tasbeh/features/tasbeeh/application/tasbeeh_controller.dart';
+import 'package:tasbeh/features/tasbeeh/application/tasbeeh_app_scope.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_phrase.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_task_context.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_home_screen.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_statistics_screen.dart';
 
+/// A linked Daily Wird task session.
+///
+/// Phase 2A: this route no longer creates its own [TasbeehController].
+/// It observes the application-scoped authority via a session adapter
+/// ([TasbeehSessionScope]), so ordinary Tasbeeh and task sessions can never
+/// save conflicting snapshots, and opening/closing the task neither replaces
+/// nor removes the main-app named port.
 class TasbeehTaskSessionScreen extends StatefulWidget {
   const TasbeehTaskSessionScreen({required this.taskContext, super.key});
 
@@ -18,7 +25,10 @@ class TasbeehTaskSessionScreen extends StatefulWidget {
 
 class _TasbeehTaskSessionScreenState extends State<TasbeehTaskSessionScreen> {
   final _store = DailyWirdRepository.instance;
-  final _tasbeeh = TasbeehController();
+  /// Session-local adapter over the shared authority; disposed with the
+  /// route. The underlying controller is NOT disposed here.
+  late final TasbeehSessionScope _scope =
+      TasbeehSessionScope.inheritAppScope();
   bool _ready = false;
 
   int get _progress {
@@ -32,13 +42,14 @@ class _TasbeehTaskSessionScreenState extends State<TasbeehTaskSessionScreen> {
   void initState() {
     super.initState();
     _store.addListener(_onChanged);
-    _tasbeeh.addListener(_onChanged);
+    _scope.addListener(_onChanged);
     _initialize();
   }
 
   Future<void> _initialize() async {
-    await _tasbeeh.initialize();
-    await _tasbeeh.selectDhikr(
+    // Idempotent: no port re-registration, no stale full reload.
+    await TasbeehAppScope.ensureInitialized();
+    await _scope.selectDhikr(
       TasbeehPhrase(
         id: widget.taskContext.phraseId,
         text: widget.taskContext.phraseText,
@@ -55,7 +66,7 @@ class _TasbeehTaskSessionScreenState extends State<TasbeehTaskSessionScreen> {
   }
 
   Future<void> _increment() async {
-    final completedTask = await _tasbeeh.increment();
+    final completedTask = await _scope.increment();
     if (!mounted || !completedTask) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -70,8 +81,10 @@ class _TasbeehTaskSessionScreenState extends State<TasbeehTaskSessionScreen> {
   @override
   void dispose() {
     _store.removeListener(_onChanged);
-    _tasbeeh.removeListener(_onChanged);
-    _tasbeeh.dispose();
+    _scope.removeListener(_onChanged);
+    // Only the adapter is disposed; the shared authority (and its port)
+    // remains alive for the rest of the app.
+    _scope.dispose();
     super.dispose();
   }
 
@@ -84,17 +97,17 @@ class _TasbeehTaskSessionScreenState extends State<TasbeehTaskSessionScreen> {
       );
     }
     return TasbeehHomeScreen(
-      state: _tasbeeh.state,
+      state: _scope.state,
       taskContext: widget.taskContext,
       taskProgress: _progress,
       onIncrement: _increment,
-      onResetSession: _tasbeeh.resetSession,
-      onDecrement: _tasbeeh.decrement,
+      onResetSession: _scope.resetSession,
+      onDecrement: _scope.decrement,
       onOpenSettings: () {},
-      phrases: _tasbeeh.phrases,
-      onSelectDhikr: _tasbeeh.selectDhikr,
+      phrases: _scope.phrases,
+      onSelectDhikr: _scope.selectDhikr,
       onAddCustomPhrase: (text) async {
-        await _tasbeeh.addCustomPhrase(text);
+        await _scope.addCustomPhrase(text);
       },
       onOpenStatistics: () {
         Navigator.of(context).push<void>(
@@ -102,11 +115,11 @@ class _TasbeehTaskSessionScreenState extends State<TasbeehTaskSessionScreen> {
         );
       },
       onOpenManualLog: () {},
-      focusController: _tasbeeh,
-      hapticEnabled: _tasbeeh.settings.hapticFeedbackEnabled,
+      focusController: _scope.controller,
+      hapticEnabled: _scope.controller.settings.hapticFeedbackEnabled,
       onHapticChanged: (enabled) async {
-        await _tasbeeh.replaceSettings(
-          _tasbeeh.settings.copyWith(hapticFeedbackEnabled: enabled),
+        await _scope.controller.replaceSettings(
+          _scope.controller.settings.copyWith(hapticFeedbackEnabled: enabled),
         );
       },
       onBack: () => Navigator.pop(context),

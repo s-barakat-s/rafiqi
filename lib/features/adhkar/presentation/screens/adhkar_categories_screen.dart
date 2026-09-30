@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_local_repository.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/custom_adhkar_collections_repository.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/adhkar_collection_customization_screen.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/custom_adhkar_collection_editor_screen.dart';
+import 'package:tasbeh/features/adhkar/presentation/screens/wird_reader_screen.dart';
 import 'package:tasbeh/features/adhkar/presentation/widgets/adhkar_category_grid.dart';
+import 'package:tasbeh/features/adhkar/presentation/widgets/adhkar_hub_hero.dart';
 
 class AdhkarCategoriesScreen extends StatefulWidget {
   const AdhkarCategoriesScreen({
@@ -18,8 +19,7 @@ class AdhkarCategoriesScreen extends StatefulWidget {
   final bool soundEnabled;
 
   @override
-  State<AdhkarCategoriesScreen> createState() =>
-      _AdhkarCategoriesScreenState();
+  State<AdhkarCategoriesScreen> createState() => _AdhkarCategoriesScreenState();
 }
 
 class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
@@ -34,10 +34,39 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
     });
   }
 
+  Future<void> _openCurrentCollection(AdhkarCategory category) async {
+    final resolved = await AdhkarLocalRepository.loadResolvedCategory(
+      category.id,
+    );
+    if (!mounted || resolved == null) return;
+    await Navigator.of(context).push<void>(
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 500),
+        reverseTransitionDuration: const Duration(milliseconds: 500),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            WirdReaderScreen(
+              category: resolved,
+              vibrationEnabled: widget.vibrationEnabled,
+              soundEnabled: widget.soundEnabled,
+              morphTransition: MorphTransitionSpec(controller: animation),
+            ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          // Fade the opaque Reader surface over the Hub below the Hero overlay.
+          // Reversing this same interval reveals the Hub before the Hero lands.
+          return FadeTransition(
+            opacity: animation.drive(CurveTween(curve: const Interval(0, .35))),
+            child: child,
+          );
+        },
+      ),
+    );
+    if (mounted) _refreshCategories();
+  }
+
   Future<void> _customize(AdhkarCategory category) async {
     if (category.kind == AdhkarCategoryKind.custom) {
-      final collections =
-          await CustomAdhkarCollectionsRepository.instance.load();
+      final collections = await CustomAdhkarCollectionsRepository.instance
+          .load();
       final collection = collections.firstWhere(
         (item) => item.id == category.id,
       );
@@ -75,7 +104,6 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
     return SafeArea(
       bottom: false,
       child: FutureBuilder<List<AdhkarCategory>>(
@@ -84,29 +112,8 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'الأذكار',
-                      style: TextStyle(
-                        fontFamily: AppFonts.display,
-                        fontSize: 36,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'اختر وردك، واجعل للذكر نصيبًا من يومك',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: colors.secondaryText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Image-led hero for the current morning/evening wird.
+              AdhkarHubHero(onOpen: _openCurrentCollection),
               Expanded(
                 child: snapshot.hasError
                     ? const Center(

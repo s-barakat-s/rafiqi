@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tasbeh/core/theme/rafiqi_palette.dart';
+import 'package:tasbeh/shared/widgets/app_decorative_background.dart';
+import 'package:tasbeh/features/tasbeeh/application/tasbeeh_app_scope.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_controller.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/adhkar_categories_screen.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/floating_tasbeeh_settings_screen.dart';
 import 'package:tasbeh/features/journey/presentation/screens/journey_screen.dart';
+import 'package:tasbeh/app/navigation/app_placeholder_screen.dart';
+import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_home_screen.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_statistics_screen.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/manual_tasbeeh_logging.dart';
@@ -19,10 +22,6 @@ import 'package:tasbeh/features/home/presentation/home_screen.dart';
 /// Owns the five top-level destinations and cross-feature navigation only.
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({
-    required this.isDarkMode,
-    required this.onThemeChanged,
-    required this.selectedPalette,
-    required this.onPaletteChanged,
     required this.adhkarVibrationEnabled,
     required this.onAdhkarVibrationChanged,
     required this.adhkarSoundEnabled,
@@ -30,10 +29,6 @@ class MainShellScreen extends StatefulWidget {
     super.key,
   });
 
-  final bool isDarkMode;
-  final ValueChanged<bool> onThemeChanged;
-  final RafiqiPalette selectedPalette;
-  final ValueChanged<RafiqiPalette> onPaletteChanged;
   final bool adhkarVibrationEnabled;
   final ValueChanged<bool> onAdhkarVibrationChanged;
   final bool adhkarSoundEnabled;
@@ -45,22 +40,18 @@ class MainShellScreen extends StatefulWidget {
 
 class _MainShellScreenState extends State<MainShellScreen>
     with WidgetsBindingObserver {
-  final _tasbeeh = TasbeehController();
+  /// Application-scoped Tasbeeh authority (Phase 2A). The shell no longer
+  /// creates or disposes its own controller; the scope outlives every route.
+  TasbeehController get _tasbeeh => TasbeehAppScope.controller;
   int _tabIndex = 0;
   bool _tasbeehInitialized = false;
-  final _tasbeehFocusProgress = ValueNotifier<double>(0);
   final _visitedTabs = <int>{0};
-  Future<void>? _tasbeehInitialization;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tasbeeh.addListener(_onTasbeehChanged);
-  }
-
-  Future<void> _ensureTasbeehInitialized() {
-    return _tasbeehInitialization ??= _tasbeeh.initialize().then((_) {
+    TasbeehAppScope.ensureInitialized().then((_) {
       _tasbeehInitialized = true;
     });
   }
@@ -70,25 +61,50 @@ class _MainShellScreenState extends State<MainShellScreen>
       _tabIndex = index;
       _visitedTabs.add(index);
     });
-    if (index == 2) {
-      if (_tasbeehInitialized) {
-        _tasbeeh.reload();
-      } else {
-        _ensureTasbeehInitialized();
-      }
-    }
   }
 
-  void _onTasbeehChanged() {
-    if (mounted) setState(() {});
+  Future<void> _ensureTasbeehInitialized() =>
+      TasbeehAppScope.ensureInitialized();
+
+  Future<void> _openTasbeeh() async {
+    await _ensureTasbeehInitialized();
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => TasbeehHomeScreen(
+          state: _tasbeeh.state,
+          onIncrement: _incrementTasbeeh,
+          onResetSession: _tasbeeh.resetSession,
+          onDecrement: _tasbeeh.decrement,
+          onOpenSettings: _openTasbeehSettings,
+          phrases: _tasbeeh.phrases,
+          onSelectDhikr: _tasbeeh.selectDhikr,
+          onAddCustomPhrase: (text) async {
+            await _tasbeeh.addCustomPhrase(text);
+          },
+          onOpenStatistics: _openTasbeehStatistics,
+          onOpenManualLog: _openManualTasbeehLog,
+          focusController: _tasbeeh,
+          hapticEnabled: _tasbeeh.settings.hapticFeedbackEnabled,
+          onHapticChanged: (enabled) async {
+            await _tasbeeh.replaceSettings(
+              _tasbeeh.settings.copyWith(hapticFeedbackEnabled: enabled),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openJourney() async {
+    await Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const JourneyScreen()));
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _tasbeeh.removeListener(_onTasbeehChanged);
-    _tasbeeh.dispose();
-    _tasbeehFocusProgress.dispose();
     super.dispose();
   }
 
@@ -141,8 +157,6 @@ class _MainShellScreenState extends State<MainShellScreen>
     );
   }
 
-
-
   Future<void> _openManualTasbeehHistory() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
@@ -186,70 +200,64 @@ class _MainShellScreenState extends State<MainShellScreen>
   }
 
   Future<void> _openAdhkarReader(String categoryId) async {
-    final categories = await AdhkarLocalRepository.loadCategories();
+    final category = await AdhkarLocalRepository.loadResolvedCategory(
+      categoryId,
+    );
     if (!mounted) return;
-    final category = categories
-        .where((item) => item.id == categoryId)
-        .firstOrNull;
     if (category == null) {
       _showMessage('هذا الورد غير متوفر أو تم حذفه');
       return;
     }
     await Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => WirdReaderScreen(
+  PageRouteBuilder(
+    transitionDuration: const Duration(milliseconds: 180),
+    reverseTransitionDuration: const Duration(milliseconds: 160),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return AppDecorativeBackground(
+        child: WirdReaderScreen(
           category: category,
           vibrationEnabled: widget.adhkarVibrationEnabled,
           soundEnabled: widget.adhkarSoundEnabled,
         ),
-      ),
-    );
+      );
+    },
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+        ),
+        child: child,
+      );
+    },
+  ),
+);
   }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
       HomeScreen(
-        onOpenTasbeeh: () => _selectTab(2),
+        onOpenTasbeeh: _openTasbeeh,
         onOpenAdhkar: _openAdhkarReader,
-        onOpenJourney: () => _selectTab(3),
+        onOpenJourney: _openJourney,
       ),
       AdhkarCategoriesScreen(
         vibrationEnabled: widget.adhkarVibrationEnabled,
         soundEnabled: widget.adhkarSoundEnabled,
       ),
-      TasbeehHomeScreen(
-        state: _tasbeeh.state,
-        onIncrement: _incrementTasbeeh,
-        onResetSession: _tasbeeh.resetSession,
-        onDecrement: _tasbeeh.decrement,
-        onOpenSettings: _openTasbeehSettings,
-        phrases: _tasbeeh.phrases,
-        onSelectDhikr: _tasbeeh.selectDhikr,
-        onAddCustomPhrase: (text) async {
-          await _tasbeeh.addCustomPhrase(text);
-        },
-        onOpenStatistics: _openTasbeehStatistics,
-        onOpenManualLog: _openManualTasbeehLog,
-        focusController: _tasbeeh,
-        onFocusProgress: (progress) {
-          if (!mounted) return;
-          _tasbeehFocusProgress.value = progress;
-        },
-        hapticEnabled: _tasbeeh.settings.hapticFeedbackEnabled,
-        onHapticChanged: (enabled) async {
-          await _tasbeeh.replaceSettings(
-            _tasbeeh.settings.copyWith(hapticFeedbackEnabled: enabled),
-          );
-        },
+      const AppPlaceholderScreen(
+        icon: RafiqiIcons.quran,
+        title: 'القرآن الكريم',
+        message: 'قريبًا ستتمكن من متابعة قراءتك من حيث توقفت',
       ),
-      const JourneyScreen(),
-      MoreScreen(
-        isDarkMode: widget.isDarkMode,
-        onThemeChanged: widget.onThemeChanged,
-        selectedPalette: widget.selectedPalette,
-        onPaletteChanged: widget.onPaletteChanged,
+      const AppPlaceholderScreen(
+        icon: RafiqiIcons.adhan,
+        title: 'مواقيت الصلاة',
+        message: 'قريبًا: مواقيت الصلاة والتنبيه بموعد الأذان',
       ),
+      const MoreScreen(),
     ];
 
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -269,8 +277,8 @@ class _MainShellScreenState extends State<MainShellScreen>
         body: Stack(
           children: [
             Positioned.fill(
-              child: ValueListenableBuilder<double>(
-                valueListenable: _tasbeehFocusProgress,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 94),
                 child: IndexedStack(
                   index: _tabIndex,
                   children: [
@@ -283,12 +291,6 @@ class _MainShellScreenState extends State<MainShellScreen>
                       ),
                   ],
                 ),
-                builder: (context, progress, child) => Padding(
-                padding: EdgeInsets.only(
-                  bottom: 94 * (1 - Curves.easeInOutCubic.transform(progress)),
-                ),
-                child: child,
-                ),
               ),
             ),
             Positioned(
@@ -297,22 +299,9 @@ class _MainShellScreenState extends State<MainShellScreen>
               bottom: 16,
               child: SafeArea(
                 top: false,
-                child: ValueListenableBuilder<double>(
-                  valueListenable: _tasbeehFocusProgress,
-                  child: AppBottomNavBar(
-                    currentIndex: _tabIndex,
-                    onChanged: _selectTab,
-                  ),
-                  builder: (context, progress, child) => IgnorePointer(
-                  ignoring: progress > 0,
-                  child: FractionalTranslation(
-                    translation: Offset(0, 1.35 * Curves.easeInCubic.transform(progress)),
-                    child: Opacity(
-                      opacity: 1 - progress,
-                      child: child,
-                    ),
-                  ),
-                ),
+                child: AppBottomNavBar(
+                  currentIndex: _tabIndex,
+                  onChanged: _selectTab,
                 ),
               ),
             ),
@@ -329,7 +318,6 @@ class _MainShellScreenState extends State<MainShellScreen>
       MaterialPageRoute(
         builder: (_) => FloatingTasbeehSettingsScreen(
           initialSettings: _tasbeeh.settings,
-          state: _tasbeeh.state,
           onStartOverlay: _startFloatingTasbeeh,
           onStopOverlay: _stopFloatingTasbeeh,
         ),

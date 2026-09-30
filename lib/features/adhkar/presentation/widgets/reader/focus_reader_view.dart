@@ -6,6 +6,8 @@ class _FocusReaderView extends StatelessWidget {
     required this.transition,
     required this.onTap,
     required this.onRestart,
+    required this.audio,
+    required this.onAudioPressed,
     super.key,
   });
 
@@ -13,6 +15,8 @@ class _FocusReaderView extends StatelessWidget {
   final Animation<double> transition;
   final VoidCallback onTap;
   final VoidCallback onRestart;
+  final DhikrAudioController? audio;
+  final ValueChanged<DhikrItem> onAudioPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +32,8 @@ class _FocusReaderView extends StatelessWidget {
       remaining: reader.remaining,
       transition: transition,
       onTap: onTap,
+      audio: audio,
+      onAudioPressed: onAudioPressed,
     );
   }
 }

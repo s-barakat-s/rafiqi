@@ -1,0 +1,13 @@
+# Phase 4 — Adhkar consistency
+- Status: complete.
+- Reader entry points now resolve one customized collection by stable id.
+- Canonical collections remain limited to customization/reset flows.
+- Saved progress is reconciled by dhikr id after reorder, hide, add, or repeat edits.
+- A newly added dhikr reopens an otherwise completed collection.
+- Progress and customization notifications are scoped per collection.
+- Home, Hub, and category summaries rebuild only when their displayed value changes.
+- Home and Hub share `AdhkarTimePeriod` for morning/evening selection.
+- One-shot timers refresh at noon/midnight; lifecycle resume refresh remains enabled.
+- Focused Phase 4 plus shared-reader tests: 12/12 passed.
+- Scoped Flutter analysis: no issues.
+- The four pre-existing obsolete Reader UI finder failures were not changed.

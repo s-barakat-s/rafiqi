@@ -6,37 +6,139 @@ typedef _ListDecrement =
       Future<void> Function()? animateRemoval,
     });
 
-class _ListReaderView extends StatelessWidget {
+class _ListReaderView extends StatefulWidget {
   const _ListReaderView({
     required this.reader,
     required this.onDecrement,
     required this.onRestart,
+    required this.audio,
+    required this.onAudioPressed,
     super.key,
   });
 
   final WirdReaderController reader;
   final _ListDecrement onDecrement;
   final VoidCallback onRestart;
+  final DhikrAudioController? audio;
+  final ValueChanged<DhikrItem> onAudioPressed;
+
+  @override
+  State<_ListReaderView> createState() => _ListReaderViewState();
+}
+
+class _ListReaderViewState extends State<_ListReaderView> {
+  final ScrollController _scrollController = ScrollController();
+  final Map<String, BuildContext> _itemContexts = {};
+  String? _lastActiveId;
+
+  List<DhikrItem> _orderedRemainingItems() {
+    final defaultItems = widget.reader.remainingItems;
+    final sessionOrder = widget.audio?.sessionCardOrder ?? const <String>[];
+    if (sessionOrder.isEmpty) return defaultItems;
+    final byId = {for (final item in defaultItems) item.id: item};
+    return [
+      for (final id in sessionOrder)
+        if (byId.containsKey(id)) byId.remove(id)!,
+      ...byId.values,
+    ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final activeId = widget.audio?.currentDhikrId;
+    if (activeId != null) {
+      _lastActiveId = activeId;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(activeId));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ListReaderView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final activeId = widget.audio?.currentDhikrId;
+    if (activeId != _lastActiveId) {
+      _lastActiveId = activeId;
+      if (activeId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(activeId));
+      }
+    }
+  }
+
+  Future<void> _reveal(String id) async {
+    if (!mounted || !_scrollController.hasClients) return;
+    var itemContext = _itemContexts[id];
+    if (itemContext == null) {
+      final items = _orderedRemainingItems();
+      final index = items.indexWhere((item) => item.id == id);
+      if (index < 0) return;
+      final target = items.length <= 1
+          ? 0.0
+          : _scrollController.position.maxScrollExtent *
+                (index / (items.length - 1));
+      await _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      );
+      if (!mounted) return;
+      itemContext = _itemContexts[id];
+    }
+    if (itemContext == null || !itemContext.mounted) return;
+    final itemBox = itemContext.findRenderObject() as RenderBox?;
+    final viewportBox = context.findRenderObject() as RenderBox?;
+    if (itemBox == null || viewportBox == null) return;
+    final itemTop = itemBox.localToGlobal(Offset.zero).dy;
+    final itemBottom = itemTop + itemBox.size.height;
+    final viewportTop = viewportBox.localToGlobal(Offset.zero).dy;
+    final viewportBottom = viewportTop + viewportBox.size.height;
+    if (itemTop < viewportTop + 12 || itemBottom > viewportBottom - 12) {
+      await Scrollable.ensureVisible(
+        itemContext,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        alignment: .18,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (reader.isComplete) {
-      return _CompletionState(total: reader.total, onRestart: onRestart);
+    if (widget.reader.isComplete) {
+      return _CompletionState(
+        total: widget.reader.total,
+        onRestart: widget.onRestart,
+      );
     }
+    final remainingItems = _orderedRemainingItems();
     return ListView.separated(
+      controller: _scrollController,
       key: const PageStorageKey('wird-list-reader'),
       padding: const EdgeInsets.fromLTRB(1, 4, 1, 18),
-      itemCount: reader.remainingItems.length,
+      itemCount: remainingItems.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final item = reader.remainingItems[index];
-        return _ListDhikrCard(
-          key: ValueKey(item.id),
-          categoryId: reader.category.id,
-          item: item,
-          remaining: reader.remainingFor(item.id),
-          enabled: !reader.isTransitioning,
-          onDecrement: onDecrement,
+        final item = remainingItems[index];
+        return Builder(
+          builder: (itemContext) {
+            _itemContexts[item.id] = itemContext;
+            return _ListDhikrCard(
+              key: ValueKey(item.id),
+              categoryId: widget.reader.category.id,
+              item: item,
+              remaining: widget.reader.remainingFor(item.id),
+              enabled: !widget.reader.isTransitioning,
+              onDecrement: widget.onDecrement,
+              audio: widget.audio,
+              onAudioPressed: widget.onAudioPressed,
+            );
+          },
         );
       },
     );
@@ -50,6 +152,8 @@ class _ListDhikrCard extends StatefulWidget {
     required this.remaining,
     required this.enabled,
     required this.onDecrement,
+    required this.audio,
+    required this.onAudioPressed,
     super.key,
   });
 
@@ -58,6 +162,8 @@ class _ListDhikrCard extends StatefulWidget {
   final int remaining;
   final bool enabled;
   final _ListDecrement onDecrement;
+  final DhikrAudioController? audio;
+  final ValueChanged<DhikrItem> onAudioPressed;
 
   @override
   State<_ListDhikrCard> createState() => _ListDhikrCardState();
@@ -125,7 +231,9 @@ class _ListDhikrCardState extends State<_ListDhikrCard>
             borderRadius: BorderRadius.circular(18),
             level: AppGlassSurfaceLevel.reader,
             grouped: true,
-            borderColor: colors.outlineStrong,
+            borderColor: widget.audio?.isCurrent(widget.item.id) ?? false
+                ? colors.progress
+                : colors.outlineStrong,
             child: InkWell(
               onTap: widget.enabled ? _tap : null,
               splashFactory: NoSplash.splashFactory,
@@ -179,6 +287,14 @@ class _ListDhikrCardState extends State<_ListDhikrCard>
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: colors.textSecondary),
                           ),
+                        const SizedBox(height: 4),
+                        _DhikrAudioAction(
+                          active:
+                              widget.audio?.isCurrent(widget.item.id) ?? false,
+                          phase: widget.audio?.phase,
+                          status: widget.audio?.status,
+                          onPressed: () => widget.onAudioPressed(widget.item),
+                        ),
                       ],
                     ),
                   ],
@@ -189,10 +305,7 @@ class _ListDhikrCardState extends State<_ListDhikrCard>
         ),
       ),
     );
-    return _DhikrDetailsTransition(
-      item: widget.item,
-      child: card,
-    );
+    return _DhikrDetailsTransition(item: widget.item, child: card);
   }
 }
 

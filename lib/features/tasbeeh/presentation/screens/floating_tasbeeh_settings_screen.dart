@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
@@ -5,23 +7,22 @@ import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_launcher.dar
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_messenger.dart';
 import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_settings.dart';
-import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_state.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/widgets/auto_hide_selector.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/widgets/floating_controls_card.dart';
 
 class FloatingTasbeehSettingsScreen extends StatefulWidget {
   const FloatingTasbeehSettingsScreen({
     required this.initialSettings,
-    required this.state,
     this.onStartOverlay,
     this.onStopOverlay,
+    this.repository,
     super.key,
   });
 
   final TasbeehSettings initialSettings;
-  final TasbeehState state;
   final Future<void> Function()? onStartOverlay;
   final Future<void> Function()? onStopOverlay;
+  final TasbeehRepository? repository;
 
   @override
   State<FloatingTasbeehSettingsScreen> createState() =>
@@ -30,7 +31,8 @@ class FloatingTasbeehSettingsScreen extends StatefulWidget {
 
 class _FloatingTasbeehSettingsScreenState
     extends State<FloatingTasbeehSettingsScreen> {
-  final _repository = TasbeehRepository();
+  late final TasbeehRepository _repository =
+      widget.repository ?? TasbeehRepository();
   late TasbeehSettings _settings = widget.initialSettings;
 
   Future<void> _updateSettings(
@@ -51,14 +53,23 @@ class _FloatingTasbeehSettingsScreenState
       settings,
       source: TasbeehOverlayMessenger.sourceApp,
     );
-    await TasbeehOverlayMessenger.sendStateUpdate(
-      widget.state,
-      source: TasbeehOverlayMessenger.sourceApp,
-    );
   }
 
   void _previewSize(double value) {
     setState(() => _settings = _settings.copyWith(sizeScale: value));
+  }
+
+  void _previewSettings(TasbeehSettings settings) {
+    setState(() => _settings = settings);
+    unawaited(_sendOverlayPreview(settings));
+  }
+
+  Future<void> _sendOverlayPreview(TasbeehSettings settings) async {
+    if (!await FlutterOverlayWindow.isActive()) return;
+    await TasbeehOverlayMessenger.sendSettingsUpdate(
+      settings,
+      source: TasbeehOverlayMessenger.sourceApp,
+    );
   }
 
   @override
@@ -148,6 +159,8 @@ class _FloatingTasbeehSettingsScreenState
                       divisions: 6,
                       label: _opacityLabel(_settings.opacity),
                       onChanged: (value) =>
+                          _previewSettings(_settings.copyWith(opacity: value)),
+                      onChangeEnd: (value) =>
                           _updateSettings(_settings.copyWith(opacity: value)),
                     ),
                     const _SettingDivider(),
@@ -175,7 +188,10 @@ class _FloatingTasbeehSettingsScreenState
                       max: TasbeehSettings.maxCounterScale,
                       divisions: 13,
                       label: _scaleLabel(_settings.counterScale),
-                      onChanged: (value) => _updateSettings(
+                      onChanged: (value) => _previewSettings(
+                        _settings.copyWith(counterScale: value),
+                      ),
+                      onChangeEnd: (value) => _updateSettings(
                         _settings.copyWith(counterScale: value),
                       ),
                     ),
@@ -190,7 +206,10 @@ class _FloatingTasbeehSettingsScreenState
                       max: TasbeehSettings.maxCollapsedHandleScale,
                       divisions: 12,
                       label: _scaleLabel(_settings.collapsedHandleScale),
-                      onChanged: (value) => _updateSettings(
+                      onChanged: (value) => _previewSettings(
+                        _settings.copyWith(collapsedHandleScale: value),
+                      ),
+                      onChangeEnd: (value) => _updateSettings(
                         _settings.copyWith(collapsedHandleScale: value),
                       ),
                     ),
@@ -205,7 +224,10 @@ class _FloatingTasbeehSettingsScreenState
                       max: 1,
                       divisions: 15,
                       label: _opacityLabel(_settings.collapsedHandleOpacity),
-                      onChanged: (value) => _updateSettings(
+                      onChanged: (value) => _previewSettings(
+                        _settings.copyWith(collapsedHandleOpacity: value),
+                      ),
+                      onChangeEnd: (value) => _updateSettings(
                         _settings.copyWith(collapsedHandleOpacity: value),
                       ),
                     ),

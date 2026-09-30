@@ -26,9 +26,17 @@ abstract final class AdhkarLocalRepository {
     return categories.firstWhere((category) => category.id == id);
   }
 
-  static Future<AdhkarCategory> _applyOverrides(
-    AdhkarCategory category,
-  ) async {
+  static Future<AdhkarCategory?> loadResolvedCategory(String id) async {
+    final canonical = await loadCanonicalCategories();
+    final category = canonical.where((item) => item.id == id).firstOrNull;
+    if (category != null) return _applyOverrides(category);
+
+    final custom = await CustomAdhkarCollectionsRepository.instance.load();
+    final customCollection = custom.where((item) => item.id == id).firstOrNull;
+    return customCollection?.toAdhkarCategory();
+  }
+
+  static Future<AdhkarCategory> _applyOverrides(AdhkarCategory category) async {
     final overrides = await AdhkarCollectionOverridesRepository.instance.load(
       category.id,
     );
@@ -37,7 +45,8 @@ abstract final class AdhkarLocalRepository {
       ...overrides.addedDhikrItems.map(
         (item) => DhikrItem(
           id: item.id,
-          order: category.items.length * 100 +
+          order:
+              category.items.length * 100 +
               overrides.addedDhikrItems.indexOf(item),
           category: category.id,
           text: item.text,

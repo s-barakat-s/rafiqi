@@ -23,6 +23,9 @@ void main() {
       final today = LocalDay.date(DateTime.now());
       final yesterday = today.subtract(const Duration(days: 1));
 
+      // Historical records are created only by an explicit mutation.
+      await repository.setCompleted('morning_adhkar', false, day: yesterday);
+
       // Check yesterday items
       final pastRecord = repository.recordFor(yesterday);
       expect(pastRecord, isNotNull);

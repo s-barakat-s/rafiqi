@@ -7,6 +7,8 @@ class _DhikrCard extends StatelessWidget {
     required this.remaining,
     required this.enabled,
     this.onTap,
+    this.audio,
+    this.onAudioPressed,
     super.key,
   });
   final String categoryId;
@@ -14,6 +16,8 @@ class _DhikrCard extends StatelessWidget {
   final int remaining;
   final bool enabled;
   final VoidCallback? onTap;
+  final DhikrAudioController? audio;
+  final ValueChanged<DhikrItem>? onAudioPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +25,11 @@ class _DhikrCard extends StatelessWidget {
     final conciseSource = _conciseSource(item);
     final virtuePreview = item.virtuePreview ?? _virtuePreview(item.virtue);
     final hasMetadata = conciseSource.isNotEmpty || virtuePreview != null;
+    final isAudioActive = audio?.isCurrent(item.id) ?? false;
     final card = AppGlassSurface(
       borderRadius: BorderRadius.circular(22),
       level: AppGlassSurfaceLevel.reader,
-      borderColor: colors.outlineStrong,
+      borderColor: isAudioActive ? colors.progress : colors.outlineStrong,
       child: InkWell(
         onTap: enabled ? onTap : null,
         splashFactory: NoSplash.splashFactory,
@@ -88,6 +93,16 @@ class _DhikrCard extends StatelessWidget {
               ),
               Divider(color: colors.divider.withValues(alpha: .55)),
               const SizedBox(height: 8),
+              if (!item.isPrelude && onAudioPressed != null)
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: _DhikrAudioAction(
+                    active: audio?.isCurrent(item.id) ?? false,
+                    phase: audio?.phase,
+                    status: audio?.status,
+                    onPressed: () => onAudioPressed!(item),
+                  ),
+                ),
               if (hasMetadata)
                 Align(
                   alignment: AlignmentDirectional.centerStart,
@@ -99,24 +114,25 @@ class _DhikrCard extends StatelessWidget {
                           conciseSource,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontFamily: AppFonts.ui,
-                            color: colors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontFamily: AppFonts.ui,
+                                color: colors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       if (virtuePreview != null) ...[
-                        if (conciseSource.isNotEmpty)
-                          const SizedBox(height: 3),
+                        if (conciseSource.isNotEmpty) const SizedBox(height: 3),
                         Text(
                           'الفضل: $virtuePreview',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontFamily: AppFonts.ui,
-                            color: colors.textSecondary,
-                            height: 1.45,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontFamily: AppFonts.ui,
+                                color: colors.textSecondary,
+                                height: 1.45,
+                              ),
                         ),
                       ],
                     ],
@@ -128,10 +144,7 @@ class _DhikrCard extends StatelessWidget {
       ),
     );
     if (!enabled) return card;
-    return _DhikrDetailsTransition(
-      item: item,
-      child: card,
-    );
+    return _DhikrDetailsTransition(item: item, child: card);
   }
 }
 

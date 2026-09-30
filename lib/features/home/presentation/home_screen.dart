@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
@@ -6,6 +7,7 @@ import 'package:tasbeh/core/time/hijri_date.dart';
 import 'package:tasbeh/core/time/local_day.dart';
 import 'package:tasbeh/features/calendar/presentation/screens/hijri_calendar_screen.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_progress_repository.dart';
+import 'package:tasbeh/features/adhkar/data/repositories/adhkar_collection_overrides_repository.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar.dart';
 import 'package:tasbeh/features/adhkar/domain/entities/adhkar_progress.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_local_repository.dart';
@@ -13,28 +15,40 @@ import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_reposito
 import 'package:tasbeh/features/daily_wird/domain/entities/daily_wird.dart';
 import 'package:tasbeh/features/home/data/repositories/daily_dhikr_repository.dart';
 import 'package:tasbeh/features/home/domain/adhkar_time_period.dart';
+import 'dart:async';
+
+import 'package:tasbeh/features/home/domain/prayer_schedule.dart';
+import 'package:tasbeh/features/home/domain/quran_reading.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_phrase.dart';
 import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_task_context.dart';
 import 'package:tasbeh/features/tasbeeh/presentation/screens/tasbeeh_task_session_screen.dart';
 import 'package:tasbeh/shared/widgets/app_glass_surface.dart';
+import 'package:tasbeh/shared/widgets/app_theme_artwork.dart';
 import 'package:tasbeh/shared/widgets/rafiqi_svg_icon.dart';
 
 part '../../daily_wird/presentation/widgets/add_daily_task_sheet.dart';
 part 'widgets/daily_wird_section.dart';
 part 'widgets/dhikr_of_the_day.dart';
 part 'widgets/home_hero.dart';
+part 'widgets/home_prayer_header.dart';
+part 'widgets/home_quran_section.dart';
+part 'widgets/home_quick_access.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     required this.onOpenTasbeeh,
     required this.onOpenAdhkar,
     this.onOpenJourney,
+    this.onOpenTasbeehStatistics,
+    this.onOpenMore,
     super.key,
   });
   final VoidCallback onOpenTasbeeh;
   final Future<void> Function(String categoryId) onOpenAdhkar;
   final VoidCallback? onOpenJourney;
+  final VoidCallback? onOpenTasbeehStatistics;
+  final VoidCallback? onOpenMore;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -45,6 +59,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _progressRepository = AdhkarProgressRepository.instance;
   final _dailyDhikrRepository = DailyDhikrRepository.instance;
   Map<String, AdhkarProgressSummary> _adhkarProgress = const {};
+  late final ValueListenable<int> _morningProgressChanges;
+  late final ValueListenable<int> _eveningProgressChanges;
+  late final ValueListenable<int> _morningDefinitionChanges;
+  late final ValueListenable<int> _eveningDefinitionChanges;
+  Timer? _timeBoundaryTimer;
   late DateTime _today;
   late HijriDate _hijriToday;
 
@@ -63,7 +82,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _refreshDate();
     WidgetsBinding.instance.addObserver(this);
     _store.addListener(_onStoreChanged);
-    _progressRepository.addListener(_onProgressChanged);
+    _morningProgressChanges = _progressRepository.changesFor('morning')
+      ..addListener(_onMorningProgressChanged);
+    _eveningProgressChanges = _progressRepository.changesFor('evening')
+      ..addListener(_onEveningProgressChanged);
+    _morningDefinitionChanges =
+        AdhkarCollectionOverridesRepository.instance.changesFor('morning')
+          ..addListener(_onMorningProgressChanged);
+    _eveningDefinitionChanges =
+        AdhkarCollectionOverridesRepository.instance.changesFor('evening')
+          ..addListener(_onEveningProgressChanged);
+    _scheduleTimeBoundary();
     _loadHomeState();
   }
 
@@ -71,7 +100,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _store.removeListener(_onStoreChanged);
-    _progressRepository.removeListener(_onProgressChanged);
+    _morningProgressChanges.removeListener(_onMorningProgressChanged);
+    _eveningProgressChanges.removeListener(_onEveningProgressChanged);
+    _morningDefinitionChanges.removeListener(_onMorningProgressChanged);
+    _eveningDefinitionChanges.removeListener(_onEveningProgressChanged);
+    _timeBoundaryTimer?.cancel();
     super.dispose();
   }
 
@@ -79,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _refreshDate();
+      _scheduleTimeBoundary();
       _loadHomeState();
     }
   }
@@ -92,7 +126,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (mounted) setState(() {});
   }
 
-  void _onProgressChanged() => _loadAdhkarProgress();
+  void _onMorningProgressChanged() => _loadAdhkarProgressFor('morning');
+
+  void _onEveningProgressChanged() => _loadAdhkarProgressFor('evening');
+
+  void _scheduleTimeBoundary() {
+    _timeBoundaryTimer?.cancel();
+    final now = DateTime.now();
+    final boundary = AdhkarTimePeriod.nextBoundaryAfter(now);
+    _timeBoundaryTimer = Timer(
+      boundary.difference(now) + const Duration(milliseconds: 10),
+      _handleTimeBoundary,
+    );
+  }
+
+  void _handleTimeBoundary() {
+    if (!mounted) return;
+    _refreshDate();
+    setState(() {});
+    _loadAdhkarProgress();
+    _scheduleTimeBoundary();
+  }
 
   Future<void> _loadHomeState() async {
     await Future.wait([
@@ -103,22 +157,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadAdhkarProgress() async {
-    if (!_store.initialized) await _store.initialize();
-    final categories = await AdhkarLocalRepository.loadCategories();
-    final requiredCategories = categories.where(
-      (category) => category.id == 'morning' || category.id == 'evening',
-    );
-    final summaries = await Future.wait(
-      requiredCategories.map(_progressRepository.loadSummary),
-    );
+    final summaries = await Future.wait([
+      _loadSummaryFor('morning'),
+      _loadSummaryFor('evening'),
+    ]);
     final byCategory = {
-      for (final summary in summaries) summary.categoryId: summary,
+      for (final summary in summaries.whereType<AdhkarProgressSummary>())
+        summary.categoryId: summary,
     };
-    if (!mounted) return;
+    if (!mounted || _mapsEqual(_adhkarProgress, byCategory)) return;
     setState(() {
       _adhkarProgress = byCategory;
     });
   }
+
+  Future<void> _loadAdhkarProgressFor(String categoryId) async {
+    final summary = await _loadSummaryFor(categoryId);
+    if (!mounted || summary == null || _adhkarProgress[categoryId] == summary) {
+      return;
+    }
+    setState(() {
+      _adhkarProgress = {..._adhkarProgress, categoryId: summary};
+    });
+  }
+
+  Future<AdhkarProgressSummary?> _loadSummaryFor(String categoryId) async {
+    final category = await AdhkarLocalRepository.loadResolvedCategory(
+      categoryId,
+    );
+    return category == null ? null : _progressRepository.loadSummary(category);
+  }
+
+  bool _mapsEqual(
+    Map<String, AdhkarProgressSummary> left,
+    Map<String, AdhkarProgressSummary> right,
+  ) =>
+      left.length == right.length &&
+      left.entries.every((entry) => right[entry.key] == entry.value);
 
   Future<void> _openHeroAdhkar(String categoryId) async {
     await widget.onOpenAdhkar(categoryId);
@@ -267,11 +342,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
   }
 
+  Future<void> _openQuranPosition(QuranReadingPosition position) async {
+    // Placeholder until Quran navigation exists; keeps the UI isolated.
+    _showComingSoon();
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentPeriod = AdhkarTimePeriod.now();
     final completedCount = _completedIds.length.clamp(0, _tasks.length);
-    final overallProgress = _tasks.isEmpty ? 0.0 : completedCount / _tasks.length;
+    final overallProgress = _tasks.isEmpty
+        ? 0.0
+        : completedCount / _tasks.length;
     final weekStart = _today.subtract(Duration(days: _today.weekday - 1));
     final weekCompleted = _store.initialized
         ? _store.completedBetween(
@@ -282,9 +364,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return SafeArea(
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 36),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: [
-          _HomeHeader(
+          _HomePrayerHeader(
             hijriDate: _hijriToday.formatFull(),
             gregorianDate: HijriDate.formatGregorianFull(_today),
             streak: _store.currentStreak,
@@ -297,14 +379,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             progress: _adhkarProgress[currentPeriod.categoryId],
             onOpen: _openHeroAdhkar,
           ),
-          const SizedBox(height: 18),
-          _QuickActions(
-            onOpenAdhkar: () => widget.onOpenAdhkar(currentPeriod.categoryId),
-            onOpenTasbeeh: widget.onOpenTasbeeh,
-            onOpenJourney: widget.onOpenJourney ?? () {},
-            onComingSoon: _showComingSoon,
+          const SizedBox(height: 20),
+          _ContinueQuranCard(
+            onContinue: _openQuranPosition,
+            onStart: _showComingSoon,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           _DailyWirdCard(
             tasks: _tasks,
             completedIds: _completedIds,
@@ -316,9 +396,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onToggleCheckbox: _toggleTask,
             onAdd: _showAddTaskSheet,
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
           const _DhikrOfTheDay(),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
+          _QuickAccessSection(
+            onOpenTasbeeh: widget.onOpenTasbeeh,
+            onOpenJourney: widget.onOpenJourney ?? () {},
+            onOpenCalendar: _openHijriCalendar,
+            onOpenStatistics: widget.onOpenTasbeehStatistics,
+            onOpenSettings: widget.onOpenMore,
+            onComingSoon: _showComingSoon,
+          ),
+          const SizedBox(height: 20),
           _JourneyStrip(
             streak: _store.currentStreak,
             weekCompleted: weekCompleted,

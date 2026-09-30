@@ -14,6 +14,8 @@ class DailyWirdRepository extends ChangeNotifier {
   static const _tasksKey = 'home_daily_tasks';
   static const _legacyCompletionPrefix = 'home_daily_completion_';
   static const _historyKey = 'journey_daily_history_v1';
+  static const _historyIndexKey = 'journey_daily_history_v2.index';
+  static const _historyRecordPrefix = 'journey_daily_history_v2.';
 
   static const baseTasks = [
     DailyTask(
@@ -66,21 +68,68 @@ class DailyWirdRepository extends ChangeNotifier {
               DailyTask.fromJson(jsonDecode(value) as Map<String, dynamic>),
         )
         .toList();
-    _history
-      ..clear()
-      ..addEntries(
-        (preferences.getStringList(_historyKey) ?? const []).map((value) {
-          final record = DailyHistoryRecord.fromJson(
-            jsonDecode(value) as Map<String, dynamic>,
-          );
-          return MapEntry(record.dateKey, record);
-        }),
-      );
+    await _loadIndexedHistory(preferences);
     _resolveCalendarDays(preferences);
     _evaluateLoadedRecords();
     _initialized = true;
     await _saveHistory(preferences);
     notifyListeners();
+  }
+
+  Future<void> _loadIndexedHistory(SharedPreferences preferences) async {
+    var keys = preferences.getStringList(_historyIndexKey);
+    if (keys == null) {
+      final migrated = (preferences.getStringList(_historyKey) ?? const [])
+          .map(
+            (value) => DailyHistoryRecord.fromJson(
+              jsonDecode(value) as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+      keys = migrated.map((record) => record.dateKey).toList();
+      await Future.wait([
+        for (final record in migrated)
+          preferences.setString(
+            '$_historyRecordPrefix${record.dateKey}',
+            jsonEncode(record.toJson()),
+          ),
+        preferences.setStringList(_historyIndexKey, keys),
+      ]);
+    }
+
+    _history.clear();
+    for (final key in keys) {
+      final encoded = preferences.getString('$_historyRecordPrefix$key');
+      if (encoded == null) continue;
+      final record = DailyHistoryRecord.fromJson(
+        jsonDecode(encoded) as Map<String, dynamic>,
+      );
+      _history[record.dateKey] = record;
+    }
+  }
+
+  Future<void> refreshDayForTasbeeh([DateTime? day]) async {
+    final date = LocalDay.date(day ?? DateTime.now());
+    final key = LocalDay.key(date);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.reload();
+    if (!_initialized) {
+      _customTasks = (preferences.getStringList(_tasksKey) ?? const [])
+          .map(
+            (value) =>
+                DailyTask.fromJson(jsonDecode(value) as Map<String, dynamic>),
+          )
+          .toList();
+    }
+    final encoded = preferences.getString('$_historyRecordPrefix$key');
+    if (encoded != null) {
+      _history[key] = DailyHistoryRecord.fromJson(
+        jsonDecode(encoded) as Map<String, dynamic>,
+      );
+    } else if (!_initialized) {
+      await _loadIndexedHistory(preferences);
+    }
+    _initialized = true;
   }
 
   void _resolveCalendarDays(SharedPreferences preferences) {
@@ -138,7 +187,10 @@ class DailyWirdRepository extends ChangeNotifier {
   Future<void> addTask(DailyTask task) async {
     if (task.taskType == DailyTask.tasbeehTargetTaskType &&
         task.tasbeehPhraseId != null &&
-        hasLinkedTasbeehTask(task.tasbeehPhraseId!, task.tasbeehTargetCount ?? 0)) {
+        hasLinkedTasbeehTask(
+          task.tasbeehPhraseId!,
+          task.tasbeehTargetCount ?? 0,
+        )) {
       await updateTasbeehTaskTarget(
         phraseId: task.tasbeehPhraseId!,
         targetCount: task.tasbeehTargetCount ?? task.goal ?? 33,
@@ -146,7 +198,8 @@ class DailyWirdRepository extends ChangeNotifier {
       );
       return;
     }
-    final baseline = task.taskType == DailyTask.tasbeehTargetTaskType &&
+    final baseline =
+        task.taskType == DailyTask.tasbeehTargetTaskType &&
             task.tasbeehPhraseId != null
         ? await TasbeehRepository().eligibleCountForDay(
             LocalDay.key(DateTime.now()),
@@ -365,8 +418,11 @@ class DailyWirdRepository extends ChangeNotifier {
     final date = LocalDay.date(day ?? DateTime.now());
     final key = LocalDay.key(date);
     final current = _history[key] ?? _snapshotFor(date);
-    final existing = current.items.where((item) => item.id == itemId).firstOrNull;
-    final isTasbeeh = existing?.taskType == DailyTask.tasbeehTargetTaskType &&
+    final existing = current.items
+        .where((item) => item.id == itemId)
+        .firstOrNull;
+    final isTasbeeh =
+        existing?.taskType == DailyTask.tasbeehTargetTaskType &&
         existing?.tasbeehPhraseId != null;
     final currentEligible = isTasbeeh
         ? await TasbeehRepository().eligibleCountForDay(
@@ -376,43 +432,36 @@ class DailyWirdRepository extends ChangeNotifier {
         : 0;
     _history[key] = _evaluateCompletion(
       current.copyWith(
-        items: current.items
-            .map(
-              (item) {
-                if (item.id != itemId) return item;
-                if (item.taskType != DailyTask.tasbeehTargetTaskType) {
-                  return item.copyWith(
-                    completed: completed,
-                    completionSource: completed ? source : null,
-                    clearCompletionSource: !completed,
-                  );
-                }
-                final target = item.tasbeehTargetCount ?? item.goal ?? 33;
-                if (!completed) {
-                  return item.copyWith(
-                    completed: false,
-                    progress: 0,
-                    baselineTotalCount: currentEligible,
-                    externalContribution: 0,
-                    clearCompletionSource: true,
-                  );
-                }
-                final eligibleProgress =
-                    (currentEligible - item.baselineTotalCount)
-                    .clamp(0, target)
-                    .toInt();
-                final missing = (target - eligibleProgress)
-                    .clamp(0, target)
-                    .toInt();
-                return item.copyWith(
-                  completed: true,
-                  progress: target,
-                  externalContribution: missing,
-                  completionSource: source,
-                );
-              },
-            )
-            .toList(),
+        items: current.items.map((item) {
+          if (item.id != itemId) return item;
+          if (item.taskType != DailyTask.tasbeehTargetTaskType) {
+            return item.copyWith(
+              completed: completed,
+              completionSource: completed ? source : null,
+              clearCompletionSource: !completed,
+            );
+          }
+          final target = item.tasbeehTargetCount ?? item.goal ?? 33;
+          if (!completed) {
+            return item.copyWith(
+              completed: false,
+              progress: 0,
+              baselineTotalCount: currentEligible,
+              externalContribution: 0,
+              clearCompletionSource: true,
+            );
+          }
+          final eligibleProgress = (currentEligible - item.baselineTotalCount)
+              .clamp(0, target)
+              .toInt();
+          final missing = (target - eligibleProgress).clamp(0, target).toInt();
+          return item.copyWith(
+            completed: true,
+            progress: target,
+            externalContribution: missing,
+            completionSource: source,
+          );
+        }).toList(),
       ),
     );
     final preferences = await SharedPreferences.getInstance();
@@ -435,15 +484,12 @@ class DailyWirdRepository extends ChangeNotifier {
         return item;
       }
       final target = item.tasbeehTargetCount ?? item.goal ?? 33;
-      final eligibleProgress =
-          (currentEligibleTotal - item.baselineTotalCount)
+      final eligibleProgress = (currentEligibleTotal - item.baselineTotalCount)
           .clamp(0, target)
           .toInt();
-      final calculatedProgress =
-          (eligibleProgress + item.externalContribution).clamp(
-        0,
-        target,
-      ).toInt();
+      final calculatedProgress = (eligibleProgress + item.externalContribution)
+          .clamp(0, target)
+          .toInt();
       final manuallyCompleted =
           item.completed && item.completionSource == 'manual';
       final progress = manuallyCompleted ? target : calculatedProgress;
@@ -464,15 +510,12 @@ class DailyWirdRepository extends ChangeNotifier {
     if (_sameRecord(current, updated)) return newlyCompleted;
     _history[key] = updated;
     final preferences = await SharedPreferences.getInstance();
-    await _saveHistory(preferences);
+    await _saveRecord(preferences, updated);
     notifyListeners();
     return newlyCompleted;
   }
 
-  Map<String, int> externalContributionsBetween(
-    DateTime start,
-    DateTime end,
-  ) {
+  Map<String, int> externalContributionsBetween(DateTime start, DateTime end) {
     final result = <String, int>{};
     for (final record in _history.values) {
       final day = LocalDay.parse(record.dateKey);
@@ -504,8 +547,8 @@ class DailyWirdRepository extends ChangeNotifier {
     final updated = _evaluateCompletion(
       current.copyWith(
         items: current.items.map((item) {
-          final matchesCategory = (categoryId == 'morning' &&
-                  item.id == 'morning_adhkar') ||
+          final matchesCategory =
+              (categoryId == 'morning' && item.id == 'morning_adhkar') ||
               (categoryId == 'evening' && item.id == 'evening_adhkar') ||
               (item.taskType == DailyTask.adhkarCollectionTaskType &&
                   item.collectionId == categoryId);
@@ -575,14 +618,32 @@ class DailyWirdRepository extends ChangeNotifier {
     return true;
   }
 
-  Future<void> _saveHistory(SharedPreferences preferences) =>
-      preferences.setStringList(
-        _historyKey,
-        (_history.values.toList()
-              ..sort((a, b) => a.dateKey.compareTo(b.dateKey)))
-            .map((record) => jsonEncode(record.toJson()))
-            .toList(),
-      );
+  Future<void> _saveHistory(SharedPreferences preferences) async {
+    final keys = _history.keys.toList()..sort();
+    await Future.wait([
+      for (final key in keys)
+        preferences.setString(
+          '$_historyRecordPrefix$key',
+          jsonEncode(_history[key]!.toJson()),
+        ),
+      preferences.setStringList(_historyIndexKey, keys),
+    ]);
+  }
+
+  Future<void> _saveRecord(
+    SharedPreferences preferences,
+    DailyHistoryRecord record,
+  ) async {
+    final keys = preferences.getStringList(_historyIndexKey) ?? <String>[];
+    await Future.wait([
+      preferences.setString(
+        '$_historyRecordPrefix${record.dateKey}',
+        jsonEncode(record.toJson()),
+      ),
+      if (!keys.contains(record.dateKey))
+        preferences.setStringList(_historyIndexKey, [...keys, record.dateKey]),
+    ]);
+  }
 
   DailyHistoryRecord? recordFor(DateTime date) {
     final day = LocalDay.date(date);
@@ -594,9 +655,7 @@ class DailyWirdRepository extends ChangeNotifier {
     if (day.isAfter(today)) {
       return null;
     }
-    final snapshot = _snapshotFor(day);
-    _history[key] = snapshot;
-    return snapshot;
+    return _snapshotFor(day);
   }
 
   int get currentStreak {

@@ -1,0 +1,620 @@
+{
+  "schemaVersion": 1,
+  "status": "draft_timestamp_map",
+  "reciter": {
+    "id": "mishary_alafasy",
+    "nameAr": "مشاري راشد العفاسي"
+  },
+  "collection": {
+    "id": "morning",
+    "nameAr": "أذكار الصباح"
+  },
+  "audio": {
+    "sourceType": "localAssetForDevelopment",
+    "assetPath": "assets/audio/adhkar/mishary_alafasy/morning.mp3",
+    "note": "مسار مؤقت أثناء التطوير؛ لاحقًا يمكن استبداله بملف remote/downloaded بدون تغيير التوقيتات."
+  },
+  "playbackOrder": {
+    "mode": "reciterSpecific",
+    "logicalCardOrder": [
+      "ayat_al_kursi",
+      "al_ikhlas",
+      "al_falaq",
+      "al_nas",
+      "asbahna_wa_asbahal_mulk",
+      "rabbi_asaluka_khayra_hadha_alyawm",
+      "allahumma_bika_asbahna",
+      "sayyid_al_istighfar",
+      "allahumma_inni_asbahtu_ushhiduka",
+      "allahumma_ma_asbaha_bi_min_nimah",
+      "allahumma_afini_fi_badani",
+      "hasbiyallahu",
+      "allahumma_inni_asaluka_al_afwa_wal_afiyah",
+      "allahumma_alim_al_ghaybi_wal_shahadah",
+      "bismillah_alladhi_la_yadurru",
+      "raditu_billahi_rabba",
+      "subhanallahi_wa_bihamdihi_adada_khalqihi",
+      "subhanallahi_wa_bihamdihi_100",
+      "ya_hayyu_ya_qayyum",
+      "la_ilaha_illa_allah_100",
+      "asbahna_wa_asbahal_mulku_lillahi_rabbil_alamin",
+      "asbahna_ala_fitratil_islam",
+      "allahumma_inni_asaluka_ilman_nafia",
+      "salat_ala_nabi",
+      "closing_and_istighfar"
+    ],
+    "note": "أثناء جلسة صوت هذا الشيخ، ترتيب الكروت يتبع أول ظهور للذكر في التسجيل. التكرارات لا تنشئ كروت مكررة."
+  },
+  "segments": [
+    {
+      "step": 1,
+      "mappingKey": "intro",
+      "dhikrId": null,
+      "label": "المقدمة: بسم الله والحمد لله والصلاة والسلام على رسول الله",
+      "startMs": 0,
+      "endMs": 10600,
+      "durationMs": 10600
+    },
+    {
+      "step": 2,
+      "mappingKey": "ayat_al_kursi",
+      "dhikrId": "seen-ar-morning-002",
+      "label": "آية الكرسي",
+      "startMs": 10600,
+      "endMs": 82910,
+      "durationMs": 72310,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 3,
+      "mappingKey": "al_ikhlas",
+      "dhikrId": "seen-ar-morning-004",
+      "label": "قل هو الله أحد",
+      "startMs": 82910,
+      "endMs": 103610,
+      "durationMs": 20700,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 4,
+      "mappingKey": "al_falaq",
+      "dhikrId": "seen-ar-morning-005",
+      "label": "قل أعوذ برب الفلق",
+      "startMs": 103610,
+      "endMs": 135730,
+      "durationMs": 32120,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 5,
+      "mappingKey": "al_nas",
+      "dhikrId": "seen-ar-morning-006",
+      "label": "قل أعوذ برب الناس",
+      "startMs": 135730,
+      "endMs": 183050,
+      "durationMs": 47320,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 6,
+      "mappingKey": "al_ikhlas",
+      "dhikrId": "seen-ar-morning-004",
+      "label": "قل هو الله أحد",
+      "startMs": 183050,
+      "endMs": 202240,
+      "durationMs": 19190,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 7,
+      "mappingKey": "al_falaq",
+      "dhikrId": "seen-ar-morning-005",
+      "label": "قل أعوذ برب الفلق",
+      "startMs": 202240,
+      "endMs": 233690,
+      "durationMs": 31450,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 8,
+      "mappingKey": "al_nas",
+      "dhikrId": "seen-ar-morning-006",
+      "label": "قل أعوذ برب الناس",
+      "startMs": 233690,
+      "endMs": 278660,
+      "durationMs": 44970,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 9,
+      "mappingKey": "al_ikhlas",
+      "dhikrId": "seen-ar-morning-004",
+      "label": "قل هو الله أحد",
+      "startMs": 278660,
+      "endMs": 297800,
+      "durationMs": 19140,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 10,
+      "mappingKey": "al_falaq",
+      "dhikrId": "seen-ar-morning-005",
+      "label": "قل أعوذ برب الفلق",
+      "startMs": 297800,
+      "endMs": 329510,
+      "durationMs": 31710,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 11,
+      "mappingKey": "al_nas",
+      "dhikrId": "seen-ar-morning-006",
+      "label": "قل أعوذ برب الناس",
+      "startMs": 329510,
+      "endMs": 375160,
+      "durationMs": 45650,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 12,
+      "mappingKey": "asbahna_wa_asbahal_mulk",
+      "dhikrId": "seen-ar-morning-007",
+      "label": "أصبحنا وأصبح الملك لله ... وهو على كل شيء قدير",
+      "startMs": 375160,
+      "endMs": 402900,
+      "durationMs": 27740,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 13,
+      "mappingKey": "rabbi_asaluka_khayra_hadha_alyawm",
+      "dhikrId": "seen-ar-morning-008",
+      "label": "رب أسألك خير ما في هذا اليوم ... وعذاب في القبر",
+      "startMs": 402900,
+      "endMs": 435800,
+      "durationMs": 32900,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 14,
+      "mappingKey": "allahumma_bika_asbahna",
+      "dhikrId": "seen-ar-morning-009",
+      "label": "اللهم بك أصبحنا ... وإليك النشور",
+      "startMs": 435800,
+      "endMs": 451650,
+      "durationMs": 15850,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 15,
+      "mappingKey": "sayyid_al_istighfar",
+      "dhikrId": "seen-ar-morning-011",
+      "label": "اللهم أنت ربي لا إله إلا أنت ... لا يغفر الذنوب إلا أنت",
+      "startMs": 451650,
+      "endMs": 496570,
+      "durationMs": 44920,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 16,
+      "mappingKey": "allahumma_inni_asbahtu_ushhiduka",
+      "dhikrId": "seen-ar-morning-012",
+      "label": "اللهم إني أصبحت أشهدك ... وأن محمدًا عبدك ورسولك",
+      "startMs": 496570,
+      "endMs": 525460,
+      "durationMs": 28890,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 17,
+      "mappingKey": "allahumma_inni_asbahtu_ushhiduka",
+      "dhikrId": "seen-ar-morning-012",
+      "label": "اللهم إني أصبحت أشهدك ... وأن محمدًا عبدك ورسولك",
+      "startMs": 525460,
+      "endMs": 554170,
+      "durationMs": 28710,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 18,
+      "mappingKey": "allahumma_inni_asbahtu_ushhiduka",
+      "dhikrId": "seen-ar-morning-012",
+      "label": "اللهم إني أصبحت أشهدك ... وأن محمدًا عبدك ورسولك",
+      "startMs": 554170,
+      "endMs": 582910,
+      "durationMs": 28740,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 19,
+      "mappingKey": "allahumma_inni_asbahtu_ushhiduka",
+      "dhikrId": "seen-ar-morning-012",
+      "label": "اللهم إني أصبحت أشهدك ... وأن محمدًا عبدك ورسولك",
+      "startMs": 582910,
+      "endMs": 612800,
+      "durationMs": 29890,
+      "sourceRepetition": 4
+    },
+    {
+      "step": 20,
+      "mappingKey": "allahumma_ma_asbaha_bi_min_nimah",
+      "dhikrId": "seen-ar-morning-014",
+      "label": "اللهم ما أصبح بي من نعمة ... فلك الحمد ولك الشكر",
+      "startMs": 612800,
+      "endMs": 629930,
+      "durationMs": 17130,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 21,
+      "mappingKey": "allahumma_afini_fi_badani",
+      "dhikrId": "seen-ar-morning-016",
+      "label": "اللهم عافني في بدني ... وأعوذ بك من عذاب القبر لا إله إلا أنت",
+      "startMs": 629930,
+      "endMs": 669100,
+      "durationMs": 39170,
+      "sourceRepetition": 1,
+      "note": "في التطبيق مكتوب 3 مرات، بينما الشيخ قاله مرة واحدة. يمكن للتطبيق إعادة نفس المقطع حسب repeatCount."
+    },
+    {
+      "step": 22,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 669100,
+      "endMs": 684050,
+      "durationMs": 14950,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 23,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 684050,
+      "endMs": 699180,
+      "durationMs": 15130,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 24,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 699180,
+      "endMs": 713230,
+      "durationMs": 14050,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 25,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 713230,
+      "endMs": 728140,
+      "durationMs": 14910,
+      "sourceRepetition": 4
+    },
+    {
+      "step": 26,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 728140,
+      "endMs": 743390,
+      "durationMs": 15250,
+      "sourceRepetition": 5
+    },
+    {
+      "step": 27,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 743390,
+      "endMs": 757370,
+      "durationMs": 13980,
+      "sourceRepetition": 6
+    },
+    {
+      "step": 28,
+      "mappingKey": "hasbiyallahu",
+      "dhikrId": "seen-ar-morning-017",
+      "label": "حسبي الله",
+      "startMs": 757370,
+      "endMs": 772160,
+      "durationMs": 14790,
+      "sourceRepetition": 7
+    },
+    {
+      "step": 29,
+      "mappingKey": "allahumma_inni_asaluka_al_afwa_wal_afiyah",
+      "dhikrId": "seen-ar-morning-018",
+      "label": "اللهم إني أسألك العفو والعافية في الدنيا والآخرة ... وأن أغتال من تحتي",
+      "startMs": 772160,
+      "endMs": 825830,
+      "durationMs": 53670,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 30,
+      "mappingKey": "allahumma_alim_al_ghaybi_wal_shahadah",
+      "dhikrId": "seen-ar-morning-019",
+      "label": "اللهم عالم الغيب والشهادة ... أجره إلى مسلم",
+      "startMs": 825830,
+      "endMs": 867830,
+      "durationMs": 42000,
+      "sourceRepetition": 1,
+      "note": "الاسم هنا كما تم إملاؤه في المحادثة؛ يراجع لاحقًا مقابل نص الكارت الفعلي."
+    },
+    {
+      "step": 31,
+      "mappingKey": "bismillah_alladhi_la_yadurru",
+      "dhikrId": "seen-ar-morning-020",
+      "label": "بسم الله الذي لا يضر",
+      "startMs": 867830,
+      "endMs": 884030,
+      "durationMs": 16200,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 32,
+      "mappingKey": "bismillah_alladhi_la_yadurru",
+      "dhikrId": "seen-ar-morning-020",
+      "label": "بسم الله الذي لا يضر",
+      "startMs": 884030,
+      "endMs": 900230,
+      "durationMs": 16200,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 33,
+      "mappingKey": "bismillah_alladhi_la_yadurru",
+      "dhikrId": "seen-ar-morning-020",
+      "label": "بسم الله الذي لا يضر",
+      "startMs": 900230,
+      "endMs": 918820,
+      "durationMs": 18590,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 34,
+      "mappingKey": "raditu_billahi_rabba",
+      "dhikrId": "seen-ar-morning-021",
+      "label": "رضيت بالله ربًا",
+      "startMs": 918820,
+      "endMs": 935660,
+      "durationMs": 16840,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 35,
+      "mappingKey": "raditu_billahi_rabba",
+      "dhikrId": "seen-ar-morning-021",
+      "label": "رضيت بالله ربًا",
+      "startMs": 935660,
+      "endMs": 951150,
+      "durationMs": 15490,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 36,
+      "mappingKey": "raditu_billahi_rabba",
+      "dhikrId": "seen-ar-morning-021",
+      "label": "رضيت بالله ربًا",
+      "startMs": 951150,
+      "endMs": 968190,
+      "durationMs": 17040,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 37,
+      "mappingKey": "subhanallahi_wa_bihamdihi_adada_khalqihi",
+      "dhikrId": "seen-ar-morning-031",
+      "label": "سبحان الله وبحمده ... ومداد كلماته",
+      "startMs": 968190,
+      "endMs": 982210,
+      "durationMs": 14020,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 38,
+      "mappingKey": "subhanallahi_wa_bihamdihi_adada_khalqihi",
+      "dhikrId": "seen-ar-morning-031",
+      "label": "سبحان الله وبحمده ... ومداد كلماته",
+      "startMs": 982210,
+      "endMs": 996230,
+      "durationMs": 14020,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 39,
+      "mappingKey": "subhanallahi_wa_bihamdihi_adada_khalqihi",
+      "dhikrId": "seen-ar-morning-031",
+      "label": "سبحان الله وبحمده ... ومداد كلماته",
+      "startMs": 996230,
+      "endMs": 1011280,
+      "durationMs": 15050,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 40,
+      "mappingKey": "subhanallahi_wa_bihamdihi_100",
+      "dhikrId": "seen-ar-morning-034",
+      "label": "سبحان الله وبحمده — الشيخ يذكر بعدها أنها تقال 100 مرة",
+      "startMs": 1011280,
+      "endMs": 1036980,
+      "durationMs": 25700,
+      "sourceRepetition": 1,
+      "note": "المقطع يتضمن كلامًا توضيحيًا من الشيخ. يحتاج sub-clip نظيف قبل استخدامه في auto-repeat 100 مرة."
+    },
+    {
+      "step": 41,
+      "mappingKey": "ya_hayyu_ya_qayyum",
+      "dhikrId": "seen-ar-morning-022",
+      "label": "يا حي يا قيوم ... ولا تكلني إلى نفسي طرفة عين",
+      "startMs": 1036980,
+      "endMs": 1056260,
+      "durationMs": 19280,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 42,
+      "mappingKey": "la_ilaha_illa_allah_100",
+      "dhikrId": "seen-ar-morning-032",
+      "label": "لا إله إلا الله ... وهو على كل شيء قدير — الشيخ يذكر بعدها أنها تقال 100 مرة",
+      "startMs": 1056260,
+      "endMs": 1096410,
+      "durationMs": 40150,
+      "sourceRepetition": 1,
+      "note": "المقطع يتضمن كلامًا توضيحيًا من الشيخ. يحتاج sub-clip نظيف قبل استخدامه في auto-repeat 100 مرة."
+    },
+    {
+      "step": 43,
+      "mappingKey": "asbahna_wa_asbahal_mulku_lillahi_rabbil_alamin",
+      "dhikrId": "seen-ar-morning-023",
+      "label": "أصبحنا وأصبح الملك لله رب العالمين ... وشر ما بعده",
+      "startMs": 1096410,
+      "endMs": 1126380,
+      "durationMs": 29970,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 44,
+      "mappingKey": "asbahna_ala_fitratil_islam",
+      "dhikrId": "seen-ar-morning-025",
+      "label": "أصبحنا على فطرة الإسلام ... وما كان من المشركين",
+      "startMs": 1126380,
+      "endMs": 1159710,
+      "durationMs": 33330,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 45,
+      "mappingKey": "allahumma_inni_asaluka_ilman_nafia",
+      "dhikrId": "seen-ar-morning-027",
+      "label": "اللهم إني أسألك علمًا نافعًا",
+      "startMs": 1159710,
+      "endMs": 1174600,
+      "durationMs": 14890,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 46,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1174600,
+      "endMs": 1181540,
+      "durationMs": 6940,
+      "sourceRepetition": 1
+    },
+    {
+      "step": 47,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1181540,
+      "endMs": 1188700,
+      "durationMs": 7160,
+      "sourceRepetition": 2
+    },
+    {
+      "step": 48,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1188700,
+      "endMs": 1195450,
+      "durationMs": 6750,
+      "sourceRepetition": 3
+    },
+    {
+      "step": 49,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1195450,
+      "endMs": 1202190,
+      "durationMs": 6740,
+      "sourceRepetition": 4
+    },
+    {
+      "step": 50,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1202190,
+      "endMs": 1209160,
+      "durationMs": 6970,
+      "sourceRepetition": 5
+    },
+    {
+      "step": 51,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1209160,
+      "endMs": 1215670,
+      "durationMs": 6510,
+      "sourceRepetition": 6
+    },
+    {
+      "step": 52,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1215670,
+      "endMs": 1222540,
+      "durationMs": 6870,
+      "sourceRepetition": 7
+    },
+    {
+      "step": 53,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1222540,
+      "endMs": 1229240,
+      "durationMs": 6700,
+      "sourceRepetition": 8
+    },
+    {
+      "step": 54,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1229240,
+      "endMs": 1235630,
+      "durationMs": 6390,
+      "sourceRepetition": 9
+    },
+    {
+      "step": 55,
+      "mappingKey": "salat_ala_nabi",
+      "dhikrId": "seen-ar-morning-029",
+      "label": "اللهم صل وسلم على نبينا محمد",
+      "startMs": 1235630,
+      "endMs": 1245760,
+      "durationMs": 10130,
+      "sourceRepetition": 10
+    },
+    {
+      "step": 56,
+      "mappingKey": "closing_and_istighfar",
+      "dhikrId": null,
+      "label": "هذا وآخر دعوانا أن الحمد لله رب العالمين، والنبي ﷺ كان يستغفر الله ويتوب إليه 100 مرة في اليوم: أستغفر الله، أستغفر الله، أستغفر الله",
+      "startMs": 1245870,
+      "endMs": 1269790,
+      "durationMs": 23920,
+      "note": "مقطع ختامي يتضمن التنبيه إلى الاستغفار 100 مرة ثم قول «أستغفر الله» ثلاث مرات في التسجيل."
+    }
+  ],
+  "implementationNotes": [
+    "لا يتم قص ملف الصوت فعليًا؛ يتم التشغيل باستخدام startMs/endMs.",
+    "dhikrId متروك null عمدًا لحين مطابقة mappingKey مع canonical IDs الفعلية في مشروع رفيقي.",
+    "allahumma_afini_fi_badani مسجل مرة واحدة رغم أن repeatCount في التطبيق = 3؛ يعاد نفس المقطع برمجيًا.",
+    "مقاطع 100 مرة التي تحتوي على شرح من الشيخ تحتاج sub-clip نظيف قبل auto-repeat.",
+    "ترتيب الكروت أثناء تشغيل هذا الشيخ يتبع logicalCardOrder وليس الترتيب الافتراضي للتطبيق."
+  ]
+}

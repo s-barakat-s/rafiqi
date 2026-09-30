@@ -16,8 +16,8 @@ class AppBottomNavBar extends StatelessWidget {
   static const _items = [
     (RafiqiIcons.home, 'الرئيسية'),
     (RafiqiIcons.adhkar, 'الأذكار'),
-    (RafiqiIcons.tasbeeh, 'السبحة'),
-    (RafiqiIcons.journey, 'رحلتي'),
+    (RafiqiIcons.quran, 'القرآن'),
+    (RafiqiIcons.adhan, 'الأذان'),
     (RafiqiIcons.more, 'المزيد'),
   ];
 
@@ -28,8 +28,6 @@ class AppBottomNavBar extends StatelessWidget {
     final activeColor = colors.primary;
     return Material(
       color: Colors.transparent,
-      elevation: 5,
-      shadowColor: colors.textPrimary.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(28),
       child: AppGlassSurface(
         borderRadius: BorderRadius.circular(28),

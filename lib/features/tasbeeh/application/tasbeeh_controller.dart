@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
-import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_repository.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_counter_logic.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_launcher.dart';
 import 'package:tasbeh/features/tasbeeh/application/tasbeeh_overlay_messenger.dart';
@@ -28,18 +28,44 @@ class TasbeehController extends ChangeNotifier {
   TasbeehSettings _settings = TasbeehSettings.initial();
   StreamSubscription<TasbeehStateMessage>? _stateSubscription;
   StreamSubscription<TasbeehSettingsMessage>? _settingsSubscription;
+
+  /// Monotonic operation identity of the last accepted mutation (local or
+  /// overlay). Orders deliveries and rejects duplicates/out-of-order state.
+  int _revision = 0;
+  int get revision => _revision;
   ReceivePort? _mainAppPort;
   List<TasbeehPhrase> _phrases = TasbeehPhrase.defaultPhrases;
   Future<void> _recordingQueue = Future<void>.value();
+  int _localOperationSequence = 0;
+  int _pendingLocalOperations = 0;
+  late final String _operationPrefix =
+      'app-${DateTime.now().microsecondsSinceEpoch}-'
+      '${Random.secure().nextInt(1 << 32)}';
 
   TasbeehState get state => _state;
   TasbeehSettings get settings => _settings;
   List<TasbeehPhrase> get phrases => List.unmodifiable(_phrases);
 
-  Future<void> initialize() async {
+  /// Whether [initialize] has completed at least once for this instance.
+  bool get isInitialized => _initialized;
+  bool _initialized = false;
+  Future<void>? _initialization;
+
+  /// Idempotent initialization.
+  ///
+  /// The main-app named port and overlay subscriptions are registered only
+  /// once per instance lifetime; repeated calls (e.g. reopening a route) do
+  /// not replace the port mapping and do not overwrite newer in-memory state
+  /// with a stale full reload while an initialize is already in flight.
+  Future<void> initialize() {
+    return _initialization ??= _initialize();
+  }
+
+  Future<void> _initialize() async {
     _mainAppPort = TasbeehOverlayMessenger.registerMainAppPort(
       _applyIncomingState,
     );
+    TasbeehOverlayMessenger.registerOperationProcessor(acceptOverlayOperation);
     _stateSubscription = TasbeehOverlayMessenger.stateMessages.listen(
       _applyIncomingState,
     );
@@ -47,6 +73,7 @@ class TasbeehController extends ChangeNotifier {
       _applyIncomingSettings,
     );
     await reload();
+    _initialized = true;
   }
 
   Future<void> reload() async {
@@ -54,28 +81,43 @@ class TasbeehController extends ChangeNotifier {
       _repository.load(),
       _repository.loadSettings(),
       _repository.loadPhrases(),
+      _repository.loadRevision(),
     ]);
     _state = results[0] as TasbeehState;
     _settings = results[1] as TasbeehSettings;
     _phrases = results[2] as List<TasbeehPhrase>;
+    _revision = results[3] as int;
     notifyListeners();
   }
 
   Future<bool> increment() {
     final next = _recording.nextState(_state);
+    _localOperationSequence += 1;
+    _pendingLocalOperations += 1;
+    final operationSequence = _localOperationSequence;
+    final operationId = '$_operationPrefix-$operationSequence';
     _state = next;
     notifyListeners();
-    unawaited(_notifyOverlay(_state));
 
     final completion = Completer<bool>();
     _recordingQueue = _recordingQueue.then((_) async {
       try {
-        final result = await _recording.recordIncrement(
-          next,
+        final result = await _recording.recordIncrementOperation(
+          operationId: operationId,
           source: TasbeehActivitySource.app,
         );
+        _pendingLocalOperations -= 1;
+        _revision = result.revision;
+        if (operationSequence == _localOperationSequence) {
+          _state = result.state;
+          notifyListeners();
+          unawaited(_notifyOverlay(_state));
+        }
         completion.complete(result.completedTask);
       } catch (error, stackTrace) {
+        _pendingLocalOperations -= 1;
+        // One failed operation must not poison later queued work: the queue
+        // continues with the next entry after this handler returns.
         completion.completeError(error, stackTrace);
       }
     });
@@ -87,10 +129,25 @@ class TasbeehController extends ChangeNotifier {
     await _applyState(TasbeehCounterLogic.resetSession(_state));
   }
 
-  Future<void> decrement() async {
-    await _recordingQueue;
-    if (_state.currentCount <= 0) return;
-    await _applyState(TasbeehCounterLogic.decrement(_state));
+  Future<void> decrement() {
+    final completion = Completer<void>();
+    _recordingQueue = _recordingQueue.then((_) async {
+      try {
+        final result = await _recording.undoIncrement(
+          source: TasbeehActivitySource.app,
+        );
+        _revision = result.revision;
+        if (result.reversed && _pendingLocalOperations == 0) {
+          _state = result.state;
+          notifyListeners();
+          unawaited(_notifyOverlay(_state));
+        }
+        completion.complete();
+      } catch (error, stackTrace) {
+        completion.completeError(error, stackTrace);
+      }
+    });
+    return completion.future;
   }
 
   Future<void> selectDhikr(TasbeehPhrase phrase) async {
@@ -144,9 +201,13 @@ class TasbeehController extends ChangeNotifier {
     await _repository.saveSettings(_settings);
     notifyListeners();
     await TasbeehOverlayLauncher.restartOverlay(settings: _settings);
+    // Initial counter state always comes from the current authority, tagged
+    // with its opId; settings ride their own message type and cannot carry
+    // or reset counters.
     await TasbeehOverlayMessenger.sendStateUpdate(
       _state,
       source: TasbeehOverlayMessenger.sourceApp,
+      revision: _revision,
     );
     await TasbeehOverlayMessenger.sendSettingsUpdate(
       _settings,
@@ -164,13 +225,17 @@ class TasbeehController extends ChangeNotifier {
     bool notifyOverlay = true,
     bool persist = true,
   }) async {
-    if (persist) await _repository.save(state);
+    if (persist) {
+      _revision += 1;
+      await _repository.save(state, revision: _revision);
+    }
     _state = state;
     notifyListeners();
     if (notifyOverlay && await FlutterOverlayWindow.isActive()) {
       await TasbeehOverlayMessenger.sendStateUpdate(
         state,
         source: TasbeehOverlayMessenger.sourceApp,
+        revision: _revision,
       );
     }
   }
@@ -180,20 +245,52 @@ class TasbeehController extends ChangeNotifier {
       await TasbeehOverlayMessenger.sendStateUpdate(
         state,
         source: TasbeehOverlayMessenger.sourceApp,
+        revision: _revision,
       );
     }
   }
 
+  /// Rejects the pre-2B overlay snapshot protocol so a delayed snapshot can
+  /// never roll back the authoritative state.
   Future<void> _applyIncomingState(TasbeehStateMessage message) async {
-    if (message.source != TasbeehOverlayMessenger.sourceOverlay) return;
-    await _repository.save(message.state);
-    await DailyWirdRepository.instance.initialize();
-    _state = message.state;
-    notifyListeners();
+    // Legacy overlay snapshots are intentionally ignored. Overlay mutations
+    // are accepted only as idempotent operations by [acceptOverlayOperation].
+    return;
+  }
+
+  Future<TasbeehOperationReply> acceptOverlayOperation(
+    TasbeehIncrementOperation operation,
+  ) {
+    final completion = Completer<TasbeehOperationReply>();
+    _recordingQueue = _recordingQueue.then((_) async {
+      try {
+        final result = await _recording.recordIncrementOperation(
+          operationId: operation.operationId,
+          source: TasbeehActivitySource.overlay,
+        );
+        _revision = result.revision;
+        if (_pendingLocalOperations == 0) {
+          _state = result.state;
+          notifyListeners();
+        }
+        completion.complete(
+          TasbeehOperationReply(
+            accepted: true,
+            duplicate: result.duplicate,
+            state: result.state,
+            revision: result.revision,
+          ),
+        );
+      } catch (error, stackTrace) {
+        completion.completeError(error, stackTrace);
+      }
+    });
+    return completion.future;
   }
 
   Future<void> _applyIncomingSettings(TasbeehSettingsMessage message) async {
     if (message.source != TasbeehOverlayMessenger.sourceOverlay) return;
+    // Settings ONLY: this path must never touch counter state.
     await _repository.saveSettings(message.settings);
     _settings = message.settings;
     notifyListeners();
@@ -201,11 +298,13 @@ class TasbeehController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _initialization = null;
     unawaited(flushPendingIncrements());
     _stateSubscription?.cancel();
     _settingsSubscription?.cancel();
     _mainAppPort?.close();
     TasbeehOverlayMessenger.unregisterMainAppPort();
+    TasbeehOverlayMessenger.unregisterOperationProcessor();
     super.dispose();
   }
 }

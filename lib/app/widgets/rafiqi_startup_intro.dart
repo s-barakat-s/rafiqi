@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
+import 'package:tasbeh/shared/widgets/app_theme_artwork.dart';
 
 class RafiqiStartupIntro extends StatefulWidget {
   const RafiqiStartupIntro({required this.child, super.key});
@@ -11,29 +12,36 @@ class RafiqiStartupIntro extends StatefulWidget {
 }
 
 class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
-  static const _displayDuration = Duration(milliseconds: 1000);
+  static const _displayDuration = Duration(milliseconds: 240);
   static const _fadeDuration = Duration(milliseconds: 320);
+  static const _maxWaitForFrame = Duration(milliseconds: 1500);
 
-  bool _timerStarted = false;
+  bool _exitScheduled = false;
   bool _isVisible = true;
   bool _isFading = false;
 
-  void _onIntroImageReady() {
-    if (_timerStarted) return;
-    _timerStarted = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _startExit();
-    });
+  @override
+  void initState() {
+    super.initState();
+    // Never wedge the app if the splash decode fails or stalls.
+    Future<void>.delayed(_maxWaitForFrame, _scheduleExit);
   }
 
-  Future<void> _startExit() async {
-    await Future<void>.delayed(_displayDuration);
-    if (!mounted) return;
-    setState(() => _isFading = true);
+  void _onIntroImageReady() {
+    _scheduleExit();
+  }
 
-    await Future<void>.delayed(_fadeDuration);
-    if (!mounted) return;
-    setState(() => _isVisible = false);
+  void _scheduleExit() {
+    if (_exitScheduled || !mounted) return;
+    _exitScheduled = true;
+    Future<void>.delayed(_displayDuration, () {
+      if (!mounted) return;
+      setState(() => _isFading = true);
+      Future<void>.delayed(_fadeDuration, () {
+        if (!mounted) return;
+        setState(() => _isVisible = false);
+      });
+    });
   }
 
   @override
@@ -56,20 +64,11 @@ class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
                 curve: Curves.easeInOutCubic,
                 child: ColoredBox(
                   color: colors.background,
-                  child: Image.asset(
-                    isDark
+                  child: AppThemeArtwork(
+                    asset: isDark
                         ? 'assets/branding/splash_dark.png'
                         : 'assets/branding/splash_light.png',
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                    gaplessPlayback: true,
-                    frameBuilder:
-                        (context, child, frame, wasSynchronouslyLoaded) {
-                          if (wasSynchronouslyLoaded || frame != null) {
-                            _onIntroImageReady();
-                          }
-                          return child;
-                        },
+                    onFrameReady: _onIntroImageReady,
                   ),
                 ),
               ),
