@@ -6,6 +6,7 @@ import 'package:tasbeh/features/adhkar_audio/domain/dhikr_audio.dart';
 abstract interface class AudioPlaybackAdapter {
   Stream<Duration> get positionStream;
   Future<Duration?> play(ResolvedDhikrAudio source);
+  Future<void> seek(Duration position);
   Future<void> pause();
   Future<void> resume();
   Future<void> stop();
@@ -52,6 +53,9 @@ class JustAudioPlaybackAdapter implements AudioPlaybackAdapter {
 
   @override
   Future<void> pause() => _player.pause();
+
+  @override
+  Future<void> seek(Duration position) => _player.seek(position);
 
   @override
   Future<void> resume() => _player.play();

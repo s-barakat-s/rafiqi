@@ -75,6 +75,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/image/home/
+    - assets/image/home/days/
     - assets/branding/
     - assets/icons/svg/
     - assets/data/adhkar/
@@ -137,6 +138,58 @@ flutter:
           weight: 600
         - asset: assets/fonts/IBM_Plex_Sans_Arabic/IBMPlexSansArabic-Bold.ttf
           weight: 700
+
+    - family: ThmanyahSans
+      fonts:
+        - asset: assets/fonts/thmanyah/sans/thmanyahsans-Light.otf
+          weight: 300
+        - asset: assets/fonts/thmanyah/sans/thmanyahsans-Regular.otf
+          weight: 400
+        - asset: assets/fonts/thmanyah/sans/thmanyahsans-Medium.otf
+          weight: 500
+        - asset: assets/fonts/thmanyah/sans/thmanyahsans-Bold.otf
+          weight: 700
+        - asset: assets/fonts/thmanyah/sans/thmanyahsans-Black.otf
+          weight: 900
+
+    - family: ThmanyahSerifDisplay
+      fonts:
+        - asset: assets/fonts/thmanyah/serif_display/thmanyahserifdisplay-Light.otf
+          weight: 300
+        - asset: assets/fonts/thmanyah/serif_display/thmanyahserifdisplay-Regular.otf
+          weight: 400
+        - asset: assets/fonts/thmanyah/serif_display/thmanyahserifdisplay-Medium.otf
+          weight: 500
+        - asset: assets/fonts/thmanyah/serif_display/thmanyahserifdisplay-Bold.otf
+          weight: 700
+        - asset: assets/fonts/thmanyah/serif_display/thmanyahserifdisplay-Black.otf
+          weight: 900
+
+    - family: ThmanyahSerifText
+      fonts:
+        - asset: assets/fonts/thmanyah/serif_text/thmanyahseriftext-Light.otf
+          weight: 300
+        - asset: assets/fonts/thmanyah/serif_text/thmanyahseriftext-Regular.otf
+          weight: 400
+        - asset: assets/fonts/thmanyah/serif_text/thmanyahseriftext-Medium.otf
+          weight: 500
+        - asset: assets/fonts/thmanyah/serif_text/thmanyahseriftext-Bold.otf
+          weight: 700
+        - asset: assets/fonts/thmanyah/serif_text/thmanyahseriftext-Black.otf
+          weight: 900
+
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit/static/Outfit-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Outfit/static/Outfit-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Outfit/static/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Outfit/static/Outfit-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Outfit/static/Outfit-Black.ttf
+          weight: 900
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

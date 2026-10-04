@@ -2,7 +2,15 @@ import 'dart:io';
 
 enum ReciterCoverage { full, partial }
 
-enum DhikrAudioSourceType { individualTrack, collectionClip }
+enum DhikrAudioSourceType {
+  individualTrack,
+  collectionRecording,
+  collectionClip,
+}
+
+enum DhikrPlayAllStrategy { sequentialSources, continuousRecording }
+
+enum DhikrSegmentRepeatPolicy { recordedOnly, reuseForCanonicalCount }
 
 enum DhikrAudioLocationType { remoteDownload, bundledDevelopmentAsset }
 
@@ -66,24 +74,34 @@ class IndividualDhikrAudio extends DhikrAudioSource {
   String get assetId => dhikrId!;
 }
 
-class CollectionAudio {
+class CollectionAudio extends DhikrAudioSource {
   const CollectionAudio({
     required this.id,
     required this.remoteUrl,
     this.expectedSizeBytes,
-  }) : bundledAssetPath = null;
+  }) : bundledAssetPath = null,
+       super(dhikrId: null);
 
   const CollectionAudio.bundledDevelopment({
     required this.id,
     required this.bundledAssetPath,
   }) : remoteUrl = null,
-       expectedSizeBytes = null;
+       expectedSizeBytes = null,
+       super(dhikrId: null);
 
   final String id;
+  @override
   final String? remoteUrl;
+  @override
   final String? bundledAssetPath;
+  @override
   final int? expectedSizeBytes;
 
+  @override
+  String get assetId => id;
+  @override
+  DhikrAudioSourceType get type => DhikrAudioSourceType.collectionRecording;
+  @override
   DhikrAudioLocationType get locationType => bundledAssetPath == null
       ? DhikrAudioLocationType.remoteDownload
       : DhikrAudioLocationType.bundledDevelopmentAsset;
@@ -118,19 +136,27 @@ class DhikrAudioClip extends DhikrAudioSource {
 class ReciterCollectionAudio {
   const ReciterCollectionAudio({
     required this.collectionId,
+    this.playAllStrategy = DhikrPlayAllStrategy.sequentialSources,
+    this.continuousSource,
     this.sources = const [],
     this.playbackSequence = const [],
     this.logicalCardOrder = const [],
     this.unresolvedSegments = const [],
-  });
+  }) : assert(
+         playAllStrategy != DhikrPlayAllStrategy.continuousRecording ||
+             continuousSource != null,
+       );
 
   final String collectionId;
+  final DhikrPlayAllStrategy playAllStrategy;
+  final CollectionAudio? continuousSource;
   final List<DhikrAudioSource> sources;
   final List<DhikrAudioSegment> playbackSequence;
   final List<String> logicalCardOrder;
   final List<UnresolvedDhikrAudioSegment> unresolvedSegments;
 
   Iterable<DhikrAudioSource> get allSources sync* {
+    if (continuousSource != null) yield continuousSource!;
     yield* sources;
     for (final segment in playbackSequence) {
       yield segment.source;
@@ -160,12 +186,14 @@ class DhikrAudioSegment {
     required this.mappingKey,
     required this.source,
     this.sourceRepetition,
+    this.repeatPolicy = DhikrSegmentRepeatPolicy.recordedOnly,
   });
 
   final int step;
   final String mappingKey;
   final DhikrAudioSource source;
   final int? sourceRepetition;
+  final DhikrSegmentRepeatPolicy repeatPolicy;
 }
 
 class UnresolvedDhikrAudioSegment {

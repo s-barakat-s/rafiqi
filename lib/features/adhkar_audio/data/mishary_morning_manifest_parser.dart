@@ -18,6 +18,14 @@ class MisharyMorningManifestParser {
     final reciter = manifest['reciter'] as Map<String, dynamic>;
     final collection = manifest['collection'] as Map<String, dynamic>;
     final audio = manifest['audio'] as Map<String, dynamic>;
+    final playback = manifest['playback'] as Map<String, dynamic>?;
+    final playAllStrategy = switch (playback?['playAllStrategy']) {
+      'continuousRecording' => DhikrPlayAllStrategy.continuousRecording,
+      'sequentialSources' || null => DhikrPlayAllStrategy.sequentialSources,
+      final value => throw FormatException(
+        'Unsupported playAllStrategy "$value"',
+      ),
+    };
     final sharedAudio = CollectionAudio.bundledDevelopment(
       id: '${reciter['id']}_${collection['id']}',
       bundledAssetPath: audio['assetPath'] as String,
@@ -53,6 +61,14 @@ class MisharyMorningManifestParser {
           step: step,
           mappingKey: mappingKey,
           sourceRepetition: segment['sourceRepetition'] as int?,
+          repeatPolicy: switch (segment['repeatPolicy']) {
+            'reuseForCanonicalCount' =>
+              DhikrSegmentRepeatPolicy.reuseForCanonicalCount,
+            'recordedOnly' || null => DhikrSegmentRepeatPolicy.recordedOnly,
+            final value => throw FormatException(
+              'Unsupported repeatPolicy "$value" at manifest step $step',
+            ),
+          },
           source: DhikrAudioClip(
             dhikrId: dhikrId,
             collectionAudio: sharedAudio,
@@ -72,6 +88,11 @@ class MisharyMorningManifestParser {
       collections: {
         collection['id'] as String: ReciterCollectionAudio(
           collectionId: collection['id'] as String,
+          playAllStrategy: playAllStrategy,
+          continuousSource:
+              playAllStrategy == DhikrPlayAllStrategy.continuousRecording
+              ? sharedAudio
+              : null,
           playbackSequence: List.unmodifiable(sequence),
           logicalCardOrder: List.unmodifiable(logicalCardOrder),
           unresolvedSegments: List.unmodifiable(unresolved),

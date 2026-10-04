@@ -106,7 +106,7 @@ void main() {
     );
   });
 
-  test('listen mode respects repeatCount', () async {
+  test('manual single playback ignores canonical repeatCount', () async {
     final harness = await _harness(manifests, files);
     await harness.controller.playOne(
       collectionId: 'morning',
@@ -114,25 +114,19 @@ void main() {
     );
     await _waitFor(() => harness.player.playedIds.isNotEmpty);
     expect(harness.player.playedIds, ['d1']);
-    for (var count = 1; count <= 3; count++) {
-      harness.player.completeCurrent(const Duration(milliseconds: 5));
-      if (count < 3) {
-        await _waitFor(() => harness.player.playedIds.length == count + 1);
-        expect(harness.player.playedIds.length, count + 1);
-      } else {
-        await _waitFor(
-          () => harness.controller.status == DhikrPlaybackStatus.stopped,
-        );
-      }
-    }
+    harness.player.completeCurrent(const Duration(milliseconds: 5));
+    await _waitFor(
+      () => harness.controller.status == DhikrPlaybackStatus.stopped,
+    );
+    expect(harness.player.playedIds, ['d1']);
     expect(harness.controller.status, DhikrPlaybackStatus.stopped);
   });
 
   test('repeatAfterMe alternates audio then silence', () async {
     final harness = await _harness(manifests, files);
-    await harness.controller.playOne(
+    await harness.controller.playAll(
       collectionId: 'morning',
-      item: _item('d1', repeats: 2),
+      items: [_item('d1'), _item('d2')],
       playbackMode: DhikrPlaybackMode.repeatAfterMe,
     );
     await _waitFor(() => harness.player.playedIds.isNotEmpty);
@@ -144,7 +138,7 @@ void main() {
     expect(harness.player.playedIds.length, 1);
     await Future<void>.delayed(const Duration(milliseconds: 25));
     await _waitFor(() => harness.player.playedIds.length == 2);
-    expect(harness.player.playedIds.length, 2);
+    expect(harness.player.playedIds, ['d1', 'd2']);
   });
 
   test('repeat silence duration equals logical clip duration', () async {
@@ -192,7 +186,10 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 15));
     expect(harness.player.playedIds.length, 1);
     await Future<void>.delayed(const Duration(milliseconds: 20));
-    expect(harness.player.playedIds.length, 2);
+    await _waitFor(
+      () => harness.controller.status == DhikrPlaybackStatus.stopped,
+    );
+    expect(harness.player.playedIds.length, 1);
   });
 
   test('stop during repeat silence cancels progression', () async {
@@ -292,6 +289,195 @@ void main() {
     expect(resolved?.clipEnd, const Duration(seconds: 11));
   });
 
+  test('downloaded continuous pack uses the generic play-all path', () async {
+    const recording = CollectionAudio(
+      id: 'generic_evening_pack',
+      remoteUrl: 'https://example.invalid/generic_evening.m4a',
+    );
+    final genericCollection = ReciterCollectionAudio(
+      collectionId: 'evening',
+      playAllStrategy: DhikrPlayAllStrategy.continuousRecording,
+      continuousSource: recording,
+      playbackSequence: [
+        DhikrAudioSegment(
+          step: 1,
+          mappingKey: 'first',
+          sourceRepetition: 1,
+          source: DhikrAudioClip(
+            dhikrId: 'x',
+            collectionAudio: recording,
+            start: Duration.zero,
+            end: const Duration(milliseconds: 10),
+          ),
+        ),
+        DhikrAudioSegment(
+          step: 2,
+          mappingKey: 'second',
+          sourceRepetition: 1,
+          source: DhikrAudioClip(
+            dhikrId: 'y',
+            collectionAudio: recording,
+            start: const Duration(milliseconds: 10),
+            end: const Duration(milliseconds: 20),
+          ),
+        ),
+      ],
+      logicalCardOrder: const ['x', 'y'],
+    );
+    final genericManifests = DhikrAudioManifestRepository(
+      manifests: [
+        DhikrReciterManifest(
+          reciter: const DhikrReciter(
+            id: 'generic_reciter',
+            nameAr: 'Generic',
+            coverage: ReciterCoverage.partial,
+          ),
+          collections: {'evening': genericCollection},
+        ),
+      ],
+    );
+    final recordingFile = await files.fileFor(
+      reciterId: 'generic_reciter',
+      collectionId: 'evening',
+      source: recording,
+    );
+    await recordingFile.create(recursive: true);
+    await recordingFile.writeAsBytes([1]);
+    final harness = await _harness(genericManifests, files);
+
+    expect(
+      await harness.controller.playAll(
+        collectionId: 'evening',
+        items: [_item('x'), _item('y')],
+      ),
+      isTrue,
+    );
+    await _waitFor(() => harness.player.playedSources.length == 1);
+    expect(
+      harness.player.playedSources.single.sourceType,
+      DhikrAudioSourceType.collectionRecording,
+    );
+    expect(harness.player.playedSources.single.file?.path, recordingFile.path);
+
+    harness.player.emitPosition(const Duration(milliseconds: 11));
+    await _waitFor(() => harness.controller.currentDhikrId == 'y');
+    expect(harness.player.playedSources, hasLength(1));
+    expect(harness.controller.sessionCardOrder, ['x', 'y']);
+  });
+
+  test(
+    'recorded-only segments are not expanded to canonical repeats',
+    () async {
+      const recording = CollectionAudio(
+        id: 'unsafe_repeat_pack',
+        remoteUrl: 'https://example.invalid/unsafe.m4a',
+      );
+      final collection = ReciterCollectionAudio(
+        collectionId: 'morning',
+        playAllStrategy: DhikrPlayAllStrategy.continuousRecording,
+        continuousSource: recording,
+        playbackSequence: [
+          DhikrAudioSegment(
+            step: 1,
+            mappingKey: 'explanatory_segment',
+            sourceRepetition: 1,
+            repeatPolicy: DhikrSegmentRepeatPolicy.recordedOnly,
+            source: DhikrAudioClip(
+              dhikrId: 'd1',
+              collectionAudio: recording,
+              start: Duration.zero,
+              end: const Duration(milliseconds: 2),
+            ),
+          ),
+        ],
+      );
+      final repeatManifests = DhikrAudioManifestRepository(
+        manifests: [
+          DhikrReciterManifest(
+            reciter: manifests.reciters.first,
+            collections: {'morning': collection},
+          ),
+        ],
+      );
+      final file = await files.fileFor(
+        reciterId: 'full',
+        collectionId: 'morning',
+        source: recording,
+      );
+      await file.create(recursive: true);
+      await file.writeAsBytes([1]);
+      final harness = await _harness(repeatManifests, files);
+
+      await harness.controller.playAll(
+        collectionId: 'morning',
+        items: [_item('d1', repeats: 100)],
+        playbackMode: DhikrPlaybackMode.repeatAfterMe,
+      );
+      await _waitFor(() => harness.player.playedSources.length == 1);
+      harness.player.completeCurrent(const Duration(milliseconds: 2));
+      await _waitFor(
+        () => harness.controller.status == DhikrPlaybackStatus.stopped,
+      );
+      expect(harness.player.playedSources, hasLength(1));
+    },
+  );
+
+  test('explicit clean-segment reuse can honor canonical repeats', () async {
+    const recording = CollectionAudio(
+      id: 'reusable_repeat_pack',
+      remoteUrl: 'https://example.invalid/reusable.m4a',
+    );
+    final collection = ReciterCollectionAudio(
+      collectionId: 'morning',
+      playAllStrategy: DhikrPlayAllStrategy.continuousRecording,
+      continuousSource: recording,
+      playbackSequence: [
+        DhikrAudioSegment(
+          step: 1,
+          mappingKey: 'clean_segment',
+          sourceRepetition: 1,
+          repeatPolicy: DhikrSegmentRepeatPolicy.reuseForCanonicalCount,
+          source: DhikrAudioClip(
+            dhikrId: 'd1',
+            collectionAudio: recording,
+            start: Duration.zero,
+            end: const Duration(milliseconds: 2),
+          ),
+        ),
+      ],
+    );
+    final repeatManifests = DhikrAudioManifestRepository(
+      manifests: [
+        DhikrReciterManifest(
+          reciter: manifests.reciters.first,
+          collections: {'morning': collection},
+        ),
+      ],
+    );
+    final file = await files.fileFor(
+      reciterId: 'full',
+      collectionId: 'morning',
+      source: recording,
+    );
+    await file.create(recursive: true);
+    await file.writeAsBytes([1]);
+    final harness = await _harness(repeatManifests, files);
+
+    await harness.controller.playAll(
+      collectionId: 'morning',
+      items: [_item('d1', repeats: 3)],
+      playbackMode: DhikrPlaybackMode.repeatAfterMe,
+    );
+    for (var repeat = 1; repeat <= 3; repeat++) {
+      await _waitFor(() => harness.player.playedSources.length == repeat);
+      harness.player.completeCurrent(const Duration(milliseconds: 2));
+    }
+    await _waitFor(
+      () => harness.controller.status == DhikrPlaybackStatus.stopped,
+    );
+    expect(harness.player.playedSources, hasLength(3));
+  });
+
   test('currentDhikrId updates as play-all advances', () async {
     final harness = await _harness(manifests, files);
     await harness.controller.playAll(
@@ -367,6 +553,7 @@ class _Harness {
 class _FakePlayer implements AudioPlaybackAdapter {
   final _positions = StreamController<Duration>.broadcast();
   final List<String?> playedIds = [];
+  final List<ResolvedDhikrAudio> playedSources = [];
   Completer<Duration?>? _current;
 
   @override
@@ -375,11 +562,19 @@ class _FakePlayer implements AudioPlaybackAdapter {
   @override
   Future<Duration?> play(ResolvedDhikrAudio source) {
     playedIds.add(source.dhikrId);
+    playedSources.add(source);
     _current = Completer<Duration?>();
     return _current!.future;
   }
 
+  void emitPosition(Duration position) => _positions.add(position);
+
   void completeCurrent(Duration duration) => _current!.complete(duration);
+
+  @override
+  Future<void> seek(Duration position) async {
+    emitPosition(position);
+  }
 
   @override
   Future<void> pause() async {}

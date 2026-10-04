@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:tasbeh/core/assets/rafiqi_icons.dart';
 import 'package:tasbeh/core/formatting/arabic_numerals.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
-import 'package:tasbeh/core/time/hijri_date.dart';
 import 'package:tasbeh/core/time/local_day.dart';
 import 'package:tasbeh/features/calendar/presentation/screens/hijri_calendar_screen.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_progress_repository.dart';
@@ -14,11 +13,12 @@ import 'package:tasbeh/features/adhkar/data/repositories/adhkar_local_repository
 import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_repository.dart';
 import 'package:tasbeh/features/daily_wird/domain/entities/daily_wird.dart';
 import 'package:tasbeh/features/home/data/repositories/daily_dhikr_repository.dart';
+import 'package:tasbeh/features/home/data/home_prayer_mock_data.dart';
 import 'package:tasbeh/features/home/domain/adhkar_time_period.dart';
 import 'dart:async';
 
-import 'package:tasbeh/features/home/domain/prayer_schedule.dart';
 import 'package:tasbeh/features/home/domain/quran_reading.dart';
+import 'package:tasbeh/features/home/presentation/widgets/prayer_header/prayer_header_section.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_phrase.dart';
 import 'package:tasbeh/features/tasbeeh/data/repositories/tasbeeh_repository.dart';
 import 'package:tasbeh/features/tasbeeh/domain/models/tasbeeh_task_context.dart';
@@ -31,7 +31,6 @@ part '../../daily_wird/presentation/widgets/add_daily_task_sheet.dart';
 part 'widgets/daily_wird_section.dart';
 part 'widgets/dhikr_of_the_day.dart';
 part 'widgets/home_hero.dart';
-part 'widgets/home_prayer_header.dart';
 part 'widgets/home_quran_section.dart';
 part 'widgets/home_quick_access.dart';
 
@@ -42,6 +41,7 @@ class HomeScreen extends StatefulWidget {
     this.onOpenJourney,
     this.onOpenTasbeehStatistics,
     this.onOpenMore,
+    this.onOpenPrayerTimes,
     super.key,
   });
   final VoidCallback onOpenTasbeeh;
@@ -49,6 +49,7 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback? onOpenJourney;
   final VoidCallback? onOpenTasbeehStatistics;
   final VoidCallback? onOpenMore;
+  final VoidCallback? onOpenPrayerTimes;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -65,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final ValueListenable<int> _eveningDefinitionChanges;
   Timer? _timeBoundaryTimer;
   late DateTime _today;
-  late HijriDate _hijriToday;
 
   List<DailyTask> get _tasks => _store.tasks;
   Set<String> get _completedIds => _store.initialized
@@ -119,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _refreshDate() {
     _today = LocalDay.date(DateTime.now());
-    _hijriToday = HijriDate.fromGregorian(_today);
   }
 
   void _onStoreChanged() {
@@ -366,23 +365,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
         children: [
-          _HomePrayerHeader(
-            hijriDate: _hijriToday.formatFull(),
-            gregorianDate: HijriDate.formatGregorianFull(_today),
-            streak: _store.currentStreak,
-            onDateTap: _openHijriCalendar,
+          PrayerHeaderSection(
+            data: HomePrayerMockData.header,
+            onSettingsTap: widget.onOpenMore ?? _showComingSoon,
+            onPrayerTimesTap: widget.onOpenPrayerTimes ?? _showComingSoon,
+            onQiblaTap: _showComingSoon,
           ),
           const SizedBox(height: 18),
+          _ContinueQuranCard(
+            onContinue: _openQuranPosition,
+            onStart: _showComingSoon,
+          ),
+          const SizedBox(height: 20),
           _MorningHero(
             categoryId: currentPeriod.categoryId,
             complete: _completedIds.contains(currentPeriod.dailyTaskId),
             progress: _adhkarProgress[currentPeriod.categoryId],
             onOpen: _openHeroAdhkar,
-          ),
-          const SizedBox(height: 20),
-          _ContinueQuranCard(
-            onContinue: _openQuranPosition,
-            onStart: _showComingSoon,
           ),
           const SizedBox(height: 20),
           _DailyWirdCard(

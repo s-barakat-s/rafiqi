@@ -13,6 +13,7 @@ class AppGlassSurface extends StatelessWidget {
     this.level = AppGlassSurfaceLevel.major,
     this.grouped = false,
     this.borderColor,
+    this.backgroundColor,
     super.key,
   });
 
@@ -21,12 +22,10 @@ class AppGlassSurface extends StatelessWidget {
   final AppGlassSurfaceLevel level;
   final bool grouped;
   final Color? borderColor;
+  final Color? backgroundColor;
   final Widget child;
 
-  static double opacityFor(
-    Brightness brightness,
-    AppGlassSurfaceLevel level,
-  ) {
+  static double opacityFor(Brightness brightness, AppGlassSurfaceLevel level) {
     return switch ((level, brightness)) {
       (AppGlassSurfaceLevel.major, Brightness.light) => .86,
       (AppGlassSurfaceLevel.major, Brightness.dark) => .84,
@@ -35,10 +34,7 @@ class AppGlassSurface extends StatelessWidget {
     };
   }
 
-  static double blurFor(
-    Brightness brightness,
-    AppGlassSurfaceLevel level,
-  ) {
+  static double blurFor(Brightness brightness, AppGlassSurfaceLevel level) {
     return switch ((level, brightness)) {
       (AppGlassSurfaceLevel.major, Brightness.light) => 6,
       (AppGlassSurfaceLevel.major, Brightness.dark) => 4,
@@ -58,7 +54,7 @@ class AppGlassSurface extends StatelessWidget {
     };
     final content = DecoratedBox(
       decoration: BoxDecoration(
-        color: surfaceColor.withValues(alpha: opacity),
+        color: backgroundColor ?? surfaceColor.withValues(alpha: opacity),
         borderRadius: borderRadius,
         border: Border.all(
           color: (borderColor ?? colors.outline).withValues(alpha: .65),

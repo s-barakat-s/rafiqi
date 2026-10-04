@@ -10,7 +10,13 @@ class AppDecorativeBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final gradient = _buildGradient(context.appColors, theme.brightness);
+    final colors = context.appColors;
+
+    if (theme.brightness == Brightness.light && colors.isRafiqi) {
+      return ColoredBox(color: colors.background, child: child);
+    }
+
+    final gradient = _buildGradient(colors, theme.brightness);
 
     return DecoratedBox(
       decoration: BoxDecoration(gradient: gradient),
@@ -21,6 +27,16 @@ class AppDecorativeBackground extends StatelessWidget {
 
 LinearGradient _buildGradient(AppColors colors, Brightness brightness) {
   final isDark = brightness == Brightness.dark;
+
+  if (isDark && colors.isRafiqi) {
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [colors.surfaceElevated, colors.surface, colors.background],
+      stops: const [0.0, 0.42, 1.0],
+    );
+  }
+
   final topTint = Color.alphaBlend(
     colors.primary.withValues(alpha: isDark ? .16 : .28),
     colors.background,

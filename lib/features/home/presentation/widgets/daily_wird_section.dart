@@ -25,141 +25,154 @@ class _DailyWirdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final appColors = context.appColors;
+    final rafiqiCardSurface = appColors.isRafiqi
+        ? theme.brightness == Brightness.light
+              ? AppPalette.rafiqiLightCardSurface
+              : AppPalette.rafiqiDarkCardSurface
+        : null;
+    final colors = appColors;
+    final text = theme.textTheme;
     final isEmpty = tasks.isEmpty;
 
     return AppGlassSurface(
       borderRadius: BorderRadius.circular(26),
       padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header: title (+ optional count pill) on the right, add on the left.
-          Row(
-            children: [
-              Text(
-                'وردك اليوم',
-                style: TextStyle(
-                  fontFamily: AppFonts.display,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: colors.textPrimary,
-                ),
-              ),
-              if (!isEmpty) ...[
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 3,
+      backgroundColor: rafiqiCardSurface,
+      child: Theme(
+        data: theme.copyWith(extensions: [colors]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: title (+ optional count pill) on the right, add on the left.
+            Row(
+              children: [
+                Text(
+                  'وردك اليوم',
+                  style: TextStyle(
+                    fontFamily: AppFonts.display,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
                   ),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceSoft.withValues(alpha: .85),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: colors.outline.withValues(alpha: .5),
+                ),
+                if (!isEmpty) ...[
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceSoft.withValues(alpha: .85),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: colors.outline.withValues(alpha: .5),
+                      ),
+                    ),
+                    child: Text(
+                      '${ArabicNumerals.integer(tasks.length)} مهام',
+                      style: text.labelSmall?.copyWith(
+                        color: colors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    '${ArabicNumerals.integer(tasks.length)} مهام',
-                    style: text.labelSmall?.copyWith(
-                      color: colors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                ],
+                const Spacer(),
+                Semantics(
+                  button: true,
+                  label: 'إضافة عمل يومي',
+                  child: Material(
+                    color: colors.primary,
+                    borderRadius: BorderRadius.circular(999),
+                    child: InkWell(
+                      onTap: onAdd,
+                      customBorder: const CircleBorder(),
+                      child: const SizedBox(
+                        width: 38,
+                        height: 38,
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ],
-              const Spacer(),
-              Semantics(
-                button: true,
-                label: 'إضافة عمل يومي',
-                child: Material(
-                  color: colors.primary,
-                  borderRadius: BorderRadius.circular(999),
-                  child: InkWell(
-                    onTap: onAdd,
-                    customBorder: const CircleBorder(),
-                    child: const SizedBox(
-                      width: 38,
-                      height: 38,
-                      child: Icon(
-                        Icons.add_rounded,
-                        size: 22,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (isEmpty)
-            _DailyWirdEmpty(onAdd: onAdd)
-          else ...[
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final compact =
-                    constraints.maxWidth < 330 ||
-                    MediaQuery.textScalerOf(context).scale(1) > 1.2;
-                final progressRing = _DailyWirdProgressRing(progress: progress);
-                final taskList = Column(
-                  children: [
-                    for (final task in tasks)
-                      _DailyTaskRow(
-                        task: task,
-                        complete: completedIds.contains(task.id),
-                        adhkarProgress: progressFor(task),
-                        tasbeehProgress: tasbeehProgressFor(task),
-                        onTap: () => onTapTask(task),
-                        onToggle: () => onToggleCheckbox(task),
-                      ),
-                  ],
-                );
-                if (compact) {
-                  return Column(
+            ),
+            const SizedBox(height: 16),
+            if (isEmpty)
+              _DailyWirdEmpty(onAdd: onAdd)
+            else ...[
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact =
+                      constraints.maxWidth < 330 ||
+                      MediaQuery.textScalerOf(context).scale(1) > 1.2;
+                  final progressRing = _DailyWirdProgressRing(
+                    progress: progress,
+                  );
+                  final taskList = Column(
                     children: [
-                      Center(child: progressRing),
-                      const SizedBox(height: 16),
-                      taskList,
+                      for (final task in tasks)
+                        _DailyTaskRow(
+                          task: task,
+                          complete: completedIds.contains(task.id),
+                          adhkarProgress: progressFor(task),
+                          tasbeehProgress: tasbeehProgressFor(task),
+                          onTap: () => onTapTask(task),
+                          onToggle: () => onToggleCheckbox(task),
+                        ),
                     ],
                   );
-                }
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    progressRing,
-                    const SizedBox(width: 18),
-                    Expanded(child: taskList),
-                  ],
-                );
-              },
-            ),
-            if (readyForStreak)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.emoji_events_outlined,
-                      size: 16,
-                      color: colors.success,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'أتممت ورد اليوم، بارك الله في مداومتك',
-                        style: text.labelMedium?.copyWith(
-                          color: colors.success,
+                  if (compact) {
+                    return Column(
+                      children: [
+                        Center(child: progressRing),
+                        const SizedBox(height: 16),
+                        taskList,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      progressRing,
+                      const SizedBox(width: 18),
+                      Expanded(child: taskList),
+                    ],
+                  );
+                },
+              ),
+              if (readyForStreak)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.emoji_events_outlined,
+                        size: 16,
+                        color: colors.success,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'أتممت ورد اليوم، بارك الله في مداومتك',
+                          style: text.labelMedium?.copyWith(
+                            color: colors.success,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -196,9 +209,9 @@ class _DailyWirdProgressRing extends StatelessWidget {
               child: Text(
                 '${ArabicNumerals.integer(percent)}٪',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  color: colors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
@@ -268,14 +281,14 @@ class _SectionTitle extends StatelessWidget {
   final Color? color;
   @override
   Widget build(BuildContext context) => Text(
-        title,
-        style: TextStyle(
-          fontFamily: AppFonts.display,
-          fontSize: 25,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      );
+    title,
+    style: TextStyle(
+      fontFamily: AppFonts.display,
+      fontSize: 25,
+      fontWeight: FontWeight.w700,
+      color: color,
+    ),
+  );
 }
 
 class _DailyTaskRow extends StatelessWidget {
@@ -455,8 +468,9 @@ class _DailyTaskRow extends StatelessWidget {
                                 child: LinearProgressIndicator(
                                   value: partialProgress,
                                   minHeight: 3,
-                                  backgroundColor:
-                                      colors.outline.withValues(alpha: .5),
+                                  backgroundColor: colors.outline.withValues(
+                                    alpha: .5,
+                                  ),
                                   color: colors.primary,
                                 ),
                               ),
@@ -485,7 +499,11 @@ class _DailyTaskRow extends StatelessWidget {
 }
 
 class _JourneyStrip extends StatelessWidget {
-  const _JourneyStrip({required this.streak, required this.weekCompleted, required this.onTap});
+  const _JourneyStrip({
+    required this.streak,
+    required this.weekCompleted,
+    required this.onTap,
+  });
   final int streak;
   final int weekCompleted;
   final VoidCallback onTap;
@@ -501,18 +519,62 @@ class _JourneyStrip extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(18),
-            child: Row(children: [
-              Container(width: 48, height: 48, alignment: Alignment.center, decoration: BoxDecoration(color: colors.counterSurface, borderRadius: BorderRadius.circular(16)), child: RafiqiSvgIcon(RafiqiIcons.journey, color: colors.primary)),
-              const SizedBox(width: 12),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('رحلتك هذا الأسبوع', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 8),
-                Row(children: List.generate(7, (index) { final active = index < weekCompleted; return Padding(padding: const EdgeInsetsDirectional.only(end: 6), child: Icon(active ? Icons.circle : Icons.circle_outlined, size: 13, color: active ? colors.progress : colors.outlineStrong)); })),
-              ])),
-              Text('${ArabicNumerals.integer(streak)} يوم', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: colors.primary, fontWeight: FontWeight.w700)),
-              const SizedBox(width: 4),
-              const Icon(Icons.arrow_back_ios_new_rounded, size: 15),
-            ]),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colors.counterSurface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: RafiqiSvgIcon(
+                    RafiqiIcons.journey,
+                    color: colors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'رحلتك هذا الأسبوع',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: List.generate(7, (index) {
+                          final active = index < weekCompleted;
+                          return Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 6),
+                            child: Icon(
+                              active ? Icons.circle : Icons.circle_outlined,
+                              size: 13,
+                              color: active
+                                  ? colors.progress
+                                  : colors.outlineStrong,
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '${ArabicNumerals.integer(streak)} يوم',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_back_ios_new_rounded, size: 15),
+              ],
+            ),
           ),
         ),
       ),

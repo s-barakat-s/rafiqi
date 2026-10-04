@@ -5,10 +5,37 @@ abstract final class AppFonts {
   static const ui = 'IBMPlexSansArabic';
   static const reading = 'Amiri';
   static const display = 'ArefRuqaa';
+  static const thmanyahSans = 'ThmanyahSans';
+  static const thmanyahSerifDisplay = 'ThmanyahSerifDisplay';
+  static const thmanyahSerifText = 'ThmanyahSerifText';
+  static const outfit = 'Outfit';
 }
 
 /// Approved brand primitives. Widgets should consume [AppColors] roles.
 abstract final class AppPalette {
+  static const rafiqiLightBackground = Color(0xFFF4F3E5);
+  static const rafiqiLightCardSurface = Color(0xFFFAF9F2);
+  static const rafiqiLightPrimary = Color(0xFF225D47);
+  static const rafiqiLightSecondary = Color(0xFF377359);
+  static const rafiqiLightHeroForeground = Color(0xFF28594E);
+  static const rafiqiLightHeroForegroundMuted = Color(0xFF8A987A);
+  static const rafiqiLightHeroActionBackground = Color(0xFF315D50);
+  static const rafiqiLightHeroActionForeground = Color(0xFFF5F4E8);
+
+  static const rafiqiDarkBackground = Color.fromARGB(255, 6, 26, 27);
+  static const rafiqiDarkSurface = Color(0xFF061515);
+  static const rafiqiDarkSurfaceElevated = Color.fromARGB(255, 8, 34, 35);
+  static const rafiqiDarkCardSurface = Color(0xFF082223);
+  static const rafiqiDarkPrimary = Color(0xFFE5F0D2);
+  static const rafiqiDarkSecondary = Color(0xFFD4E5C5);
+  static const rafiqiDarkTextSecondary = Color(0xFFA9BDAA);
+  static const rafiqiDarkBorder = Color(0xFF3D7065);
+  static const rafiqiDarkHeroForeground = Color(0xFFEEF2DD);
+  static const rafiqiDarkHeroForegroundMuted = Color(0xFFD4DDCE);
+  static const rafiqiDarkHeroReminderForeground = Color(0xFFA9C990);
+  static const rafiqiDarkHeroActionBackground = Color(0xFF0B231C);
+  static const rafiqiDarkHeroActionForeground = Color(0xFFDDE8C5);
+
   static const dustGrey = Color(0xFFDAD7CD);
   static const drySage = Color(0xFFA3B18A);
   static const fern = Color(0xFF588157);
@@ -86,7 +113,10 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color imageActionBackground;
   final Color imageActionForeground;
 
-  bool get isRafiqi => morningHeroAsset.startsWith('assets/image/home/rafiqi/');
+  bool get isRafiqi =>
+      morningHeroAsset.startsWith('assets/image/home/rafiqi/') ||
+      morningHeroAsset == 'assets/image/home/Morning light.png' ||
+      morningHeroAsset == 'assets/image/home/morning dark.png';
   bool get isWard => morningHeroAsset.startsWith('assets/image/home/ward/');
   bool get isAmethyst =>
       morningHeroAsset.startsWith('assets/image/home/amethyst/');
@@ -102,7 +132,7 @@ class AppColors extends ThemeExtension<AppColors> {
       isRafiqi || isWard || isAmethyst || isLinen || isOcean;
   Color get imageForeground =>
       usesExplicitControlRoles ? Colors.white : const Color(0xFFF8FAF7);
-  Color get imageForegroundMuted => const Color(0xFFDDE3DF);
+  Color get imageForegroundMuted => const Color.fromARGB(255, 254, 254, 254);
 
   double heroScrimOpacity({
     required bool isMorning,
@@ -327,17 +357,17 @@ extension AppThemeContext on BuildContext {
 
 abstract final class AppTheme {
   static const _light = AppColors(
-    background: Color(0xFFF5F3EB),
+    background: AppPalette.rafiqiLightBackground,
     surface: Color(0xFFFFFEFA),
     surfaceElevated: Color(0xFFFFFFFF),
     previewSurface: Color(0xFFE8EDE2),
     previewSurfaceBack: Color(0xFFE2E8DD),
-    primary: Color(0xFF285443),
+    primary: AppPalette.rafiqiLightPrimary,
     onPrimary: Color(0xFFFFFFFF),
     onPrimaryMuted: Color(0xFFDDE4DB),
     primaryContainer: Color(0xFFE8EDE2),
     accent: AppPalette.drySage,
-    secondary: Color(0xFF3A5A40),
+    secondary: AppPalette.rafiqiLightSecondary,
     textPrimary: Color(0xFF202D26),
     textSecondary: Color(0xFF5D695F),
     outline: Color(0xFFDDE2D7),
@@ -350,46 +380,46 @@ abstract final class AppTheme {
     surfaceSoft: Color(0xFFE8EDE2),
     success: Color(0xFF4F7953),
     navigationInactive: Color(0xFF5D695F),
-    onPrimaryContainer: Color(0xFF285443),
+    onPrimaryContainer: AppPalette.rafiqiLightPrimary,
     onSecondary: Color(0xFFFFFFFF),
     secondaryContainer: Color(0xFFE2E8DD),
     onSecondaryContainer: Color(0xFF344E41),
-    morningHeroAsset: 'assets/image/home/rafiqi/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/rafiqi/evening_light.webp',
+    morningHeroAsset: 'assets/image/home/Morning light.png',
+    eveningHeroAsset: 'assets/image/home/evening light.png',
     imageScrim: Color(0xFF17251B),
     imageActionBackground: Color(0xFFFFFEFA),
-    imageActionForeground: Color(0xFF285443),
+    imageActionForeground: AppPalette.rafiqiLightPrimary,
   );
   static const _dark = AppColors(
-    background: Color(0xFF121914),
-    surface: Color(0xFF1C261F),
-    surfaceElevated: Color(0xFF2A382D),
-    previewSurface: Color(0xFF2A382D),
-    previewSurfaceBack: Color(0xFF30463A),
-    primary: Color(0xFFB5CAA2),
-    onPrimary: Color(0xFF17251B),
-    onPrimaryMuted: Color(0xFF344036),
-    primaryContainer: Color(0xFF2A382D),
-    accent: Color(0xFF91A982),
-    secondary: Color(0xFFAEC5B4),
-    textPrimary: Color(0xFFF1F3EB),
-    textSecondary: Color(0xFFB1BBAF),
-    outline: Color(0xFF344439),
-    border: Color(0xFF344439),
-    outlineStrong: Color(0xFF879A83),
-    selected: Color(0xFF2A382D),
-    counterSurface: Color(0xFF2A382D),
-    progress: Color(0xFF92AA83),
-    progressTrack: Color(0xFF38433C),
-    surfaceSoft: Color(0xFF2A382D),
-    success: Color(0xFFA3B18A),
-    navigationInactive: Color(0xFFB1BBAF),
-    onPrimaryContainer: Color(0xFFDCE8D2),
-    onSecondary: Color(0xFF17251B),
-    secondaryContainer: Color(0xFF30463A),
-    onSecondaryContainer: Color(0xFFDDEADF),
-    morningHeroAsset: 'assets/image/home/rafiqi/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/rafiqi/evening_dark.webp',
+    background: AppPalette.rafiqiDarkBackground,
+    surface: AppPalette.rafiqiDarkSurface,
+    surfaceElevated: AppPalette.rafiqiDarkSurfaceElevated,
+    previewSurface: AppPalette.rafiqiDarkSurfaceElevated,
+    previewSurfaceBack: Color(0xFF0A302C),
+    primary: AppPalette.rafiqiDarkPrimary,
+    onPrimary: AppPalette.rafiqiDarkBackground,
+    onPrimaryMuted: Color(0xFF5C7468),
+    primaryContainer: Color(0xFF123C37),
+    accent: Color(0xFFC4D8B4),
+    secondary: AppPalette.rafiqiDarkSecondary,
+    textPrimary: AppPalette.rafiqiDarkPrimary,
+    textSecondary: AppPalette.rafiqiDarkTextSecondary,
+    outline: AppPalette.rafiqiDarkBorder,
+    border: AppPalette.rafiqiDarkBorder,
+    outlineStrong: Color(0xFF477E70),
+    selected: Color(0xFF123C37),
+    counterSurface: AppPalette.rafiqiDarkSurfaceElevated,
+    progress: AppPalette.rafiqiDarkSecondary,
+    progressTrack: Color(0xFF1A3C36),
+    surfaceSoft: Color(0xFF0A302C),
+    success: Color(0xFFC1D7AF),
+    navigationInactive: Color(0xFF9DAFA1),
+    onPrimaryContainer: AppPalette.rafiqiDarkPrimary,
+    onSecondary: AppPalette.rafiqiDarkBackground,
+    secondaryContainer: Color(0xFF123C37),
+    onSecondaryContainer: AppPalette.rafiqiDarkPrimary,
+    morningHeroAsset: 'assets/image/home/morning dark.png',
+    eveningHeroAsset: 'assets/image/home/evening dark.png',
     imageScrim: Color(0xFF17251B),
     imageActionBackground: Color(0xFFB5CAA2),
     imageActionForeground: Color(0xFF17251B),

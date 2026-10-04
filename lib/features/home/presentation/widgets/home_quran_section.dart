@@ -1,7 +1,6 @@
 part of '../home_screen.dart';
 
-/// "Continue Quran" section: resume the last reading position, or show a
-/// calm empty state when nothing was saved yet.
+/// Image-led Quran card that resumes the last reading position when available.
 class _ContinueQuranCard extends StatefulWidget {
   const _ContinueQuranCard({required this.onContinue, this.onStart});
 
@@ -16,8 +15,10 @@ class _ContinueQuranCard extends StatefulWidget {
 }
 
 class _ContinueQuranCardState extends State<_ContinueQuranCard> {
+  static const _lightAsset = 'assets/image/home/Quran light.png';
+  static const _darkAsset = 'assets/image/home/Quran dark.png';
+
   QuranReadingPosition? _position;
-  bool _loaded = false;
 
   @override
   void initState() {
@@ -28,163 +29,123 @@ class _ContinueQuranCardState extends State<_ContinueQuranCard> {
   Future<void> _load() async {
     final position = await QuranReadingSource.load();
     if (!mounted) return;
-    setState(() {
-      _position = position;
-      _loaded = true;
-    });
+    setState(() => _position = position);
+  }
+
+  Future<void> _handleTap() async {
+    final position = _position;
+    if (position != null) {
+      await widget.onContinue(position);
+      return;
+    }
+    widget.onStart?.call();
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
-    final text = Theme.of(context).textTheme;
-    final hasPosition = _loaded && _position != null;
-    final ctaLabel = hasPosition ? 'تابع القراءة' : 'ابدأ القراءة';
+    final assetPath = Theme.of(context).brightness == Brightness.dark
+        ? _darkAsset
+        : _lightAsset;
 
-    return AppGlassSurface(
-      borderRadius: BorderRadius.circular(24),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colors.counterSurface,
-                  borderRadius: BorderRadius.circular(12),
+    return Semantics(
+      button: true,
+      label: 'فتح القرآن الكريم',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final cardWidth = constraints.maxWidth;
+
+            return Stack(
+              children: [
+                Image.asset(
+                  assetPath,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  gaplessPlayback: true,
+                  excludeFromSemantics: true,
                 ),
-                child: RafiqiSvgIcon(
-                  RafiqiIcons.quran,
-                  size: 20,
-                  color: colors.primary,
+                Positioned(
+                  right: cardWidth * 0.14,
+                  bottom: cardWidth * 0.045,
+                  width: cardWidth * 0.38,
+                  child: const _MockQuranReadingProgress(),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'القرآن الكريم',
-                  style: TextStyle(
-                    fontFamily: AppFonts.display,
-                    fontSize: 21,
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
+                Positioned.fill(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _handleTap,
+                      excludeFromSemantics: true,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (!_loaded)
-            // Avoid layout jump while the (placeholder) source resolves.
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: SizedBox(
-                height: 18,
-                width: 120,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.surfaceSoft,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
-            )
-          else if (hasPosition) ...[
-            Text(
-              'آخر قراءة',
-              style: text.labelSmall?.copyWith(color: colors.textSecondary),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'سورة ${_position!.surahName}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: AppFonts.reading,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary,
-              ),
-            ),
-            if (_metadataLine() != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                _metadataLine()!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: text.labelMedium?.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-            ],
-            if (_position!.progress != null) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                width: 56,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: _position!.progress!.clamp(0.0, 1.0),
-                    minHeight: 4,
-                    backgroundColor: colors.outline.withValues(alpha: .5),
-                    color: colors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ] else ...[
-            Text(
-              'ابدأ رحلتك مع القرآن',
-              style: text.bodyMedium?.copyWith(color: colors.textSecondary),
-            ),
-          ],
-          const SizedBox(height: 14),
-          Semantics(
-            button: true,
-            label: ctaLabel,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 148),
-              child: SizedBox(
-                height: 48,
-                child: FilledButton.tonal(
-                onPressed: hasPosition
-                    ? () => widget.onContinue(_position!)
-                    : widget.onStart,
-                style: FilledButton.styleFrom(
-                  backgroundColor: colors.primaryContainer,                  foregroundColor: colors.onPrimaryContainer ?? colors.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  visualDensity: VisualDensity.compact,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(ctaLabel),
-                    const SizedBox(width: 7),
-                    const Icon(Icons.arrow_back_rounded, size: 17),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          ),
-        ],
+              ],
+            );
+          },
+        ),
       ),
     );
   }
+}
 
-  /// Shows only metadata that actually exists; never invents page/ayah data.
-  String? _metadataLine() {
-    final position = _position;
-    if (position == null) return null;
-    final parts = [
-      if (position.page != null)
-        'الصفحة ${ArabicNumerals.integer(position.page!)}',
-      if (position.ayah != null) 'الآية ${ArabicNumerals.integer(position.ayah!)}',
-    ];
-    return parts.isEmpty ? null : parts.join(' • ');
+class _MockQuranReadingProgress extends StatelessWidget {
+  const _MockQuranReadingProgress();
+
+  static const _fontFeatures = <FontFeature>[FontFeature('ss01', 1)];
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          key: const ValueKey('quran-reading-progress-mock'),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
+                'أكمل القراءة',
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppFonts.thmanyahSans,
+                  fontFeatures: _fontFeatures,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  height: 1.05,
+                  color: colors.imageForeground,
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              child: Text(
+                'سورة البقرة • الآية 157',
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: AppFonts.thmanyahSans,
+                  fontFeatures: _fontFeatures,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  height: 1.05,
+                  color: colors.imageForegroundMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

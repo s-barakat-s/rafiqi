@@ -56,6 +56,11 @@ class DhikrAudioRepository {
         file: file,
         sourceType: source.type,
       ),
+      CollectionAudio() => ResolvedDhikrAudio(
+        dhikrId: null,
+        file: file,
+        sourceType: source.type,
+      ),
       DhikrAudioClip() => ResolvedDhikrAudio(
         dhikrId: source.dhikrId,
         file: file,

@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "collectionId": "daily_dhikr",
+  "title": "ذكر اليوم",
+  "notes": [
+    "جميع الصيغ والأذكار هنا مبنية على نصوص ثابتة في مصادر حديثية صحيحة أو حسنة.",
+    "إذا لم يرد في المصدر عدد محدد للذكر، فالقيمة repeatCount = 1 هي فقط خطوة عرض/تفاعل داخل التطبيق وليست عددًا شرعيًا محددًا.",
+    "لا تُغيَّر النصوص أو الأعداد الموسومة fixed_in_source دون مراجعة المصدر."
+  ],
+  "items": [
+    {
+      "id": "daily_salawat_001",
+      "category": "salawat",
+      "text": "اللهم صل على محمد وعلى آل محمد، كما صليت على آل إبراهيم، إنك حميد مجيد، اللهم بارك على محمد وعلى آل محمد، كما باركت على آل إبراهيم، إنك حميد مجيد.",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "صحيح البخاري",
+        "full": "حديث كعب بن عجرة رضي الله عنه في صفة الصلاة على النبي ﷺ — صحيح البخاري."
+      },
+      "virtue": {
+        "short": "صيغة مأثورة للصلاة على النبي ﷺ",
+        "full": "من الصيغ التي علّمها النبي ﷺ لأصحابه في الصلاة عليه."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 4797"
+        ],
+        "referenceUrl": "https://dorar.net/hadith/search?q=%D8%A7%D9%84%D9%84%D9%87%D9%85+%D8%B5%D9%84+%D8%B9%D9%84%D9%89+%D9%85%D8%AD%D9%85%D8%AF+%D9%88%D8%B9%D9%84%D9%89+%D8%A2%D9%84+%D9%85%D8%AD%D9%85%D8%AF"
+      }
+    },
+    {
+      "id": "daily_salawat_002",
+      "category": "salawat",
+      "text": "اللهم صل على محمد وعلى أزواجه وذريته، كما صليت على آل إبراهيم، وبارك على محمد وعلى أزواجه وذريته، كما باركت على آل إبراهيم، إنك حميد مجيد.",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "صحيح البخاري ومسلم",
+        "full": "حديث أبي حميد الساعدي رضي الله عنه في صفة الصلاة على النبي ﷺ — صحيح البخاري وصحيح مسلم."
+      },
+      "virtue": {
+        "short": "صيغة مأثورة للصلاة على النبي ﷺ",
+        "full": "صيغة ثابتة علّمها النبي ﷺ لأصحابه عندما سألوه كيف يصلون عليه."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 6360",
+          "صحيح مسلم 407"
+        ],
+        "referenceUrl": "https://dorar.net/h/N4GEvQID?osoul=1"
+      }
+    },
+    {
+      "id": "daily_salawat_003",
+      "category": "salawat",
+      "text": "اللهم صل على محمد عبدك ورسولك، كما صليت على إبراهيم، وبارك على محمد وعلى آل محمد، كما باركت على إبراهيم وآل إبراهيم.",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "صحيح البخاري",
+        "full": "حديث أبي سعيد الخدري رضي الله عنه في صفة الصلاة على النبي ﷺ — صحيح البخاري."
+      },
+      "virtue": {
+        "short": "صيغة مأثورة للصلاة على النبي ﷺ",
+        "full": "من الصيغ الثابتة الواردة في تعليم النبي ﷺ لأصحابه كيفية الصلاة عليه."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 6358"
+        ],
+        "referenceUrl": "https://dorar.net/h/eaAXilSB?osoul=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_001",
+      "category": "tasbih",
+      "text": "سبحان الله وبحمده",
+      "repeatCount": 100,
+      "countType": "fixed_in_source",
+      "countDescription": "١٠٠ مرة في اليوم",
+      "source": {
+        "short": "صحيح البخاري ومسلم",
+        "full": "عن أبي هريرة رضي الله عنه: من قال «سبحان الله وبحمده» في يوم مائة مرة حُطّت خطاياه وإن كانت مثل زبد البحر."
+      },
+      "virtue": {
+        "short": "حطّ الخطايا بإذن الله",
+        "full": "ورد أن من قالها مائة مرة في يوم حُطّت خطاياه وإن كانت مثل زبد البحر."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 6405",
+          "صحيح مسلم 2691"
+        ],
+        "referenceUrl": "https://dorar.net/h/f1jDqzs4?osoul=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_002",
+      "category": "tahlil",
+      "text": "لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، وهو على كل شيء قدير",
+      "repeatCount": 100,
+      "countType": "fixed_in_source",
+      "countDescription": "١٠٠ مرة في اليوم",
+      "source": {
+        "short": "صحيح مسلم",
+        "full": "حديث أبي هريرة رضي الله عنه في فضل التهليل مائة مرة في اليوم — صحيح مسلم."
+      },
+      "virtue": {
+        "short": "مائة حسنة ومحو مائة سيئة وحرز من الشيطان",
+        "full": "ورد أن من قالها مائة مرة كانت له عدل عشر رقاب، وكُتبت له مائة حسنة، ومُحيت عنه مائة سيئة، وكانت له حرزًا من الشيطان يومه ذلك حتى يمسي."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح مسلم 2691"
+        ],
+        "referenceUrl": "https://dorar.net/h/CyLkf3bm?osoul=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_003",
+      "category": "tasbih",
+      "text": "سبحان الله",
+      "repeatCount": 100,
+      "countType": "fixed_in_source",
+      "countDescription": "١٠٠ تسبيحة",
+      "source": {
+        "short": "صحيح مسلم",
+        "full": "عن سعد بن أبي وقاص رضي الله عنه أن النبي ﷺ قال إن مائة تسبيحة يُكتب بها ألف حسنة أو يُحط بها ألف خطيئة."
+      },
+      "virtue": {
+        "short": "ألف حسنة أو حطّ ألف خطيئة",
+        "full": "في الحديث: «يسبح مائة تسبيحة، فيكتب له ألف حسنة، أو يحط عنه ألف خطيئة»."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح مسلم 2698"
+        ],
+        "referenceUrl": "https://dorar.net/hadith/sharh/62931"
+      }
+    },
+    {
+      "id": "daily_dhikr_004",
+      "category": "istighfar",
+      "text": "رب اغفر لي وتب علي، إنك أنت التواب الرحيم",
+      "repeatCount": 100,
+      "countType": "fixed_in_source",
+      "countDescription": "١٠٠ مرة",
+      "source": {
+        "short": "أبو داود والترمذي وابن ماجه",
+        "full": "عن ابن عمر رضي الله عنهما: كانوا يعدّون للنبي ﷺ في المجلس قوله هذا مائة مرة."
+      },
+      "virtue": {
+        "short": "استغفار وتوبة مأثورة",
+        "full": "صيغة ثابتة من استغفار النبي ﷺ وتوبته في المجلس."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "سنن أبي داود 1516",
+          "سنن الترمذي 3434",
+          "سنن ابن ماجه 3814"
+        ],
+        "referenceUrl": "https://dorar.net/h/OajLKnKA?sims=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_005",
+      "category": "tasbih",
+      "text": "سبحان الله العظيم وبحمده",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "سنن الترمذي",
+        "full": "عن جابر رضي الله عنه عن النبي ﷺ: «من قال: سبحان الله العظيم وبحمده، غرست له نخلة في الجنة»."
+      },
+      "virtue": {
+        "short": "تُغرس له نخلة في الجنة",
+        "full": "ثبت أن من قالها غُرست له نخلة في الجنة."
+      },
+      "sourceMeta": {
+        "authenticity": "حسن صحيح",
+        "references": [
+          "سنن الترمذي 3464"
+        ],
+        "referenceUrl": "https://hadithprophet.com/hadith-61664.html"
+      }
+    },
+    {
+      "id": "daily_dhikr_006",
+      "category": "tasbih",
+      "text": "سبحان الله وبحمده، سبحان الله العظيم",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "صحيح البخاري ومسلم",
+        "full": "قال النبي ﷺ: «كلمتان خفيفتان على اللسان، ثقيلتان في الميزان، حبيبتان إلى الرحمن: سبحان الله وبحمده، سبحان الله العظيم»."
+      },
+      "virtue": {
+        "short": "ثقيلتان في الميزان، حبيبتان إلى الرحمن",
+        "full": "وصفهما النبي ﷺ بأنهما خفيفتان على اللسان، ثقيلتان في الميزان، حبيبتان إلى الرحمن."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 6682",
+          "صحيح مسلم 2694"
+        ],
+        "referenceUrl": "https://dorar.net/h/23IiX7qt?osoul=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_007",
+      "category": "hawqala",
+      "text": "لا حول ولا قوة إلا بالله",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "صحيح البخاري ومسلم",
+        "full": "عن أبي موسى الأشعري رضي الله عنه أن النبي ﷺ قال عنها: «كنز من كنوز الجنة»."
+      },
+      "virtue": {
+        "short": "كنز من كنوز الجنة",
+        "full": "ثبت في الصحيحين أن «لا حول ولا قوة إلا بالله» كنز من كنوز الجنة."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 6384",
+          "صحيح مسلم 2704"
+        ],
+        "referenceUrl": "https://dorar.net/h/vfqk0U79?osoul=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_008",
+      "category": "general_dhikr",
+      "text": "سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "لا عدد محدد في الحديث",
+      "source": {
+        "short": "صحيح مسلم",
+        "full": "قال النبي ﷺ: «أحب الكلام إلى الله أربع: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر»."
+      },
+      "virtue": {
+        "short": "من أحب الكلام إلى الله",
+        "full": "ثبت في صحيح مسلم أن هذه الكلمات الأربع من أحب الكلام إلى الله."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح مسلم 2137"
+        ],
+        "referenceUrl": "https://dorar.net/h/8tnCeuLe?osoul=1"
+      }
+    },
+    {
+      "id": "daily_dhikr_009",
+      "category": "istighfar",
+      "text": "أستغفر الله وأتوب إليه",
+      "repeatCount": 1,
+      "countType": "single_occurrence_no_fixed_count",
+      "countDescription": "يُكثر منه؛ ثبت أكثر من سبعين مرة في اليوم",
+      "source": {
+        "short": "صحيح البخاري",
+        "full": "قال النبي ﷺ: «والله إني لأستغفر الله وأتوب إليه في اليوم أكثر من سبعين مرة»."
+      },
+      "virtue": {
+        "short": "استغفار وتوبة مأثورة",
+        "full": "ثبت عن النبي ﷺ الإكثار من الاستغفار والتوبة كل يوم."
+      },
+      "sourceMeta": {
+        "authenticity": "صحيح",
+        "references": [
+          "صحيح البخاري 6307"
+        ],
+        "referenceUrl": "https://dorar.net/h/Ef0iuGIu?osoul=1"
+      }
+    }
+  ]
+}

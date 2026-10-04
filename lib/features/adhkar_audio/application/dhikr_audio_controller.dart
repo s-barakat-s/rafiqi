@@ -34,6 +34,9 @@ class DhikrAudioController extends ChangeNotifier {
   int _generation = 0;
   int _currentIndex = -1;
   List<_QueuedAudio> _queue = const [];
+  List<DhikrAudioSegment> _continuousSegments = const [];
+  Map<String, DhikrItem> _continuousItemsById = const {};
+  bool _isContinuousPlayback = false;
   _PausableDelay? _silence;
   StreamSubscription<Duration>? _positionSubscription;
 
@@ -44,7 +47,7 @@ class DhikrAudioController extends ChangeNotifier {
     mode = await preferences.playbackMode();
     _positionSubscription ??= player.positionStream.listen((value) {
       position = value;
-      notifyListeners();
+      if (_isContinuousPlayback) _updateActiveSegment(value);
     });
     notifyListeners();
   }
@@ -86,6 +89,7 @@ class DhikrAudioController extends ChangeNotifier {
     collectionId: collectionId,
     items: [item],
     playbackMode: playbackMode,
+    request: _PlaybackRequest.single,
   );
 
   Future<bool> playAll({
@@ -96,35 +100,59 @@ class DhikrAudioController extends ChangeNotifier {
     collectionId: collectionId,
     items: items.where((item) => !item.isPrelude).toList(growable: false),
     playbackMode: playbackMode,
+    request: _PlaybackRequest.all,
   );
 
   Future<bool> _start({
     required String collectionId,
     required List<DhikrItem> items,
     DhikrPlaybackMode? playbackMode,
+    required _PlaybackRequest request,
   }) async {
     final reciterId = selectedReciterId;
     if (reciterId == null || items.isEmpty) return false;
     final collection = manifests.collectionFor(reciterId, collectionId);
     if (collection == null) return false;
     final itemsById = {for (final item in items) item.id: item};
-    final isWholeCollection = items.length > 1;
-    final queue = collection.playbackSequence.isNotEmpty
-        ? [
-            for (final segment in collection.playbackSequence)
-              if ((segment.source.dhikrId == null && isWholeCollection) ||
-                  itemsById.containsKey(segment.source.dhikrId))
-                _QueuedAudio(
-                  item: itemsById[segment.source.dhikrId],
-                  source: segment.source,
-                  repeatCount: 1,
-                  sourceRepetition: segment.sourceRepetition,
-                ),
-          ]
-        : [
-            for (final item in items)
-              _QueuedAudio(item: item, repeatCount: item.repeatCount),
-          ];
+    final requestedMode = playbackMode ?? mode;
+    if (request == _PlaybackRequest.all &&
+        requestedMode == DhikrPlaybackMode.listen &&
+        collection.playAllStrategy ==
+            DhikrPlayAllStrategy.continuousRecording) {
+      final source = collection.continuousSource;
+      if (source == null || collection.playbackSequence.isEmpty) return false;
+      final resolved = await repository.resolveSource(
+        reciterId: reciterId,
+        collectionId: collectionId,
+        source: source,
+      );
+      if (resolved == null) return false;
+      await stop();
+      if (playbackMode != null) await selectMode(playbackMode);
+      selectedCollectionId = collectionId;
+      _continuousSegments = collection.playbackSequence;
+      _continuousItemsById = itemsById;
+      _isContinuousPlayback = true;
+      _currentIndex = -1;
+      currentDhikrId = null;
+      currentRepeatNumber = 0;
+      totalRepeatCount = 0;
+      position = Duration.zero;
+      duration = Duration.zero;
+      status = DhikrPlaybackStatus.playing;
+      phase = DhikrPlaybackPhase.listening;
+      final token = ++_generation;
+      notifyListeners();
+      unawaited(_runContinuous(token, resolved));
+      return true;
+    }
+    final queue = _buildQueue(
+      collection: collection,
+      items: items,
+      itemsById: itemsById,
+      request: request,
+      playbackMode: requestedMode,
+    );
     if (!queue.any((entry) => entry.item != null)) return false;
     var hasPlayableItem = false;
     for (final entry in queue.where((entry) => entry.item != null)) {
@@ -153,6 +181,120 @@ class DhikrAudioController extends ChangeNotifier {
     final token = ++_generation;
     unawaited(_runQueue(token));
     return true;
+  }
+
+  List<_QueuedAudio> _buildQueue({
+    required ReciterCollectionAudio collection,
+    required List<DhikrItem> items,
+    required Map<String, DhikrItem> itemsById,
+    required _PlaybackRequest request,
+    required DhikrPlaybackMode playbackMode,
+  }) {
+    if (collection.playbackSequence.isEmpty) {
+      return [
+        for (final item in items)
+          _QueuedAudio(
+            item: item,
+            repeatCount: request == _PlaybackRequest.single
+                ? 1
+                : item.repeatCount,
+          ),
+      ];
+    }
+    if (request == _PlaybackRequest.single) {
+      return [
+        for (final item in items)
+          if (collection.playbackSequence
+                  .where(
+                    (segment) =>
+                        segment.source.dhikrId == item.id &&
+                        segment.sourceRepetition == 1,
+                  )
+                  .firstOrNull
+              case final segment?)
+            _QueuedAudio(
+              item: item,
+              source: segment.source,
+              repeatCount: 1,
+              sourceRepetition: 1,
+            ),
+      ];
+    }
+    return [
+      for (final segment in collection.playbackSequence)
+        if (segment.source.dhikrId == null ||
+            itemsById.containsKey(segment.source.dhikrId))
+          _QueuedAudio(
+            item: itemsById[segment.source.dhikrId],
+            source: segment.source,
+            repeatCount:
+                playbackMode == DhikrPlaybackMode.repeatAfterMe &&
+                    segment.repeatPolicy ==
+                        DhikrSegmentRepeatPolicy.reuseForCanonicalCount
+                ? _safeRepeatCount(
+                    itemsById[segment.source.dhikrId]?.repeatCount ?? 1,
+                  )
+                : 1,
+            sourceRepetition: segment.sourceRepetition,
+          ),
+    ];
+  }
+
+  int _safeRepeatCount(int value) => value < 1 ? 1 : value;
+
+  Future<void> _runContinuous(int token, ResolvedDhikrAudio source) async {
+    final playedDuration = await player.play(source);
+    if (token != _generation || playedDuration == null) return;
+    await stop();
+  }
+
+  void _updateActiveSegment(Duration currentPosition) {
+    final nextIndex = _segmentIndexAt(currentPosition);
+    final activeSegment = nextIndex < 0 ? null : _continuousSegments[nextIndex];
+    final nextDhikrId = activeSegment?.source.dhikrId;
+    final changedDhikr = nextDhikrId != currentDhikrId;
+    _currentIndex = nextIndex;
+    currentDhikrId = nextDhikrId;
+    currentRepeatNumber = activeSegment?.sourceRepetition ?? 0;
+    totalRepeatCount = nextDhikrId == null
+        ? 0
+        : (_continuousItemsById[nextDhikrId]?.repeatCount ?? 1);
+    if (changedDhikr) notifyListeners();
+  }
+
+  int _segmentIndexAt(Duration currentPosition) {
+    if (_currentIndex >= 0 && _currentIndex < _continuousSegments.length) {
+      final current = _continuousSegments[_currentIndex].source;
+      if (current is DhikrAudioClip) {
+        if (currentPosition >= current.start && currentPosition < current.end) {
+          return _currentIndex;
+        }
+        if (currentPosition >= current.end) {
+          for (
+            var index = _currentIndex + 1;
+            index < _continuousSegments.length;
+            index++
+          ) {
+            final source = _continuousSegments[index].source;
+            if (source is! DhikrAudioClip) continue;
+            if (currentPosition >= source.start &&
+                currentPosition < source.end) {
+              return index;
+            }
+            if (currentPosition < source.start) break;
+          }
+        }
+      }
+    }
+    for (var index = 0; index < _continuousSegments.length; index++) {
+      final source = _continuousSegments[index].source;
+      if (source is DhikrAudioClip &&
+          currentPosition >= source.start &&
+          currentPosition < source.end) {
+        return index;
+      }
+    }
+    return -1;
   }
 
   Future<void> _runQueue(int token) async {
@@ -230,6 +372,21 @@ class DhikrAudioController extends ChangeNotifier {
 
   Future<void> skip() async {
     if (!isActive) return;
+    if (_isContinuousPlayback) {
+      for (
+        var index = _currentIndex + 1;
+        index < _continuousSegments.length;
+        index++
+      ) {
+        final source = _continuousSegments[index].source;
+        if (source is DhikrAudioClip) {
+          await player.seek(source.start);
+          return;
+        }
+      }
+      await stop();
+      return;
+    }
     final nextIndex = _currentIndex + 1;
     _generation++;
     _silence?.cancel();
@@ -253,6 +410,9 @@ class DhikrAudioController extends ChangeNotifier {
   }
 
   void _setStopped() {
+    _isContinuousPlayback = false;
+    _continuousSegments = const [];
+    _continuousItemsById = const {};
     status = DhikrPlaybackStatus.stopped;
     phase = DhikrPlaybackPhase.listening;
     currentDhikrId = null;
@@ -272,6 +432,8 @@ class DhikrAudioController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+enum _PlaybackRequest { single, all }
 
 class _QueuedAudio {
   const _QueuedAudio({

@@ -15,14 +15,41 @@ class _MorningHero extends StatelessWidget {
   final AdhkarProgressSummary? progress;
   final Future<void> Function(String categoryId) onOpen;
 
+  static const _thmanyahGeneralFeatures = <FontFeature>[
+    FontFeature('ss01', 1),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
     final theme = Theme.of(context);
     final text = theme.textTheme;
     final isMorning = categoryId == 'morning';
-    final foreground = colors.imageForeground;
-    final mutedForeground = colors.imageForegroundMuted;
+    final isRafiqi = colors.isRafiqi;
+    final isRafiqiDark = isRafiqi && theme.brightness == Brightness.dark;
+    final foreground = isRafiqi
+        ? isRafiqiDark
+              ? AppPalette.rafiqiDarkHeroForeground
+              : AppPalette.rafiqiLightHeroForeground
+        : colors.imageForeground;
+    final mutedForeground = isRafiqi
+        ? isRafiqiDark
+              ? AppPalette.rafiqiDarkHeroForegroundMuted
+              : AppPalette.rafiqiLightHeroForegroundMuted
+        : colors.imageForegroundMuted;
+    final reminderForeground = isRafiqiDark
+        ? AppPalette.rafiqiDarkHeroReminderForeground
+        : foreground;
+    final actionBackground = isRafiqi
+        ? isRafiqiDark
+              ? AppPalette.rafiqiDarkHeroActionBackground
+              : AppPalette.rafiqiLightHeroActionBackground
+        : colors.imageActionBackground;
+    final actionForeground = isRafiqi
+        ? isRafiqiDark
+              ? AppPalette.rafiqiDarkHeroActionForeground
+              : AppPalette.rafiqiLightHeroActionForeground
+        : colors.imageActionForeground;
     final backgroundAsset = colors.heroAsset(
       isMorning: isMorning,
       brightness: theme.brightness,
@@ -56,27 +83,27 @@ class _MorningHero extends StatelessWidget {
                   : Alignment.center,
             ),
           ),
-          // Subtle readability overlay only — no heavy dark gradient.
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: AlignmentDirectional.centerStart,
-                  end: AlignmentDirectional.centerEnd,
-                  colors: [
-                    colors.imageScrim.withValues(
-                      alpha: colors.heroScrimOpacity(
-                        isMorning: isMorning,
-                        brightness: theme.brightness,
+          if (!colors.isRafiqi)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: AlignmentDirectional.centerStart,
+                    end: AlignmentDirectional.centerEnd,
+                    colors: [
+                      colors.imageScrim.withValues(
+                        alpha: colors.heroScrimOpacity(
+                          isMorning: isMorning,
+                          brightness: theme.brightness,
+                        ),
                       ),
-                    ),
-                    colors.imageScrim.withValues(alpha: 0),
-                  ],
-                  stops: const [0, .62],
+                      colors.imageScrim.withValues(alpha: 0),
+                    ],
+                    stops: const [0, .62],
+                  ),
                 ),
               ),
             ),
-          ),
           Padding(
             // +2 horizontal so the CTA's ink/rounding never nudges the
             // column past the clip edge; removes the 1px overflow.
@@ -91,10 +118,10 @@ class _MorningHero extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: foreground.withValues(alpha: .14),
+                    color: reminderForeground.withValues(alpha: .14),
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: foreground.withValues(alpha: .28),
+                      color: reminderForeground.withValues(alpha: .28),
                     ),
                   ),
                   child: Row(
@@ -103,13 +130,15 @@ class _MorningHero extends StatelessWidget {
                       RafiqiSvgIcon(
                         RafiqiIcons.notification,
                         size: 14,
-                        color: foreground,
+                        color: reminderForeground,
                       ),
                       const SizedBox(width: 5),
                       Text(
                         'حان الآن وقته',
                         style: text.labelSmall?.copyWith(
-                          color: foreground,
+                          fontFamily: AppFonts.thmanyahSans,
+                          fontFeatures: _thmanyahGeneralFeatures,
+                          color: reminderForeground,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -122,7 +151,8 @@ class _MorningHero extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: AppFonts.display,
+                    fontFamily: AppFonts.thmanyahSans,
+                    fontFeatures: _thmanyahGeneralFeatures,
                     color: foreground,
                     fontSize: 32,
                     height: 1.15,
@@ -134,7 +164,11 @@ class _MorningHero extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: text.bodyMedium?.copyWith(color: mutedForeground),
+                  style: text.bodyMedium?.copyWith(
+                    fontFamily: AppFonts.thmanyahSans,
+                    fontFeatures: _thmanyahGeneralFeatures,
+                    color: mutedForeground,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -142,8 +176,8 @@ class _MorningHero extends StatelessWidget {
                     FilledButton(
                       onPressed: () => onOpen(categoryId),
                       style: FilledButton.styleFrom(
-                        backgroundColor: colors.imageActionBackground,
-                        foregroundColor: colors.imageActionForeground,
+                        backgroundColor: actionBackground,
+                        foregroundColor: actionForeground,
                         minimumSize: const Size(0, 42),
                         padding: const EdgeInsets.symmetric(horizontal: 18),
                         visualDensity: VisualDensity.compact,
@@ -151,7 +185,14 @@ class _MorningHero extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(ctaLabel),
+                          Text(
+                            ctaLabel,
+                            style: const TextStyle(
+                              fontFamily: AppFonts.thmanyahSans,
+                              fontFeatures: _thmanyahGeneralFeatures,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                           const SizedBox(width: 7),
                           const Icon(Icons.arrow_back_rounded, size: 17),
                         ],
@@ -162,6 +203,8 @@ class _MorningHero extends StatelessWidget {
                       Text(
                         '${ArabicNumerals.integer(completedSteps)} من ${ArabicNumerals.integer(totalSteps)}',
                         style: text.labelMedium?.copyWith(
+                          fontFamily: AppFonts.thmanyahSans,
+                          fontFeatures: _thmanyahGeneralFeatures,
                           color: foreground,
                           fontWeight: FontWeight.w700,
                         ),

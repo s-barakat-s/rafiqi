@@ -242,6 +242,8 @@ class _MainShellScreenState extends State<MainShellScreen>
         onOpenTasbeeh: _openTasbeeh,
         onOpenAdhkar: _openAdhkarReader,
         onOpenJourney: _openJourney,
+        onOpenPrayerTimes: () => _selectTab(3),
+        onOpenMore: () => _selectTab(4),
       ),
       AdhkarCategoriesScreen(
         vibrationEnabled: widget.adhkarVibrationEnabled,

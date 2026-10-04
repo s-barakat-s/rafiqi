@@ -1,0 +1,629 @@
+[
+  {
+    "id": "islambook-sleep-001",
+    "order": 1,
+    "category": "sleep",
+    "type": "single",
+    "text": "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي وَبِكَ أَرْفَعُهُ، إِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "إذا قام أحدكم من فراشه ثم رجع إليه فلينفض بصنفة  إزاره ثلاث مرات وليسم الله  فإنه لا يدري ماذا خلفه عليه بعده وإذا اضطجع فليقل ... (الحديث)\r\n\r\n البخاري 11/ 126. ومسلم 4/ 2084"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 1,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-002",
+    "order": 2,
+    "category": "sleep",
+    "type": "single",
+    "text": "اللَّهُمَّ إِنَّكَ خَلَقْتَ نَفْسِي وَأَنْتَ تَوَفَّاهَا، لَكَ مَمَاتُهَا وَمَحْيَاهَا، إِنْ أَحْيَيْتَهَا فَاحْفَظْهَا، وَإِنْ أَمَتَّهَا فَاغْفِرْ لَهَا، اللَّهُمَّ إِنِّي أَسْأَلُكَ العَافِيَةَ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه مسلم وأحمد",
+      "full": "أخرجه مسلم 4/ 2083 وأحمد بلفظه 2/ 79"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 2,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-003",
+    "order": 3,
+    "category": "sleep",
+    "type": "single",
+    "text": "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ",
+    "repeatCount": 3,
+    "countDescription": "ثلاث مرات",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه أبو داود",
+      "full": "كان رسول الله صلى الله عليه وسلم إذا أراد أن يرقد وضع يده اليمنى تحت خده ثم يقول ... (الحديث)\r\n\r\nأبو داود بلفظه 4/ 311 وانظر صحيح التّرمذي 3/ 143"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 3,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-004",
+    "order": 4,
+    "category": "sleep",
+    "type": "single",
+    "text": "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "البخاري مع الفتح 11/ 113 ومسلم 4/ 2083"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 4,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-005",
+    "order": 5,
+    "category": "sleep",
+    "type": "single",
+    "text": "الحَمْدُ لِلَّهِ الذِي أَطْعَمَنَا وَسَقَانَا وَكَفَانَا وَآوَانَا فَكَمْ مِمَّنْ لَا كَافِيَ لَهُ وَلَا مُؤْوِي",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه مسلم",
+      "full": "مسلم 4/ 2085"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 5,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-006",
+    "order": 6,
+    "category": "sleep",
+    "type": "single",
+    "text": "اللَّهُمَّ عَالِمَ الغَيْبِ وَالشَّهَادَةِ، فَاطِرَ السَّمَوَاتِ وَالأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطَانِ وَشَرَكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءًا أَوْ أَجُرَّه إِلَى مُسْلِمٍ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه أبو داود",
+      "full": "أبو داود 4/ 317 وانظر صحيح سنن التّرمذي 3/ 142"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 6,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-007",
+    "order": 7,
+    "category": "sleep",
+    "type": "single",
+    "text": "اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَهْبَةً وَرَغْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الذِي أَنْزَلْتَ وَبِنَبِيِّكَ الذِي أَرْسَلْتَ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "إذا أخذت مضجعك فتوضأ وضوءك للصلاة ثم اضطجع على شقك الأيمن، وقل: ... (الحديث)  قال صلى الله عليه وسلم لمن قال ذلك: فإن متَّ، متَّ على الفطرة البخاري مع الفتح 11/ 113 ومسلم 4/ 2081"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 7,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-008",
+    "order": 8,
+    "category": "sleep",
+    "type": "single",
+    "text": "سُبْحَانَ اللَّهِ",
+    "repeatCount": 33,
+    "countDescription": "ثلاث وثلاثون مرة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "من قال ذلك عندما يأوي إلى فراشه كان خيرًا له من خادم. البخاري مع الفتح 7/ 71 ومسلم 4/ 2091"
+    },
+    "virtue": {
+      "short": "خيرٌ له من خادم",
+      "full": "من قال ذلك عندما يأوي إلى فراشه كان خيرًا له من خادم."
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 8,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-009",
+    "order": 9,
+    "category": "sleep",
+    "type": "single",
+    "text": "الحَمْدُ لِلَّهِ",
+    "repeatCount": 33,
+    "countDescription": "ثلاث وثلاثون مرة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "من قال ذلك عندما يأوي إلى فراشه كان خيرًا له من خادم. البخاري مع الفتح 7/ 71 ومسلم 4/ 2091"
+    },
+    "virtue": {
+      "short": "خيرٌ له من خادم",
+      "full": "من قال ذلك عندما يأوي إلى فراشه كان خيرًا له من خادم."
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 9,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-010",
+    "order": 10,
+    "category": "sleep",
+    "type": "single",
+    "text": "اللَّهُ أَكْبَرُ",
+    "repeatCount": 34,
+    "countDescription": "أربع وثلاثون مرة",
+    "instruction": null,
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "من قال ذلك عندما يأوي إلى فراشه كان خيرًا له من خادم. البخاري مع الفتح 7/ 71 ومسلم 4/ 2091"
+    },
+    "virtue": {
+      "short": "خيرٌ له من خادم",
+      "full": "من قال ذلك عندما يأوي إلى فراشه كان خيرًا له من خادم."
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 10,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-011",
+    "order": 11,
+    "category": "sleep",
+    "type": "compositePractice",
+    "text": null,
+    "repeatCount": 3,
+    "countDescription": "ثلاث مرات",
+    "instruction": "يجمع كفيه ثم ينفث فيهما، ويقرأ السور الثلاث، ثم يمسح ما استطاع من جسده، يبدأ برأسه ووجهه وما أقبل من جسده.",
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [
+      {
+        "id": "islambook-sleep-011-step-1",
+        "text": "قُلْ هُوَ اللَّهُ أَحَدٌ * اللَّهُ الصَّمَدُ * لَمْ يَلِدْ وَلَمْ يُولَدْ * وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "repeatOverrides": [],
+        "quran": {
+          "isQuran": true,
+          "surah": "الإخلاص",
+          "ayahFrom": 1,
+          "ayahTo": 4
+        }
+      },
+      {
+        "id": "islambook-sleep-011-step-2",
+        "text": "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ * مِن شَرِّ مَا خَلَقَ * وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ * وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ * وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "repeatOverrides": [],
+        "quran": {
+          "isQuran": true,
+          "surah": "الفلق",
+          "ayahFrom": 1,
+          "ayahTo": 5
+        }
+      },
+      {
+        "id": "islambook-sleep-011-step-3",
+        "text": "قُلْ أَعُوذُ بِرَبِّ النَّاسِ * مَلِكِ النَّاسِ * إِلَهِ النَّاسِ * مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ * الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ * مِنَ الْجِنَّةِ وَالنَّاسِ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "repeatOverrides": [],
+        "quran": {
+          "isQuran": true,
+          "surah": "الناس",
+          "ayahFrom": 1,
+          "ayahTo": 6
+        }
+      }
+    ],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "البخاري مع الفتح 9/ 62 ومسلم 4/ 1723"
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 11,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-012",
+    "order": 12,
+    "category": "sleep",
+    "type": "single",
+    "text": "آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ كُلٌّ آمَنَ بِاللّهِ وَمَلآئِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لاَ نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ وَقَالُواْ سَمِعْنَا وَأَطَعْنَا غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ * لاَ يُكَلِّفُ اللّهُ نَفْسًا إِلاَّ وُسْعَهَا لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ رَبَّنَا لاَ تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا رَبَّنَا وَلاَ تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا رَبَّنَا وَلاَ تُحَمِّلْنَا مَا لاَ طَاقَةَ لَنَا بِهِ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا أَنتَ مَوْلاَنَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": "يبدأ بالاستعاذة: أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري ومسلم",
+      "full": "من قرأهما في ليلة كفتاه، البخاري مع الفتح 9/ 94 ومسلم 1/ 554، والآيتان من سورة البقرة، 285 – 286"
+    },
+    "virtue": {
+      "short": "من قرأهما في ليلة كفتاه",
+      "full": "من قرأ آيتين من آخر سورة البقرة في ليلة كفتاه."
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": true,
+      "surah": "البقرة",
+      "ayahFrom": 285,
+      "ayahTo": 286
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 12,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-013",
+    "order": 13,
+    "category": "sleep",
+    "type": "single",
+    "text": "اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": "يبدأ بالاستعاذة: أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": "رواه البخاري",
+      "full": "من قرأها إذا أوى إلى فراشه فإنه لن يزال عليه من الله حافظ ولا يقربه شيطان حتى يصبح البخاري مع الفتح 4/ 487"
+    },
+    "virtue": {
+      "short": "أُجير من الشيطان حتى يصبح",
+      "full": "من قرأها إذا أوى إلى فراشه فإنه لن يزال عليه من الله حافظ، ولا يقربه شيطان حتى يصبح."
+    },
+    "hadithText": null,
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": true,
+      "surah": "البقرة",
+      "ayahFrom": 255,
+      "ayahTo": 255
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 13,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": "existing_sleep_dataset"
+    }
+  },
+  {
+    "id": "islambook-sleep-014",
+    "order": 14,
+    "category": "sleep",
+    "type": "compositePractice",
+    "text": null,
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": "أذكار من قلق في فراشه ولم ينم.",
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [
+      {
+        "id": "islambook-sleep-014-step-1",
+        "text": "اللَّهُمَّ رَبَّ السَّمَوَاتِ السَّبْعِ وَمَا أَظَلَّتْ، وَرَبَّ الْأَرَضِينَ وَمَا أَقَلَّتْ، وَرَبَّ الشَّيَاطِينِ وَمَا أَضَلَّتْ، كُنْ لِي جَارًا مِنْ خَلْقِكَ كُلِّهِمْ جَمِيعًا أَنْ يَفْرُطَ عَلَيَّ أَحَدٌ مِنْهُمْ أَوْ أَنْ يَبْغِيَ عَلَيَّ، عَزَّ جَارُكَ، وَجَلَّ ثَنَاؤُكَ، وَلَا إِلَهَ غَيْرُكَ، وَلَا إِلَهَ إِلَّا أَنْتَ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "repeatOverrides": [],
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      },
+      {
+        "id": "islambook-sleep-014-step-2",
+        "text": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّةِ مِنْ غَضَبِهِ وَشَرِّ عِبَادِهِ، وَمِنْ هَمَزَاتِ الشَّيَاطِينِ وَأَنْ يَحْضُرُونِ",
+        "repeatCount": 1,
+        "countDescription": "مرة واحدة",
+        "instruction": null,
+        "repeatOverrides": [],
+        "quran": {
+          "isQuran": false,
+          "surah": null,
+          "ayahFrom": null,
+          "ayahTo": null
+        }
+      }
+    ],
+    "source": {
+      "short": null,
+      "full": null
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": "عن بريدة رضي الله عنه قال: شكا خالد بن الوليد رضي الله عنه إلى النبي صلى الله عليه وسلم فقال: يا رسول الله! ما أنام الليل من الأرق، فقال النبي صلى الله عليه وسلم: إذا أويت إلى فراشك فقل: اللهم رب السموات السبع وما أظلت، ورب الأرضين وما أقلت، ورب الشياطين وما أضلت، كن لي جارًا من خلقك كلهم جميعًا أن يفرط علي أحد منهم أو أن يبغي علي، عز جارك، وجل ثناؤك ولا إله غيرك، ولا إله إلا أنت. وعن عمرو بن شعيب، عن أبيه، عن جده: أن رسول الله صلى الله عليه وسلم كان يعلمهم من الفزع كلمات: أعوذ بكلمات الله التامة من غضبه وشر عباده، ومن همزات الشياطين وأن يحضرون.",
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 14,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": null
+    }
+  },
+  {
+    "id": "islambook-sleep-015",
+    "order": 15,
+    "category": "sleep",
+    "type": "compositePractice",
+    "text": null,
+    "repeatCount": 1,
+    "countDescription": "مرة واحدة",
+    "instruction": "إذا رأى ما يكره في المنام: ينفث عن شماله ثلاثًا ويتعوذ من الشيطان.",
+    "appliesTo": [],
+    "repeatOverrides": [],
+    "steps": [],
+    "source": {
+      "short": null,
+      "full": null
+    },
+    "virtue": {
+      "short": null,
+      "full": null
+    },
+    "hadithText": "عن أبي قتادة رضي الله عنه قال: قال رسول الله صلى الله عليه وسلم: الرؤيا الصالحة - وفي رواية: الرؤيا الحسنة - من الله، والحلم من الشيطان، فمن رأى شيئًا يكرهه فلينفث عن شماله ثلاثًا وليتعوذ من الشيطان، فإنها لا تضره.",
+    "explanation": null,
+    "audioUrl": null,
+    "quran": {
+      "isQuran": false,
+      "surah": null,
+      "ayahFrom": null,
+      "ayahTo": null
+    },
+    "sourceMeta": {
+      "provider": "IslamBook",
+      "categoryId": 11,
+      "sourceOrder": 15,
+      "url": "https://www.islambook.com/?action=Azkar&azkar_diacritics=1&cat=11",
+      "referenceProvider": null
+    }
+  }
+]

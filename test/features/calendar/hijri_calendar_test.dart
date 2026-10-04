@@ -6,6 +6,7 @@ import 'package:tasbeh/core/theme/app_theme.dart';
 import 'package:tasbeh/core/time/hijri_date.dart';
 import 'package:tasbeh/features/calendar/presentation/screens/hijri_calendar_screen.dart';
 import 'package:tasbeh/features/daily_wird/data/repositories/daily_wird_repository.dart';
+import 'package:tasbeh/features/home/data/home_prayer_mock_data.dart';
 import 'package:tasbeh/features/home/presentation/home_screen.dart';
 
 void main() {
@@ -24,32 +25,23 @@ void main() {
   }
 
   testWidgets(
-    'HomeScreen displays dynamic date and opens HijriCalendar on tap',
+    'HomeScreen displays prayer header data and exposes Settings action',
     (tester) async {
+      var settingsTaps = 0;
       await tester.pumpWidget(
         createTestWidget(
-          HomeScreen(onOpenTasbeeh: () {}, onOpenAdhkar: (_) async {}),
+          HomeScreen(
+            onOpenTasbeeh: () {},
+            onOpenAdhkar: (_) async {},
+            onOpenMore: () => settingsTaps++,
+          ),
         ),
       );
       await tester.pumpAndSettle();
 
-      final todayHijri = HijriDate.now();
-      final todayGregorian = DateTime.now();
-
-      // Verify dynamic text is rendered
-      expect(find.text(todayHijri.formatFull()), findsOneWidget);
-      expect(
-        find.text(HijriDate.formatGregorianDayMonth(todayGregorian)),
-        findsOneWidget,
-      );
-
-      // Tap the date area
-      await tester.tap(find.text(todayHijri.formatFull()));
-      await tester.pumpAndSettle();
-
-      // Verify HijriCalendarScreen is opened
-      expect(find.text('التقويم الهجري'), findsOneWidget);
-      expect(find.text(todayHijri.formatMonthYear()), findsOneWidget);
+      expect(find.text(HomePrayerMockData.header.hijriDate), findsOneWidget);
+      await tester.tap(find.byTooltip('الإعدادات'));
+      expect(settingsTaps, 1);
     },
   );
 

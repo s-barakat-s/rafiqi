@@ -172,7 +172,9 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap on morning_adhkar row (أذكار الصباح)
-        await tester.tap(find.text('أذكار الصباح').last);
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, -800));
+        await tester.pumpAndSettle();
+        await tester.tap(find.bySemanticsLabel('تسجيل منجز').first);
         await tester.pumpAndSettle();
 
         // Confirmation dialog appears
@@ -190,7 +192,7 @@ void main() {
         );
 
         // Tap again on morning_adhkar row
-        await tester.tap(find.text('أذكار الصباح').last);
+        await tester.tap(find.bySemanticsLabel('إلغاء الإنجاز').first);
         await tester.pumpAndSettle();
 
         // Dialog does NOT appear; task is immediately unchecked

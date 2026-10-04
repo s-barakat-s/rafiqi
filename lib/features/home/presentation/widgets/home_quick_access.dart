@@ -68,9 +68,7 @@ class _QuickAccessSection extends StatelessWidget {
               children: [
                 for (var row = 0; row < 2; row++)
                   Padding(
-                    padding: EdgeInsets.only(
-                      bottom: row == 0 ? gap : 0,
-                    ),
+                    padding: EdgeInsets.only(bottom: row == 0 ? gap : 0),
                     child: Row(
                       children: [
                         for (var col = 0; col < columns; col++)
@@ -116,21 +114,23 @@ class _QuickAccessTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final brightness = Theme.of(context).brightness;
+    final usesRafiqiDarkSurface =
+        brightness == Brightness.dark && colors.isRafiqi;
+    final rafiqiCardSurface = colors.isRafiqi
+        ? brightness == Brightness.light
+              ? AppPalette.rafiqiLightCardSurface
+              : AppPalette.rafiqiDarkCardSurface
+        : null;
+    final iconColor = colors.primary;
     final icon = item.icon != null
-        ? RafiqiSvgIcon(
-            item.icon!,
-            size: 24,
-            color: colors.primary,
-          )
-        : Icon(
-            item.fallbackIcon,
-            size: 24,
-            color: colors.primary,
-          );
+        ? RafiqiSvgIcon(item.icon!, size: 24, color: iconColor)
+        : Icon(item.fallbackIcon, size: 24, color: iconColor);
     return Semantics(
       button: true,
       label: item.label,
-      excludeSemantics: true,        child: InkWell(
+      excludeSemantics: true,
+      child: InkWell(
         onTap: item.onTap,
         borderRadius: BorderRadius.circular(18),
         child: Padding(
@@ -146,9 +146,13 @@ class _QuickAccessTile extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: colors.surfaceElevated.withValues(alpha: .88),
+                  color:
+                      rafiqiCardSurface ??
+                      colors.surfaceElevated.withValues(alpha: .88),
                   border: Border.all(
-                    color: colors.outline.withValues(alpha: .6),
+                    color: usesRafiqiDarkSurface
+                        ? AppPalette.rafiqiLightPrimary.withValues(alpha: .28)
+                        : colors.outline.withValues(alpha: .6),
                   ),
                 ),
                 child: icon,
@@ -160,9 +164,9 @@ class _QuickAccessTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors.textPrimary,
-                    ),
+                  fontWeight: FontWeight.w600,
+                  color: colors.textPrimary,
+                ),
               ),
             ],
           ),
