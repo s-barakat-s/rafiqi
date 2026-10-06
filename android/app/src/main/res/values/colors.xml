@@ -2,4 +2,5 @@
 <resources>
     <color name="splash_background">#F2F0E9</color>
 	<color name="ic_launcher_background">#F2F0E9</color>
+    <color name="maab_splash_green">#549773</color>
 </resources>

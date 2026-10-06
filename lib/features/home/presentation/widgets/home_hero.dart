@@ -37,9 +37,6 @@ class _MorningHero extends StatelessWidget {
               ? AppPalette.rafiqiDarkHeroForegroundMuted
               : AppPalette.rafiqiLightHeroForegroundMuted
         : colors.imageForegroundMuted;
-    final reminderForeground = isRafiqiDark
-        ? AppPalette.rafiqiDarkHeroReminderForeground
-        : foreground;
     final actionBackground = isRafiqi
         ? isRafiqiDark
               ? AppPalette.rafiqiDarkHeroActionBackground
@@ -50,6 +47,13 @@ class _MorningHero extends StatelessWidget {
               ? AppPalette.rafiqiDarkHeroActionForeground
               : AppPalette.rafiqiLightHeroActionForeground
         : colors.imageActionForeground;
+    final reminderBackground = isRafiqi
+        ? actionBackground
+        : foreground.withValues(alpha: .14);
+    final reminderForeground = isRafiqi ? actionForeground : foreground;
+    final reminderBorder = isRafiqi
+        ? actionForeground.withValues(alpha: .22)
+        : foreground.withValues(alpha: .28);
     final backgroundAsset = colors.heroAsset(
       isMorning: isMorning,
       brightness: theme.brightness,
@@ -118,11 +122,9 @@ class _MorningHero extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: reminderForeground.withValues(alpha: .14),
+                    color: reminderBackground,
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: reminderForeground.withValues(alpha: .28),
-                    ),
+                    border: Border.all(color: reminderBorder),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

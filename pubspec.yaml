@@ -38,6 +38,10 @@ dependencies:
   audio_service: ^0.18.19
   background_downloader: 9.5.9
   path_provider: ^2.1.6
+  path: ^1.9.1
+  crypto: ^3.0.7
+  sqflite: 2.4.2+1
+  meta: ^1.17.0
   hijri: ^3.0.1
   flutter_svg: ^2.3.0
 
@@ -52,15 +56,21 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  sqflite_common_ffi: ^2.4.0
+  vector_graphics_compiler: ^1.3.0
+  xml: ^6.6.1
 
 flutter_launcher_icons:
   android: true
-  image_path: assets/branding/launcher_legacy.png
-  adaptive_icon_background: "#F2F0E9"
-  adaptive_icon_foreground: assets/branding/adaptive_foreground.png
-  adaptive_icon_monochrome: assets/branding/monochrome_foreground.png
+  image_path: assets/branding/app_icon.png
+  # Adaptive layers both use the finished app_icon.png artwork at identical
+  # scale so the launcher-masked result visually matches app_icon.png exactly
+  # (aligned layers = no seams, no shrink, no cream background).
+  adaptive_icon_background: assets/branding/app_icon.png
+  adaptive_icon_foreground: assets/branding/app_icon.png
+  # Themed/monochrome icons require a transparent single-color glyph.
+  adaptive_icon_monochrome: assets/branding/adaptive_foreground_transparent.png
   min_sdk_android: 21
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

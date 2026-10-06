@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "dataset_kind": "syntheticTest",
+    "source_provider": "Maab test suite",
+    "source_resource_name": "Obviously synthetic Quran Core fixture",
+    "source_reference": "test/features/quran/fixtures/synthetic_quran_core.json",
+    "source_version": "1",
+    "source_acquired_at": "2026-10-06T00:00:00.000Z",
+    "schema_version": 1,
+    "ingestion_tool_version": "maab-quran-core-ingestion/1",
+    "license_or_usage_reference": "Internal synthetic test fixture only",
+    "attribution_notes": "Contains no Quran text and must never be shipped",
+    "expected_surah_count": 2,
+    "expected_ayah_count": 3
+  },
+  "surahs": [
+    {"number": 1, "name_arabic": "SYNTHETIC-SURAH-A", "ayah_count": 2},
+    {"number": 2, "name_arabic": "SYNTHETIC-SURAH-B", "ayah_count": 1}
+  ],
+  "ayahs": [
+    {"surah_number": 1, "ayah_number": 1, "global_index": 1, "text_uthmani": "SYNTHETIC TOKEN A", "text_search": "synthetic token a"},
+    {"surah_number": 1, "ayah_number": 2, "global_index": 2, "text_uthmani": "SYNTHETIC TOKEN B", "text_search": null},
+    {"surah_number": 2, "ayah_number": 1, "global_index": 3, "text_uthmani": "SYNTHETIC TOKEN C", "text_search": "synthetic token c"}
+  ],
+  "juz_boundaries": [{"number": 1, "surah_number": 1, "ayah_number": 1}],
+  "hizb_boundaries": [{"number": 1, "surah_number": 1, "ayah_number": 1}],
+  "rub_el_hizb_boundaries": [{"number": 1, "surah_number": 1, "ayah_number": 1}],
+  "sajdah_markers": [{"surah_number": 2, "ayah_number": 1, "kind": "synthetic"}]
+}

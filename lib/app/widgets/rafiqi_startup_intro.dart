@@ -12,13 +12,19 @@ class RafiqiStartupIntro extends StatefulWidget {
 }
 
 class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
-  static const _displayDuration = Duration(milliseconds: 240);
-  static const _fadeDuration = Duration(milliseconds: 320);
-  static const _maxWaitForFrame = Duration(milliseconds: 1500);
+  /// The branded splash holds completely static (no fade, no zoom) for this
+  /// long after its first frame is decoded.
+  static const _holdDuration = Duration(milliseconds: 2000);
+
+  /// Exit animation: gentle zoom toward the viewer combined with a fade-out,
+  /// revealing the already-rendered app underneath.
+  static const _exitDuration = Duration(milliseconds: 700);
+  static const _exitScale = 1.12;
+  static const _maxWaitForFrame = Duration(milliseconds: 3500);
 
   bool _exitScheduled = false;
   bool _isVisible = true;
-  bool _isFading = false;
+  bool _isExiting = false;
 
   @override
   void initState() {
@@ -34,10 +40,10 @@ class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
   void _scheduleExit() {
     if (_exitScheduled || !mounted) return;
     _exitScheduled = true;
-    Future<void>.delayed(_displayDuration, () {
+    Future<void>.delayed(_holdDuration, () {
       if (!mounted) return;
-      setState(() => _isFading = true);
-      Future<void>.delayed(_fadeDuration, () {
+      setState(() => _isExiting = true);
+      Future<void>.delayed(_exitDuration, () {
         if (!mounted) return;
         setState(() => _isVisible = false);
       });
@@ -51,17 +57,19 @@ class _RafiqiStartupIntroState extends State<RafiqiStartupIntro> {
     return Stack(
       fit: StackFit.expand,
       children: [
+        // The real application is always built and rendered underneath; the
+        // splash is a pure overlay on top of it.
         widget.child,
         if (_isVisible)
           AbsorbPointer(
             child: AnimatedScale(
-              scale: _isFading ? 1.08 : 1,
-              duration: _fadeDuration,
-              curve: Curves.easeInOutCubic,
+              scale: _isExiting ? _exitScale : 1,
+              duration: _exitDuration,
+              curve: Curves.easeOutCubic,
               child: AnimatedOpacity(
-                opacity: _isFading ? 0 : 1,
-                duration: _fadeDuration,
-                curve: Curves.easeInOutCubic,
+                opacity: _isExiting ? 0 : 1,
+                duration: _exitDuration,
+                curve: Curves.easeOutCubic,
                 child: ColoredBox(
                   color: colors.background,
                   child: AppThemeArtwork(

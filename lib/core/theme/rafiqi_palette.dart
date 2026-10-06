@@ -17,7 +17,7 @@ enum RafiqiPalette {
   }
 
   String get arabicName => switch (this) {
-    RafiqiPalette.rafiqi => 'رفيقي',
+    RafiqiPalette.rafiqi => 'maab',
     RafiqiPalette.blush => 'ورد',
     RafiqiPalette.amethyst => 'جمشت',
     RafiqiPalette.linen => 'كتان',

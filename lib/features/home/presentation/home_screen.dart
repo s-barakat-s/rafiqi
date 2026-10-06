@@ -242,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         builder: (context) => AlertDialog(
           title: Text(
             task.taskType == DailyTask.tasbeehTargetTaskType
-                ? 'هل أتممت هذه المهمة خارج رفيقي؟'
+                ? 'هل أتممت هذه المهمة خارج maab؟'
                 : 'هل أتممت هذا الورد خارج التطبيق؟',
           ),
           content: const Text(
@@ -335,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: const Text('قريبًا في رفيقي'),
+          content: const Text('قريبًا في maab'),
           action: SnackBarAction(label: 'حسنًا', onPressed: () {}),
         ),
       );

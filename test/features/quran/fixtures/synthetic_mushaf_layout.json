@@ -1,0 +1,52 @@
+{
+  "dataset_kind": "syntheticTest",
+  "ingestion_tool_version": "maab-mushaf-layout-ingestion/1",
+  "edition": {
+    "id": "synthetic-layout-test",
+    "display_name": "Synthetic layout test",
+    "internal_name": "synthetic-layout-test",
+    "riwayah_id": "hafs-an-asim",
+    "edition_version": "1",
+    "page_count": 2,
+    "nominal_lines_per_page": 2,
+    "render_strategy": "qcfGlyphs",
+    "layout_resource_id": "synthetic-layout-resource",
+    "script_resource_id": "synthetic-script-resource",
+    "font_resource_id": null
+  },
+  "provenance": {
+    "resource_id": "synthetic-layout-resource",
+    "resource_type": "mushafLayout",
+    "provider": "Maab test suite",
+    "source_reference": "test/features/quran/fixtures/synthetic_mushaf_layout.json",
+    "version": "1",
+    "acquired_at": "2026-10-06T00:00:00.000Z",
+    "license_reference": "Internal synthetic test fixture only",
+    "commercial_use_status": "unknown",
+    "redistribution_status": "unknown",
+    "attribution": "Contains no Quran text or third-party assets",
+    "production_approval_status": "researchOnly",
+    "compatibility": {
+      "riwayah_ids": ["hafs-an-asim"],
+      "mushaf_edition_ids": ["synthetic-layout-test"],
+      "quran_core_versions": ["synthetic-core-1"]
+    }
+  },
+  "validated_word_keys": ["1:1:1", "1:1:2", "1:2:1"],
+  "pages": [1, 2],
+  "lines": [
+    {"page_number": 1, "line_number": 1, "line_type": "surahHeading", "alignment": "centered", "first_word_key": null, "last_word_key": null},
+    {"page_number": 1, "line_number": 2, "line_type": "quranText", "alignment": "justified", "first_word_key": "1:1:1", "last_word_key": "1:1:2"},
+    {"page_number": 2, "line_number": 1, "line_type": "quranText", "alignment": "justified", "first_word_key": "1:2:1", "last_word_key": "1:2:1"}
+  ],
+  "placements": [
+    {"page_number": 1, "line_number": 2, "position_in_line": 1, "word_key": "1:1:1", "glyph_code": "SYNTHETIC_GLYPH_A", "provider": "synthetic-provider", "provider_word_id": "word-a", "provider_resource_version": "1"},
+    {"page_number": 1, "line_number": 2, "position_in_line": 2, "word_key": "1:1:2", "glyph_code": "SYNTHETIC_GLYPH_B", "provider": "synthetic-provider", "provider_word_id": "word-b", "provider_resource_version": "1"},
+    {"page_number": 2, "line_number": 1, "position_in_line": 1, "word_key": "1:2:1", "glyph_code": "SYNTHETIC_GLYPH_C", "provider": "synthetic-provider", "provider_word_id": "word-c", "provider_resource_version": "1"}
+  ],
+  "provider_mappings": [
+    {"word_key": "1:1:1", "provider": "synthetic-provider", "provider_word_id": "word-a", "resource_version": "1"},
+    {"word_key": "1:1:2", "provider": "synthetic-provider", "provider_word_id": "word-b", "resource_version": "1"},
+    {"word_key": "1:2:1", "provider": "synthetic-provider", "provider_word_id": "word-c", "resource_version": "1"}
+  ]
+}

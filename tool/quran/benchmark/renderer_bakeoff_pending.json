@@ -1,0 +1,80 @@
+{
+  "selected_renderer": null,
+  "candidates": [
+    {
+      "id": "semanticVector",
+      "source_reference": "https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG (also published by QUL resource 569)",
+      "source_version": "SVG V1.01 commit ae5786ab08597f8123575dec4e774f1eca195e0f",
+      "license_status": "Resource LICENSE expressly permits lawful commercial use, app bundling, modification, redistribution, and derivatives; Quran integrity condition applies",
+      "production_eligible": false,
+      "authentic_fidelity_state": "inferred",
+      "size_state": "measured",
+      "performance_state": "pending",
+      "android_state": "pending",
+      "ios_state": "pending",
+      "measurements": {
+        "page_count": 604,
+        "source_raw_bytes": 398233152,
+        "source_zip_bytes": 80255672,
+        "compiled_gzip_bytes": 75068875,
+        "raw_svg_aab_incremental_bytes": 80401011,
+        "compiled_vector_aab_incremental_bytes": 75286758,
+        "compiled_decode_median_microseconds": 8223,
+        "compiled_decode_p95_microseconds": 13144,
+        "source_word_identity_count": 91451,
+        "path_count": 620315
+      }
+    },
+    {
+      "id": "digitalKhatt",
+      "source_reference": "https://qul.tarteel.ai/resources/mushaf-layout/21 + https://qul.tarteel.ai/resources/quran-script/48 + https://github.com/DigitalKhatt/madinafont",
+      "source_version": "unfrozen QUL/DigitalKhatt research candidates observed 2026-10-06",
+      "license_status": "madinafont is OFL-1.1; exact QUL layout/script production rights and attribution remain pending",
+      "production_eligible": false,
+      "authentic_fidelity_state": "pending",
+      "size_state": "pending",
+      "performance_state": "pending",
+      "android_state": "pending",
+      "ios_state": "pending",
+      "measurements": {
+        "font_raw_bytes": 521832,
+        "font_aab_zip_entry_bytes": 279108
+      }
+    },
+    {
+      "id": "qcfV2",
+      "source_reference": "https://api-docs.quran.com/docs/tutorials/fonts/font-rendering/ + https://qul.tarteel.ai/resources/font/249",
+      "source_version": "QCF V2 documented resources observed 2026-10-06",
+      "license_status": "Quran Foundation permits integrated font bundling with an active Developer Console account and accessible credit; standalone packs are prohibited; exact layout/script source approval remains pending",
+      "production_eligible": false,
+      "authentic_fidelity_state": "pending",
+      "size_state": "measured",
+      "performance_state": "pending",
+      "android_state": "pending",
+      "ios_state": "pending",
+      "measurements": {
+        "font_count": 604,
+        "full_raw_bytes": 207809084,
+        "research_zip_bytes": 136040757,
+        "full_aab_incremental_bytes": 136170326,
+        "min_font_bytes": 163044,
+        "median_font_bytes": 341986,
+        "p95_font_bytes": 390840,
+        "max_font_bytes": 884644
+      }
+    },
+    {
+      "id": "pageAsset",
+      "source_reference": "no approved page-asset source selected",
+      "source_version": "pending",
+      "license_status": "PENDING SOURCE/RIGHTS CONFIRMATION",
+      "production_eligible": false,
+      "authentic_fidelity_state": "pending",
+      "size_state": "pending",
+      "performance_state": "pending",
+      "android_state": "pending",
+      "ios_state": "pending",
+      "measurements": {}
+    }
+  ]
+}

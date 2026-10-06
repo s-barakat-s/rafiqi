@@ -88,7 +88,7 @@ class _DhikrAudioHandler extends BaseAudioHandler {
                   '${controller.totalRepeatCount}',
               album: controller.phase == DhikrPlaybackPhase.repeatSilence
                   ? 'حان وقت الترديد'
-                  : 'رفيقي — الأذكار',
+                  : 'maab — الأذكار',
               duration: controller.duration,
             ),
     );

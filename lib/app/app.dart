@@ -36,7 +36,7 @@ class _TasbeehAppState extends State<TasbeehApp> {
   Widget build(BuildContext context) {
     final preferences = _preferences.value;
     return MaterialApp(
-      title: 'رفيقي',
+      title: 'maab',
       debugShowCheckedModeBanner: false,
       theme: buildRafiqiTheme(
         palette: preferences.palette,

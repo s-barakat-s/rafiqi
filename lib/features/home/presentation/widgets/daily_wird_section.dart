@@ -282,9 +282,12 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     title,
+    textAlign: TextAlign.right,
+    textDirection: TextDirection.rtl,
     style: TextStyle(
-      fontFamily: AppFonts.display,
-      fontSize: 25,
+      fontFamily: AppFonts.thmanyahSans,
+      fontSize: 26,
+      height: 1.2,
       fontWeight: FontWeight.w700,
       color: color,
     ),
