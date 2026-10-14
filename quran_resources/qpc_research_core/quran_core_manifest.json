@@ -1,0 +1,15 @@
+{
+  "artifact": "quran_core.db",
+  "database_sha256": "1f1e3f8005fdd100e586c4b810c259501aecbc238be03859f26dd73a451a2580",
+  "schema_version": 2,
+  "source_sha256": "867140091710a312a77b703480fa5ba048abb9a8961247076da9582bacaf938d",
+  "source_provider": "QPC V4 Mushaf Bundle (research source cache)",
+  "source_resource_name": "QPC V4 words.csv Unicode tokens",
+  "source_reference": "https://github.com/hussainsajib/qpc-v4-mushaf-bundle",
+  "source_version": "f84ccb5688d5404748a0d38e6c53e09df4469ec9",
+  "source_acquired_at": "unavailable",
+  "license_or_usage_reference": "quran_resources/.cache/qpc_v4_source/f84ccb5688d5404748a0d38e6c53e09df4469ec9/LICENSE-NOTICE.md",
+  "attribution_notes": "Research only; generated from pinned source archive SHA-256 862e6afcdbb0d61329351513f18bf73fbebf9c871f9291a26155c65ddc2008bd. Exact edition authentication and redistribution approval are unproven. Ayah text joins preserved source tokens with U+0020.",
+  "ingestion_tool_version": "maab-quran-core-ingestion/2",
+  "dataset_kind": "research"
+}

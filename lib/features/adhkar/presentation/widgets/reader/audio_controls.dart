@@ -3,12 +3,14 @@ part of '../../screens/wird_reader_screen.dart';
 class _CollectionAudioBar extends StatelessWidget {
   const _CollectionAudioBar({
     required this.audio,
+    required this.initializing,
     required this.manifests,
     required this.collectionId,
     required this.onOpen,
   });
 
   final DhikrAudioController? audio;
+  final bool initializing;
   final DhikrAudioManifestRepository manifests;
   final String collectionId;
   final VoidCallback onOpen;
@@ -30,7 +32,7 @@ class _CollectionAudioBar extends StatelessWidget {
         color: colors.surfaceSoft,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: onOpen,
+          onTap: initializing ? null : onOpen,
           borderRadius: BorderRadius.circular(16),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 52),
@@ -67,7 +69,12 @@ class _CollectionAudioBar extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (playingThisCollection) ...[
+                  if (initializing)
+                    const SizedBox.square(
+                      dimension: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    )
+                  else if (playingThisCollection) ...[
                     IconButton(
                       tooltip: audio!.status == DhikrPlaybackStatus.playing
                           ? 'إيقاف مؤقت'

@@ -28,10 +28,13 @@ final class QuranCoreDataset {
         .where((e) => e.name == kindName)
         .firstOrNull;
     if (kind == null) throw FormatException('Unknown dataset_kind: $kindName');
-    final acquiredAt = DateTime.tryParse(
-      _string(metadata, 'source_acquired_at'),
-    );
-    if (acquiredAt == null) {
+    final acquiredAtValue = _string(metadata, 'source_acquired_at');
+    final acquiredAt = acquiredAtValue == 'unavailable'
+        ? null
+        : DateTime.tryParse(acquiredAtValue);
+    if (acquiredAt == null &&
+        !(kind == QuranDatasetKind.research &&
+            acquiredAtValue == 'unavailable')) {
       throw const FormatException('Invalid source_acquired_at');
     }
 
@@ -49,7 +52,7 @@ final class QuranCoreDataset {
         sourceResourceName: _string(metadata, 'source_resource_name'),
         sourceReference: _string(metadata, 'source_reference'),
         sourceVersion: _string(metadata, 'source_version'),
-        sourceAcquiredAt: acquiredAt.toUtc(),
+        sourceAcquiredAt: acquiredAt?.toUtc(),
         sourceChecksum: sourceChecksum,
         schemaVersion: _integer(metadata, 'schema_version'),
         ingestionToolVersion: _string(metadata, 'ingestion_tool_version'),
@@ -164,6 +167,10 @@ abstract final class QuranCoreDatasetValidator {
     if (metadata.datasetKind == QuranDatasetKind.production &&
         metadata.expectedSurahCount != 114) {
       issues.add('production Hafs data must declare 114 Surahs');
+    }
+    if (metadata.datasetKind == QuranDatasetKind.production &&
+        metadata.sourceAcquiredAt == null) {
+      issues.add('production data must declare source_acquired_at');
     }
     if (dataset.surahs.length != metadata.expectedSurahCount) {
       issues.add('Surah count does not match source convention');

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tasbeh/shared/widgets/app_decorative_background.dart';
@@ -18,6 +19,8 @@ import 'package:tasbeh/features/settings/presentation/screens/more_screen.dart';
 import 'package:tasbeh/features/adhkar/data/repositories/adhkar_local_repository.dart';
 import 'package:tasbeh/features/adhkar/presentation/screens/wird_reader_screen.dart';
 import 'package:tasbeh/features/home/presentation/home_screen.dart';
+import 'package:tasbeh/features/quran/presentation/quran_index_screen.dart';
+import 'package:tasbeh/features/quran/presentation/dev_research_quran_entry.dart';
 
 /// Owns the five top-level destinations and cross-feature navigation only.
 class MainShellScreen extends StatefulWidget {
@@ -249,11 +252,9 @@ class _MainShellScreenState extends State<MainShellScreen>
         vibrationEnabled: widget.adhkarVibrationEnabled,
         soundEnabled: widget.adhkarSoundEnabled,
       ),
-      const AppPlaceholderScreen(
-        icon: RafiqiIcons.quran,
-        title: 'القرآن الكريم',
-        message: 'قريبًا ستتمكن من متابعة قراءتك من حيث توقفت',
-      ),
+      kDebugMode
+          ? const DevResearchQuranEntry()
+          : const QuranIndexScreen(),
       const AppPlaceholderScreen(
         icon: RafiqiIcons.adhan,
         title: 'مواقيت الصلاة',

@@ -168,38 +168,47 @@ class AppColors extends ThemeExtension<AppColors> {
     final themedAsset = isMorning ? morningHeroAsset : eveningHeroAsset;
     if (themedAsset.isNotEmpty) return themedAsset;
     return switch ((isMorning, brightness)) {
-      (true, Brightness.light) => 'assets/image/home/Morning_light.webp',
-      (true, Brightness.dark) => 'assets/image/home/Morning_dark.webp',
-      (false, Brightness.light) => 'assets/image/home/evening_light.webp',
-      (false, Brightness.dark) => 'assets/image/home/evening_dark.webp',
+      (true, Brightness.light) => 'assets/image/home/Morning light.png',
+      (true, Brightness.dark) => 'assets/image/home/morning dark.png',
+      (false, Brightness.light) => 'assets/image/home/evening light.png',
+      (false, Brightness.dark) => 'assets/image/home/evening dark.png',
     };
   }
 
   String dailyDhikrBackground(Brightness brightness) {
-    final isDark = brightness == Brightness.dark;
-    if (isWard) {
-      return isDark
-          ? 'assets/image/zekr/ward_zekr_dark.png'
-          : 'assets/image/zekr/ward_zekr_light.png';
-    }
-    if (isAmethyst) {
-      return isDark
-          ? 'assets/image/zekr/amethyst_zekr_dark.png'
-          : 'assets/image/zekr/amethyst_zekr_light.png';
-    }
-    if (isLinen) {
-      return isDark
-          ? 'assets/image/zekr/linen_zekr_dark.png'
-          : 'assets/image/zekr/linen_zekr_light.png';
-    }
-    if (isOcean) {
-      return isDark
-          ? 'assets/image/zekr/ocean_zekr_dark.png'
-          : 'assets/image/zekr/ocean_zekr_light.png';
-    }
-    return isDark
-        ? 'assets/image/zekr/rafiqi_zekr_dark.png'
-        : 'assets/image/zekr/rafiqi_zekr_light.png';
+    // ============================================================
+    // TEMP V1: MULTI-THEME DISABLED
+    // Alternative visual themes are excluded from the first release.
+    // Preserve this implementation for post-V1 restoration.
+    // ============================================================
+    // final isDark = brightness == Brightness.dark;
+    // if (isWard) {
+    //   return isDark
+    //       ? 'assets/image/zekr/ward_zekr_dark.png'
+    //       : 'assets/image/zekr/ward_zekr_light.png';
+    // }
+    // if (isAmethyst) {
+    //   return isDark
+    //       ? 'assets/image/zekr/amethyst_zekr_dark.png'
+    //       : 'assets/image/zekr/amethyst_zekr_light.png';
+    // }
+    // if (isLinen) {
+    //   return isDark
+    //       ? 'assets/image/zekr/linen_zekr_dark.png'
+    //       : 'assets/image/zekr/linen_zekr_light.png';
+    // }
+    // if (isOcean) {
+    //   return isDark
+    //       ? 'assets/image/zekr/ocean_zekr_dark.png'
+    //       : 'assets/image/zekr/ocean_zekr_light.png';
+    // }
+    // return isDark
+    //     ? 'assets/image/zekr/rafiqi_zekr_dark.png'
+    //     : 'assets/image/zekr/rafiqi_zekr_light.png';
+
+    // The Rafiqi dark dhikr raster was removed from the current asset set.
+    // The existing Rafiqi artwork remains valid under the dark-mode overlay.
+    return 'assets/image/zekr/rafiqi_zekr_light.png';
   }
 
   // Compatibility aliases for widgets outside this color-only migration.
@@ -425,6 +434,8 @@ abstract final class AppTheme {
     imageActionForeground: Color(0xFF17251B),
   );
 
+  // Retained for post-V1 restoration.
+  // ignore: unused_field
   static const _oceanLight = AppColors(
     background: Color(0xFFF2FAFC),
     surface: Color(0xFFFCFEFF),
@@ -456,10 +467,16 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF102C40),
     imageActionBackground: Color(0xFFFCFEFF),
     imageActionForeground: Color(0xFF00689D),
-    morningHeroAsset: 'assets/image/home/ocean/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/ocean/evening_light.webp',
+    // ============================================================
+    // TEMP V1: MULTI-THEME DISABLED
+    // Alternative visual themes are excluded from the first release.
+    // Preserve this implementation for post-V1 restoration.
+    // ============================================================
+    // morningHeroAsset: 'assets/image/home/ocean/morning_light.webp',
+    // eveningHeroAsset: 'assets/image/home/ocean/evening_light.webp',
   );
 
+  // ignore: unused_field
   static const _oceanDark = AppColors(
     background: Color(0xFF101923),
     surface: Color(0xFF182634),
@@ -491,10 +508,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF102C40),
     imageActionBackground: Color(0xFF90E0EF),
     imageActionForeground: Color(0xFF073642),
-    morningHeroAsset: 'assets/image/home/ocean/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/ocean/evening_dark.webp',
+    // morningHeroAsset: 'assets/image/home/ocean/morning_dark.webp',
+    // eveningHeroAsset: 'assets/image/home/ocean/evening_dark.webp',
   );
 
+  // ignore: unused_field
   static const _linenLight = AppColors(
     background: Color(0xFFF5F1EB),
     surface: Color(0xFFFFFCF8),
@@ -526,10 +544,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF302A25),
     imageActionBackground: Color(0xFFFFFCF8),
     imageActionForeground: Color(0xFF715747),
-    morningHeroAsset: 'assets/image/home/linen/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/linen/evening_light.webp',
+    // morningHeroAsset: 'assets/image/home/linen/morning_light.webp',
+    // eveningHeroAsset: 'assets/image/home/linen/evening_light.webp',
   );
 
+  // ignore: unused_field
   static const _linenDark = AppColors(
     background: Color(0xFF191715),
     surface: Color(0xFF25211E),
@@ -561,10 +580,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF302A25),
     imageActionBackground: Color(0xFFD5BDAF),
     imageActionForeground: Color(0xFF30231B),
-    morningHeroAsset: 'assets/image/home/linen/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/linen/evening_dark.webp',
+    // morningHeroAsset: 'assets/image/home/linen/morning_dark.webp',
+    // eveningHeroAsset: 'assets/image/home/linen/evening_dark.webp',
   );
 
+  // ignore: unused_field
   static const _amethystLight = AppColors(
     background: Color(0xFFF8F5FC),
     surface: Color(0xFFFFFCFF),
@@ -596,10 +616,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF231942),
     imageActionBackground: Color(0xFFFFFCFF),
     imageActionForeground: Color(0xFF5E548E),
-    morningHeroAsset: 'assets/image/home/amethyst/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/amethyst/evening_light.webp',
+    // morningHeroAsset: 'assets/image/home/amethyst/morning_light.webp',
+    // eveningHeroAsset: 'assets/image/home/amethyst/evening_light.webp',
   );
 
+  // ignore: unused_field
   static const _amethystDark = AppColors(
     background: Color(0xFF171222),
     surface: Color(0xFF231B33),
@@ -631,10 +652,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF231942),
     imageActionBackground: Color(0xFFCEB9E8),
     imageActionForeground: Color(0xFF231942),
-    morningHeroAsset: 'assets/image/home/amethyst/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/amethyst/evening_dark.webp',
+    // morningHeroAsset: 'assets/image/home/amethyst/morning_dark.webp',
+    // eveningHeroAsset: 'assets/image/home/amethyst/evening_dark.webp',
   );
 
+  // ignore: unused_field
   static const _wardLight = AppColors(
     background: Color(0xFFFFF7F9),
     surface: Color(0xFFFFFCFD),
@@ -666,10 +688,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF281522),
     imageActionBackground: Color(0xFFFFF7F9),
     imageActionForeground: Color(0xFF9C3658),
-    morningHeroAsset: 'assets/image/home/ward/morning_light.webp',
-    eveningHeroAsset: 'assets/image/home/ward/evening_light.webp',
+    // morningHeroAsset: 'assets/image/home/ward/morning_light.webp',
+    // eveningHeroAsset: 'assets/image/home/ward/evening_light.webp',
   );
 
+  // ignore: unused_field
   static const _wardDark = AppColors(
     background: Color(0xFF191218),
     surface: Color(0xFF241B23),
@@ -701,10 +724,11 @@ abstract final class AppTheme {
     imageScrim: Color(0xFF281522),
     imageActionBackground: Color(0xFFFFB3C6),
     imageActionForeground: Color(0xFF432132),
-    morningHeroAsset: 'assets/image/home/ward/morning_dark.webp',
-    eveningHeroAsset: 'assets/image/home/ward/evening_dark.webp',
+    // morningHeroAsset: 'assets/image/home/ward/morning_dark.webp',
+    // eveningHeroAsset: 'assets/image/home/ward/evening_dark.webp',
   );
 
+  // ignore: unused_element
   static AppColors _derivedColors(
     RafiqiPalette palette,
     Brightness brightness,
@@ -839,22 +863,29 @@ abstract final class AppTheme {
   }
 
   static AppColors colorsFor(RafiqiPalette palette, Brightness brightness) {
-    if (palette == RafiqiPalette.rafiqi) {
-      return brightness == Brightness.light ? _light : _dark;
-    }
-    if (palette == RafiqiPalette.blush) {
-      return brightness == Brightness.light ? _wardLight : _wardDark;
-    }
-    if (palette == RafiqiPalette.amethyst) {
-      return brightness == Brightness.light ? _amethystLight : _amethystDark;
-    }
-    if (palette == RafiqiPalette.linen) {
-      return brightness == Brightness.light ? _linenLight : _linenDark;
-    }
-    if (palette == RafiqiPalette.ocean) {
-      return brightness == Brightness.light ? _oceanLight : _oceanDark;
-    }
-    return _derivedColors(palette, brightness);
+    // ============================================================
+    // TEMP V1: MULTI-THEME DISABLED
+    // Alternative visual themes are excluded from the first release.
+    // Preserve this implementation for post-V1 restoration.
+    // ============================================================
+    // if (palette == RafiqiPalette.rafiqi) {
+    //   return brightness == Brightness.light ? _light : _dark;
+    // }
+    // if (palette == RafiqiPalette.blush) {
+    //   return brightness == Brightness.light ? _wardLight : _wardDark;
+    // }
+    // if (palette == RafiqiPalette.amethyst) {
+    //   return brightness == Brightness.light ? _amethystLight : _amethystDark;
+    // }
+    // if (palette == RafiqiPalette.linen) {
+    //   return brightness == Brightness.light ? _linenLight : _linenDark;
+    // }
+    // if (palette == RafiqiPalette.ocean) {
+    //   return brightness == Brightness.light ? _oceanLight : _oceanDark;
+    // }
+    // return _derivedColors(palette, brightness);
+
+    return brightness == Brightness.light ? _light : _dark;
   }
 
   static ThemeData _build(Brightness brightness, AppColors colors) {

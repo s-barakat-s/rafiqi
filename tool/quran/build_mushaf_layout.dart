@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_database_verifier.dart';
 import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_dataset.dart';
 import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_schema.dart';
-import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_store.dart';
 import 'package:tasbeh/features/quran/domain/models/ayah_key.dart';
 import 'package:tasbeh/features/quran/domain/mushaf/mushaf_models.dart';
 import 'package:tasbeh/features/quran/domain/mushaf/resource_provenance.dart';
@@ -22,6 +22,7 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
   final sourceChecksum = sha256.convert(bytes).toString();
   final root = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
   final synthetic = root['dataset_kind'] == 'syntheticTest';
+  final research = root['dataset_kind'] == 'research';
   if (synthetic && !allowSyntheticTestFixture) {
     throw StateError(
       'Synthetic fixtures require --allow-synthetic-test-fixture',
@@ -35,7 +36,7 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
     parsed.dataset,
     validAyahKeys: parsed.validAyahKeys,
     validWordKeys: parsed.validWordKeys,
-    forProduction: !synthetic,
+    forProduction: !synthetic && !research,
   );
 
   sqfliteFfiInit();
@@ -54,9 +55,10 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
       await database.execute(statement);
     }
     await database.transaction((txn) async {
+      final batch = txn.batch();
       final edition = parsed.dataset.edition;
       final provenance = edition.provenance;
-      await txn.insert('layout_metadata', {
+      batch.insert('layout_metadata', {
         'id': 1,
         'mushaf_id': edition.id.value,
         'display_name': edition.displayName,
@@ -87,10 +89,10 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
         ),
       });
       for (final page in parsed.dataset.pages) {
-        await txn.insert('pages', {'page_number': page.key.pageNumber});
+        batch.insert('pages', {'page_number': page.key.pageNumber});
       }
       for (final line in parsed.dataset.lines) {
-        await txn.insert('lines', {
+        batch.insert('lines', {
           'page_number': line.pageKey.pageNumber,
           'line_number': line.lineNumber,
           'line_type': line.lineType.name,
@@ -104,7 +106,7 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
         });
       }
       for (final placement in parsed.dataset.placements) {
-        await txn.insert('word_placements', {
+        batch.insert('word_placements', {
           'page_number': placement.pageKey.pageNumber,
           'line_number': placement.lineNumber,
           'position_in_line': placement.positionInLine,
@@ -119,7 +121,7 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
         });
       }
       for (final mapping in parsed.dataset.providerMappings) {
-        await txn.insert('word_provider_mappings', {
+        batch.insert('word_provider_mappings', {
           'provider': mapping.provider,
           'resource_version': mapping.resourceVersion,
           'provider_word_id': mapping.providerWordId,
@@ -128,6 +130,7 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
           'word_number': mapping.wordKey.wordNumber,
         });
       }
+      await batch.commit(noResult: true);
     });
     await MushafLayoutDatabaseVerifier.verify(database);
   } finally {
@@ -152,6 +155,10 @@ Future<MushafLayoutBuildResult> buildMushafLayout({
     'riwayah_id': parsed.dataset.edition.riwayahId.value,
     'production_approval_status':
         parsed.dataset.edition.provenance.productionApprovalStatus.name,
+    'dataset_kind': root['dataset_kind'],
+    'page_count': parsed.dataset.pages.length,
+    'line_count': parsed.dataset.lines.length,
+    'placement_count': parsed.dataset.placements.length,
   };
   final manifestStaging = File('${outputManifest.path}.staging');
   await manifestStaging.writeAsString(

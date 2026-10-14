@@ -4,18 +4,20 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:tasbeh/features/quran/application/search/arabic_search_normalizer.dart';
+import 'package:tasbeh/features/quran/data/quran_core_database_verifier.dart';
 import 'package:tasbeh/features/quran/data/quran_core_dataset.dart';
 import 'package:tasbeh/features/quran/data/quran_core_schema.dart';
-import 'package:tasbeh/features/quran/data/quran_core_store.dart';
 import 'package:tasbeh/features/quran/domain/models/quran_core_models.dart';
 
-const quranCoreIngestionToolVersion = 'maab-quran-core-ingestion/1';
+const quranCoreIngestionToolVersion = 'maab-quran-core-ingestion/2';
 
 Future<QuranCoreBuildResult> buildQuranCore({
   required File sourceFile,
   required File outputDatabase,
   required File outputManifest,
   bool allowSyntheticTestFixture = false,
+  bool allowResearchDataset = false,
   DatabaseFactory? factory,
 }) async {
   final sourceBytes = await sourceFile.readAsBytes();
@@ -33,6 +35,10 @@ Future<QuranCoreBuildResult> buildQuranCore({
     throw StateError(
       'Synthetic fixtures require --allow-synthetic-test-fixture',
     );
+  }
+  if (dataset.metadata.datasetKind == QuranDatasetKind.research &&
+      !allowResearchDataset) {
+    throw StateError('Research datasets require --allow-research');
   }
   QuranCoreDatasetValidator.validate(dataset);
 
@@ -61,7 +67,8 @@ Future<QuranCoreBuildResult> buildQuranCore({
         'source_resource_name': metadata.sourceResourceName,
         'source_reference': metadata.sourceReference,
         'source_version': metadata.sourceVersion,
-        'source_acquired_at': metadata.sourceAcquiredAt.toIso8601String(),
+        'source_acquired_at':
+            metadata.sourceAcquiredAt?.toIso8601String() ?? 'unavailable',
         'source_checksum': metadata.sourceChecksum,
         'schema_version': metadata.schemaVersion,
         'ingestion_tool_version': metadata.ingestionToolVersion,
@@ -86,6 +93,22 @@ Future<QuranCoreBuildResult> buildQuranCore({
           'text_uthmani': ayah.textUthmani,
           'text_search': ayah.textSearch,
         });
+        final normalized = ArabicSearchNormalizer.normalize(
+          ayah.textSearch ?? ayah.textUthmani,
+        );
+        if (normalized.isEmpty) {
+          throw StateError('Ayah ${ayah.key} has no searchable text');
+        }
+        await txn.insert('ayah_search_documents', {
+          'global_index': ayah.globalIndex,
+          'normalized_text': normalized,
+        });
+        for (final token in normalized.split(' ').toSet()) {
+          await txn.insert('ayah_search_terms', {
+            'token': token,
+            'global_index': ayah.globalIndex,
+          });
+        }
       }
       Future<void> boundaries(String table, Iterable<dynamic> values) async {
         for (final boundary in values) {
@@ -131,7 +154,8 @@ Future<QuranCoreBuildResult> buildQuranCore({
     'source_resource_name': dataset.metadata.sourceResourceName,
     'source_reference': dataset.metadata.sourceReference,
     'source_version': dataset.metadata.sourceVersion,
-    'source_acquired_at': dataset.metadata.sourceAcquiredAt.toIso8601String(),
+    'source_acquired_at':
+        dataset.metadata.sourceAcquiredAt?.toIso8601String() ?? 'unavailable',
     'license_or_usage_reference': dataset.metadata.licenseOrUsageReference,
     'attribution_notes': dataset.metadata.attributionNotes,
     'ingestion_tool_version': quranCoreIngestionToolVersion,
@@ -162,7 +186,7 @@ final class QuranCoreBuildResult {
 Future<void> main(List<String> arguments) async {
   if (arguments.length < 3) {
     stderr.writeln(
-      'Usage: dart run tool/quran/build_quran_core.dart <source.json> <quran_core.db> <manifest.json> [--allow-synthetic-test-fixture]',
+      'Usage: dart run tool/quran/build_quran_core.dart <source.json> <quran_core.db> <manifest.json> [--allow-synthetic-test-fixture] [--allow-research]',
     );
     exitCode = 64;
     return;
@@ -174,5 +198,6 @@ Future<void> main(List<String> arguments) async {
     allowSyntheticTestFixture: arguments
         .skip(3)
         .contains('--allow-synthetic-test-fixture'),
+    allowResearchDataset: arguments.skip(3).contains('--allow-research'),
   );
 }

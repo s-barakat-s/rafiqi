@@ -64,10 +64,7 @@ void main() {
     final firstImage = tester.widget<Image>(find.byType(Image));
     final firstProvider = firstImage.image as ResizeImage;
     expect(firstProvider.width, 448);
-    expect(
-      (firstProvider.imageProvider as AssetImage).assetName,
-      _lightHero,
-    );
+    expect((firstProvider.imageProvider as AssetImage).assetName, _lightHero);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -86,10 +83,7 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
     final finalProvider = tester.widget<Image>(find.byType(Image)).image;
     expect((finalProvider as ResizeImage).imageProvider, isA<AssetImage>());
-    expect(
-      (finalProvider.imageProvider as AssetImage).assetName,
-      _darkHero,
-    );
+    expect((finalProvider.imageProvider as AssetImage).assetName, _darkHero);
   });
 
   test('destination artwork is selected when color interpolation starts', () {
@@ -115,12 +109,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    // Exit = splash frame ready + 240ms hold + 320ms fade, with a 1500ms
-    // decode fallback. Pump long enough to cover the fallback path so the
-    // test is deterministic regardless of when the frame decodes.
-    for (var i = 0; i < 12; i++) {
-      await tester.pump(const Duration(milliseconds: 250));
-    }
+    // Cover the 3500ms decode fallback plus the 2000ms hold and 700ms fade so
+    // the test is deterministic regardless of whether the frame decodes.
+    await tester.pump(const Duration(milliseconds: 6500));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('startup-content')), findsOneWidget);
@@ -128,8 +119,8 @@ void main() {
   });
 }
 
-const _lightHero = 'assets/image/home/rafiqi/morning_light.webp';
-const _darkHero = 'assets/image/home/rafiqi/morning_dark.webp';
+const _lightHero = 'assets/image/home/Morning light.png';
+const _darkHero = 'assets/image/home/morning dark.png';
 
 const _category = AdhkarCategory(
   id: 'phase-5-reader',

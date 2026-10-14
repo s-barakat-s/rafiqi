@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+/quran_resources/qpc_v4_tajweed_pack/
+/quran_resources/.cache/
 
 # Symbolication related
 app.*.symbols

@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:tasbeh/features/quran/domain/models/ayah_key.dart';
 
-enum QuranDatasetKind { production, syntheticTest }
+enum QuranDatasetKind { production, research, syntheticTest }
 
 @immutable
 final class QuranCoreMetadata {
@@ -25,7 +25,7 @@ final class QuranCoreMetadata {
   final String sourceResourceName;
   final String sourceReference;
   final String sourceVersion;
-  final DateTime sourceAcquiredAt;
+  final DateTime? sourceAcquiredAt;
   final String sourceChecksum;
   final int schemaVersion;
   final String ingestionToolVersion;

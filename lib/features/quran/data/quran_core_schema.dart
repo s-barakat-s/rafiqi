@@ -1,5 +1,5 @@
 abstract final class QuranCoreSchema {
-  static const version = 1;
+  static const version = 2;
 
   static final statements = <String>[
     '''CREATE TABLE quran_metadata (
@@ -27,6 +27,18 @@ abstract final class QuranCoreSchema {
     )''',
     'CREATE INDEX ayahs_surah_order ON ayahs(surah_number, ayah_number)',
     'CREATE INDEX ayahs_global_order ON ayahs(global_index)',
+    '''CREATE TABLE ayah_search_documents (
+      global_index INTEGER PRIMARY KEY,
+      normalized_text TEXT NOT NULL CHECK(length(normalized_text) > 0),
+      FOREIGN KEY(global_index) REFERENCES ayahs(global_index)
+    )''',
+    '''CREATE TABLE ayah_search_terms (
+      token TEXT NOT NULL CHECK(length(token) > 0),
+      global_index INTEGER NOT NULL,
+      PRIMARY KEY(token, global_index),
+      FOREIGN KEY(global_index) REFERENCES ayahs(global_index)
+    )''',
+    'CREATE INDEX ayah_search_terms_document ON ayah_search_terms(global_index)',
     _boundary('juz_boundaries'),
     _boundary('hizb_boundaries'),
     _boundary('rub_el_hizb_boundaries'),

@@ -17,7 +17,9 @@ final class SqfliteQuranRepository implements QuranRepository {
       sourceResourceName: row['source_resource_name']! as String,
       sourceReference: row['source_reference']! as String,
       sourceVersion: row['source_version']! as String,
-      sourceAcquiredAt: DateTime.parse(row['source_acquired_at']! as String),
+      sourceAcquiredAt: row['source_acquired_at'] == 'unavailable'
+          ? null
+          : DateTime.parse(row['source_acquired_at']! as String),
       sourceChecksum: row['source_checksum']! as String,
       schemaVersion: row['schema_version']! as int,
       ingestionToolVersion: row['ingestion_tool_version']! as String,
@@ -103,14 +105,35 @@ final class SqfliteQuranRepository implements QuranRepository {
   }
 
   @override
+  Future<List<QuranJuz>> getJuzs() =>
+      _boundaries('juz_boundaries', QuranJuz.new);
+  @override
   Future<QuranJuz?> getJuz(int number) =>
       _boundary('juz_boundaries', number, QuranJuz.new);
+  @override
+  Future<List<QuranHizb>> getHizbs() =>
+      _boundaries('hizb_boundaries', QuranHizb.new);
   @override
   Future<QuranHizb?> getHizb(int number) =>
       _boundary('hizb_boundaries', number, QuranHizb.new);
   @override
+  Future<List<QuranRubElHizb>> getRubElHizbs() =>
+      _boundaries('rub_el_hizb_boundaries', QuranRubElHizb.new);
+  @override
   Future<QuranRubElHizb?> getRubElHizb(int number) =>
       _boundary('rub_el_hizb_boundaries', number, QuranRubElHizb.new);
+
+  Future<List<T>> _boundaries<T extends QuranBoundary>(
+    String table,
+    T Function(int, AyahKey) create,
+  ) async => (await _database.query(table, orderBy: 'number ASC'))
+      .map(
+        (row) => create(
+          row['number']! as int,
+          AyahKey(row['surah_number']! as int, row['ayah_number']! as int),
+        ),
+      )
+      .toList(growable: false);
 
   Future<T?> _boundary<T extends QuranBoundary>(
     String table,

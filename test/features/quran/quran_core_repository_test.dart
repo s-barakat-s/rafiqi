@@ -145,6 +145,57 @@ void main() {
       throwsStateError,
     );
   });
+
+  test(
+    'builder requires explicit research opt-in and records unavailable acquisition',
+    () async {
+      final sourceMap =
+          jsonDecode(
+                await File(
+                  'test/features/quran/fixtures/synthetic_quran_core.json',
+                ).readAsString(),
+              )
+              as Map<String, dynamic>;
+      final metadata = sourceMap['metadata'] as Map<String, dynamic>;
+      metadata['dataset_kind'] = 'research';
+      metadata['source_acquired_at'] = 'unavailable';
+      final source = File('${temporary.path}/research_source.json');
+      await source.writeAsString(jsonEncode(sourceMap));
+      final researchDatabase = File('${temporary.path}/research.db');
+      final researchManifest = File('${temporary.path}/research_manifest.json');
+
+      expect(
+        () => buildQuranCore(
+          sourceFile: source,
+          outputDatabase: researchDatabase,
+          outputManifest: researchManifest,
+        ),
+        throwsStateError,
+      );
+      await buildQuranCore(
+        sourceFile: source,
+        outputDatabase: researchDatabase,
+        outputManifest: researchManifest,
+        allowResearchDataset: true,
+      );
+      final manifest =
+          jsonDecode(await researchManifest.readAsString())
+              as Map<String, dynamic>;
+      expect(manifest['dataset_kind'], 'research');
+      expect(manifest['source_acquired_at'], 'unavailable');
+
+      final researchDb = await databaseFactoryFfi.openDatabase(
+        researchDatabase.path,
+        options: OpenDatabaseOptions(readOnly: true, singleInstance: false),
+      );
+      final researchMetadata = await SqfliteQuranRepository(
+        researchDb,
+      ).getMetadata();
+      expect(researchMetadata.datasetKind.name, 'research');
+      expect(researchMetadata.sourceAcquiredAt, isNull);
+      await researchDb.close();
+    },
+  );
 }
 
 final class _CountingInstaller implements QuranCoreInstaller {

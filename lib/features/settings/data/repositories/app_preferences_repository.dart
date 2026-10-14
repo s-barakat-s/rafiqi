@@ -32,10 +32,7 @@ class AppPreferencesRepository extends ChangeNotifier {
   Future<void> _load() async {
     final storage = await SharedPreferences.getInstance();
     final storedPalette = storage.getString(_paletteKey);
-    final palette = RafiqiPalette.fromStorage(storedPalette);
-    if (storedPalette != null && storedPalette != palette.name) {
-      await storage.setString(_paletteKey, palette.name);
-    }
+    final palette = RafiqiPalette.resolveForV1(storedPalette);
     _value = AppPreferences(
       themeMode: (storage.getBool(_themeKey) ?? false)
           ? ThemeMode.dark
@@ -65,10 +62,18 @@ class AppPreferencesRepository extends ChangeNotifier {
   }
 
   Future<void> setPalette(RafiqiPalette palette) async {
-    _value = _value.copyWith(palette: palette);
+    // ============================================================
+    // TEMP V1: MULTI-THEME DISABLED
+    // Alternative visual themes are excluded from the first release.
+    // Preserve this implementation for post-V1 restoration.
+    // ============================================================
+    // _value = _value.copyWith(palette: palette);
+    _value = _value.copyWith(palette: RafiqiPalette.rafiqi);
     _appearanceChanges.value++;
     notifyListeners();
+    if (palette != RafiqiPalette.rafiqi) return;
     final storage = await SharedPreferences.getInstance();
+    // Post-V1 restoration: persist the requested palette instead.
     await storage.setString(_paletteKey, palette.name);
   }
 

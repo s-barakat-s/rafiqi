@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
-import 'package:tasbeh/features/quran/data/quran_core_schema.dart';
+import 'package:tasbeh/features/quran/data/quran_core_database_verifier.dart';
 import 'package:tasbeh/features/quran/data/sqflite_quran_repository.dart';
 import 'package:tasbeh/features/quran/domain/repositories/quran_repository.dart';
 
@@ -76,34 +76,6 @@ final class QuranCoreAssetInstaller implements QuranCoreInstaller {
       .transform(sha256)
       .first
       .then((digest) => digest.toString());
-}
-
-abstract final class QuranCoreDatabaseVerifier {
-  static Future<void> verify(Database database) async {
-    final integrity = await database.rawQuery('PRAGMA integrity_check');
-    if (integrity.length != 1 || integrity.single.values.single != 'ok') {
-      throw StateError('Quran Core SQLite integrity check failed');
-    }
-    final foreignKeys = await database.rawQuery('PRAGMA foreign_key_check');
-    if (foreignKeys.isNotEmpty) {
-      throw StateError('Quran Core foreign key check failed');
-    }
-    final metadata = await database.query('quran_metadata');
-    if (metadata.length != 1 ||
-        metadata.single['schema_version'] != QuranCoreSchema.version) {
-      throw StateError('Unsupported or missing Quran Core metadata');
-    }
-    final surahCount = Sqflite.firstIntValue(
-      await database.rawQuery('SELECT COUNT(*) FROM surahs'),
-    );
-    final ayahCount = Sqflite.firstIntValue(
-      await database.rawQuery('SELECT COUNT(*) FROM ayahs'),
-    );
-    if (surahCount != metadata.single['expected_surah_count'] ||
-        ayahCount != metadata.single['expected_ayah_count']) {
-      throw StateError('Quran Core declared counts do not match database');
-    }
-  }
 }
 
 final class QuranCoreStore {

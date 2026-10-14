@@ -1,0 +1,95 @@
+warning: in the working copy of 'tool/quran/build_mushaf_layout.dart', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/tool/quran/build_mushaf_layout.dart b/tool/quran/build_mushaf_layout.dart[m
+[1mindex d3cb50f..de10f93 100644[m
+[1m--- a/tool/quran/build_mushaf_layout.dart[m
+[1m+++ b/tool/quran/build_mushaf_layout.dart[m
+[36m@@ -3,9 +3,9 @@[m [mimport 'dart:io';[m
+ [m
+ import 'package:crypto/crypto.dart';[m
+ import 'package:sqflite_common_ffi/sqflite_ffi.dart';[m
+[32m+[m[32mimport 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_database_verifier.dart';[m
+ import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_dataset.dart';[m
+ import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_schema.dart';[m
+[31m-import 'package:tasbeh/features/quran/data/mushaf/mushaf_layout_store.dart';[m
+ import 'package:tasbeh/features/quran/domain/models/ayah_key.dart';[m
+ import 'package:tasbeh/features/quran/domain/mushaf/mushaf_models.dart';[m
+ import 'package:tasbeh/features/quran/domain/mushaf/resource_provenance.dart';[m
+[36m@@ -22,6 +22,7 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+   final sourceChecksum = sha256.convert(bytes).toString();[m
+   final root = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;[m
+   final synthetic = root['dataset_kind'] == 'syntheticTest';[m
+[32m+[m[32m  final research = root['dataset_kind'] == 'research';[m
+   if (synthetic && !allowSyntheticTestFixture) {[m
+     throw StateError([m
+       'Synthetic fixtures require --allow-synthetic-test-fixture',[m
+[36m@@ -35,7 +36,7 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+     parsed.dataset,[m
+     validAyahKeys: parsed.validAyahKeys,[m
+     validWordKeys: parsed.validWordKeys,[m
+[31m-    forProduction: !synthetic,[m
+[32m+[m[32m    forProduction: !synthetic && !research,[m
+   );[m
+ [m
+   sqfliteFfiInit();[m
+[36m@@ -54,9 +55,10 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+       await database.execute(statement);[m
+     }[m
+     await database.transaction((txn) async {[m
+[32m+[m[32m      final batch = txn.batch();[m
+       final edition = parsed.dataset.edition;[m
+       final provenance = edition.provenance;[m
+[31m-      await txn.insert('layout_metadata', {[m
+[32m+[m[32m      batch.insert('layout_metadata', {[m
+         'id': 1,[m
+         'mushaf_id': edition.id.value,[m
+         'display_name': edition.displayName,[m
+[36m@@ -87,10 +89,10 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+         ),[m
+       });[m
+       for (final page in parsed.dataset.pages) {[m
+[31m-        await txn.insert('pages', {'page_number': page.key.pageNumber});[m
+[32m+[m[32m        batch.insert('pages', {'page_number': page.key.pageNumber});[m
+       }[m
+       for (final line in parsed.dataset.lines) {[m
+[31m-        await txn.insert('lines', {[m
+[32m+[m[32m        batch.insert('lines', {[m
+           'page_number': line.pageKey.pageNumber,[m
+           'line_number': line.lineNumber,[m
+           'line_type': line.lineType.name,[m
+[36m@@ -104,7 +106,7 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+         });[m
+       }[m
+       for (final placement in parsed.dataset.placements) {[m
+[31m-        await txn.insert('word_placements', {[m
+[32m+[m[32m        batch.insert('word_placements', {[m
+           'page_number': placement.pageKey.pageNumber,[m
+           'line_number': placement.lineNumber,[m
+           'position_in_line': placement.positionInLine,[m
+[36m@@ -119,7 +121,7 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+         });[m
+       }[m
+       for (final mapping in parsed.dataset.providerMappings) {[m
+[31m-        await txn.insert('word_provider_mappings', {[m
+[32m+[m[32m        batch.insert('word_provider_mappings', {[m
+           'provider': mapping.provider,[m
+           'resource_version': mapping.resourceVersion,[m
+           'provider_word_id': mapping.providerWordId,[m
+[36m@@ -128,6 +130,7 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+           'word_number': mapping.wordKey.wordNumber,[m
+         });[m
+       }[m
+[32m+[m[32m      await batch.commit(noResult: true);[m
+     });[m
+     await MushafLayoutDatabaseVerifier.verify(database);[m
+   } finally {[m
+[36m@@ -152,6 +155,10 @@[m [mFuture<MushafLayoutBuildResult> buildMushafLayout({[m
+     'riwayah_id': parsed.dataset.edition.riwayahId.value,[m
+     'production_approval_status':[m
+         parsed.dataset.edition.provenance.productionApprovalStatus.name,[m
+[32m+[m[32m    'dataset_kind': root['dataset_kind'],[m
+[32m+[m[32m    'page_count': parsed.dataset.pages.length,[m
+[32m+[m[32m    'line_count': parsed.dataset.lines.length,[m
+[32m+[m[32m    'placement_count': parsed.dataset.placements.length,[m
+   };[m
+   final manifestStaging = File('${outputManifest.path}.staging');[m
+   await manifestStaging.writeAsString([m

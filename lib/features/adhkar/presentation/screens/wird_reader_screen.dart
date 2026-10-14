@@ -36,12 +36,17 @@ class WirdReaderScreen extends StatefulWidget {
     required this.vibrationEnabled,
     required this.soundEnabled,
     this.morphTransition,
+    this.audioRuntimeInitializer,
     super.key,
   });
 
   final AdhkarCategory category;
   final bool vibrationEnabled;
   final bool soundEnabled;
+
+  /// Overrides the shared runtime initializer in focused widget tests.
+  /// Production readers always use [DhikrAudioRuntime.instance].
+  final Future<DhikrAudioRuntime> Function()? audioRuntimeInitializer;
 
   /// When provided, the header morphs from the Adhkar Hub hero (same tag)
   /// and the body fades/slides in during the later part of the flight.
@@ -129,7 +134,10 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
   final ValueNotifier<double> _readingScrollProgress = ValueNotifier(0);
   int _readingSessionGeneration = 0;
   DhikrAudioRuntime? _audioRuntime;
+  Future<DhikrAudioRuntime?>? _audioInitialization;
   bool _audioListenersAttached = false;
+  bool _audioInitializing = false;
+  bool _audioActionPending = false;
   bool _audioUpdatePending = false;
 
   DhikrAudioController? get _audio => _audioRuntime?.playback;
@@ -148,7 +156,11 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
     _preferences.adhkarFeedbackChanges.addListener(_onPreferencesChanged);
     _preferences.readerModeChanges.addListener(_onPreferencesChanged);
     _reader.initialize();
-    _ensureAudio();
+    if (widget.audioRuntimeInitializer == null &&
+        DhikrAudioRuntime.instance.isInitialized) {
+      _audioRuntime = DhikrAudioRuntime.instance;
+      _attachAudioListeners(_audioRuntime!);
+    }
   }
 
   void _onReaderChanged() {
@@ -198,9 +210,20 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
       _attachAudioListeners(_audioRuntime!);
       return _audioRuntime;
     }
+    final pending = _audioInitialization;
+    if (pending != null) return pending;
+
+    final initialization = _initializeAudio();
+    _audioInitialization = initialization;
+    return initialization;
+  }
+
+  Future<DhikrAudioRuntime?> _initializeAudio() async {
+    if (mounted) setState(() => _audioInitializing = true);
     try {
-      final runtime = DhikrAudioRuntime.instance;
-      await runtime.initialize();
+      final runtime = widget.audioRuntimeInitializer == null
+          ? await _initializeSharedAudioRuntime()
+          : await widget.audioRuntimeInitializer!();
       if (!mounted) return null;
       _attachAudioListeners(runtime);
       if (_audioRuntime != runtime) {
@@ -214,7 +237,16 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
         );
       }
       return null;
+    } finally {
+      _audioInitialization = null;
+      if (mounted) setState(() => _audioInitializing = false);
     }
+  }
+
+  Future<DhikrAudioRuntime> _initializeSharedAudioRuntime() async {
+    final runtime = DhikrAudioRuntime.instance;
+    await runtime.initialize();
+    return runtime;
   }
 
   void _attachAudioListeners(DhikrAudioRuntime runtime) {
@@ -310,42 +342,48 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
       _preferences.setAdhkarVibration(!_hapticEnabled);
 
   Future<void> _openAudioOptions({DhikrItem? item}) async {
-    final runtime = await _ensureAudio();
-    if (!mounted || runtime == null) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => _ReciterSelectorSheet(
-        runtime: runtime,
-        collectionId: widget.category.id,
-        dhikrId: item?.id,
-        onPlay: (mode) async {
-          Navigator.of(context).pop();
-          if (item == null && _mode == WirdReaderMode.focus) {
-            await _selectMode(WirdReaderMode.list);
-          }
-          final played = item == null
-              ? await runtime.playback.playAll(
-                  collectionId: widget.category.id,
-                  items: widget.category.items,
-                  playbackMode: mode,
-                )
-              : await runtime.playback.playOne(
-                  collectionId: widget.category.id,
-                  item: item,
-                  playbackMode: mode,
-                );
-          if (!played && mounted) {
-            ScaffoldMessenger.of(this.context).showSnackBar(
-              const SnackBar(
-                content: Text('الصوت غير متاح أو لم يُنزّل لهذا الذكر'),
-              ),
-            );
-          }
-        },
-      ),
-    );
+    if (_audioActionPending) return;
+    _audioActionPending = true;
+    try {
+      final runtime = await _ensureAudio();
+      if (!mounted || runtime == null) return;
+      await showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        isScrollControlled: true,
+        builder: (context) => _ReciterSelectorSheet(
+          runtime: runtime,
+          collectionId: widget.category.id,
+          dhikrId: item?.id,
+          onPlay: (mode) async {
+            Navigator.of(context).pop();
+            if (item == null && _mode == WirdReaderMode.focus) {
+              await _selectMode(WirdReaderMode.list);
+            }
+            final played = item == null
+                ? await runtime.playback.playAll(
+                    collectionId: widget.category.id,
+                    items: widget.category.items,
+                    playbackMode: mode,
+                  )
+                : await runtime.playback.playOne(
+                    collectionId: widget.category.id,
+                    item: item,
+                    playbackMode: mode,
+                  );
+            if (!played && mounted) {
+              ScaffoldMessenger.of(this.context).showSnackBar(
+                const SnackBar(
+                  content: Text('الصوت غير متاح أو لم يُنزّل لهذا الذكر'),
+                ),
+              );
+            }
+          },
+        ),
+      );
+    } finally {
+      _audioActionPending = false;
+    }
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -440,6 +478,7 @@ class _WirdReaderScreenState extends State<WirdReaderScreen>
         const SizedBox(height: 12),
         _CollectionAudioBar(
           audio: _audio,
+          initializing: _audioInitializing,
           manifests:
               _audioRuntime?.manifests ?? const DhikrAudioManifestRepository(),
           collectionId: widget.category.id,

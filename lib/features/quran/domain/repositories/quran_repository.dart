@@ -10,8 +10,11 @@ abstract interface class QuranRepository {
   Future<List<QuranAyah>> getSurahAyahs(int surahNumber);
   Future<List<QuranAyah>> getAyahRange(AyahKey start, AyahKey end);
   Future<int?> resolveGlobalAyahIndex(AyahKey key);
+  Future<List<QuranJuz>> getJuzs();
   Future<QuranJuz?> getJuz(int number);
+  Future<List<QuranHizb>> getHizbs();
   Future<QuranHizb?> getHizb(int number);
+  Future<List<QuranRubElHizb>> getRubElHizbs();
   Future<QuranRubElHizb?> getRubElHizb(int number);
   Future<List<QuranSajdah>> getSajdahMarkers();
 }

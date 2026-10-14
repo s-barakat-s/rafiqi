@@ -16,6 +16,15 @@ enum RafiqiPalette {
     );
   }
 
+  static RafiqiPalette resolveForV1(String? value) {
+    // Parse the stored value so the legacy mapping stays covered and ready for
+    // post-V1 restoration, but never activate a non-Rafiqi palette in V1.
+    final storedPalette = fromStorage(value);
+    return storedPalette == RafiqiPalette.rafiqi
+        ? storedPalette
+        : RafiqiPalette.rafiqi;
+  }
+
   String get arabicName => switch (this) {
     RafiqiPalette.rafiqi => 'maab',
     RafiqiPalette.blush => 'ورد',

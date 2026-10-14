@@ -9,6 +9,29 @@ calculation; **INFERENCE** is a reasoned conclusion; **PENDING VERIFICATION**
 requires further technical evidence; and **PENDING RIGHTS** requires a
 resource-owner or legal determination.
 
+## Decision addendum — 2026-10-07
+
+This addendum records a subsequent product and architecture decision without
+changing any Phase 4.5 measurement or evidence classification below.
+
+- **Selected default renderer technology:** Semantic Vector.
+- **Selected candidate edition:** Hafs / KFGQPC 1441H / Mushaf Database SVG
+  V1.01, commit `ae5786ab08597f8123575dec4e774f1eca195e0f`.
+- **Reason:** a complete 604-page corpus exists; source-level Word/Ayah
+  semantics were validated; no runtime Arabic shaping or justification is
+  required; redistribution/commercial terms are materially clearer than the
+  alternatives; and Maab prioritizes Quran fidelity over package size.
+- **Accepted engineering cost:** the measured compiled-vector incremental AAB
+  delta of `+75,286,758` bytes (`+75.29 MB` decimal) is accepted for now. It is
+  not a final optimized-size target.
+- **Not production approval:** canonical token reconciliation, authentic
+  exact-edition fidelity verification, qualified Mushaf review, physical-device
+  profiling, and iOS runtime validation remain pending.
+- DigitalKhatt research is retained as a future optimization path, not a Phase
+  5 blocker. The evidence evaluator remains unselected because its stricter
+  machine gate represents complete measured production qualification, not this
+  product-level technology choice.
+
 ## 1. Objective
 
 **FACT:** Phase 4.5 compares Semantic Vector, DigitalKhatt Precomputed, QCF V2,

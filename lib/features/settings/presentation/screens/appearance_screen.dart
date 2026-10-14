@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tasbeh/core/theme/app_theme.dart';
-import 'package:tasbeh/core/theme/rafiqi_palette.dart';
 import 'package:tasbeh/shared/widgets/app_decorative_background.dart';
 import 'package:tasbeh/features/settings/data/repositories/app_preferences_repository.dart';
 
@@ -17,94 +16,112 @@ class AppearanceScreen extends StatelessWidget {
         final colors = context.appColors;
 
         return AppDecorativeBackground(
-  child: Scaffold(
-    backgroundColor: Colors.transparent,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      title: const Text('المظهر'),
-    ),
-    body: SafeArea(
-      top: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        children: [
-          Text(
-            'ألوان مَآب',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'اختر الألوان التي تناسبك',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              const spacing = 12.0;
-              final cardWidth = (constraints.maxWidth - spacing) / 2;
-
-              return Wrap(
-                spacing: spacing,
-                runSpacing: spacing,
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              title: const Text('المظهر'),
+            ),
+            body: SafeArea(
+              top: false,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
                 children: [
-                  for (final palette in RafiqiPalette.values)
-                    SizedBox(
-                      width: cardWidth,
-                      child: _PaletteCard(
-                        palette: palette,
-                        selected: palette == settings.palette,
-                        onTap: () => preferences.setPalette(palette),
+                  // ============================================================
+                  // TEMP V1: MULTI-THEME DISABLED
+                  // Alternative visual themes are excluded from the first release.
+                  // Preserve this implementation for post-V1 restoration.
+                  // ============================================================
+                  // The palette heading, help text, Wrap, and _PaletteCard options
+                  // previously occupied this slot. They remain below as commented
+                  // source so V1 leaves no empty heading or spacing behind.
+                  /*
+                  Text(
+                    'ألوان مَآب',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'اختر الألوان التي تناسبك',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      const spacing = 12.0;
+                      final cardWidth = (constraints.maxWidth - spacing) / 2;
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: [
+                          for (final palette in RafiqiPalette.values)
+                            SizedBox(
+                              width: cardWidth,
+                              child: _PaletteCard(
+                                palette: palette,
+                                selected: palette == settings.palette,
+                                onTap: () => preferences.setPalette(palette),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  */
+                  Text(
+                    'الوضع',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Material(
+                    color: colors.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      side: BorderSide(
+                        color: colors.outline.withValues(alpha: .55),
                       ),
                     ),
+                    clipBehavior: Clip.antiAlias,
+                    child: SwitchListTile(
+                      value: settings.isDarkMode,
+                      onChanged: preferences.setDarkMode,
+                      secondary: Icon(
+                        settings.isDarkMode
+                            ? Icons.dark_mode_outlined
+                            : Icons.light_mode_outlined,
+                        color: colors.secondary,
+                      ),
+                      title: const Text('الوضع الداكن'),
+                      subtitle: const Text('بدّل بين الوضعين الفاتح والداكن'),
+                    ),
+                  ),
                 ],
-              );
-            },
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'الوضع',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: colors.outline.withValues(alpha: .55),
               ),
             ),
-            child: SwitchListTile(
-              value: settings.isDarkMode,
-              onChanged: preferences.setDarkMode,
-              secondary: Icon(
-                settings.isDarkMode
-                    ? Icons.dark_mode_outlined
-                    : Icons.light_mode_outlined,
-                color: colors.secondary,
-              ),
-              title: const Text('الوضع الداكن'),
-              subtitle: const Text('بدّل بين الوضعين الفاتح والداكن'),
-            ),
           ),
-        ],
-      ),
-    ),
-  ),
-);
+        );
       },
     );
   }
 }
 
+/*
+// ============================================================
+// TEMP V1: MULTI-THEME DISABLED
+// Alternative visual themes are excluded from the first release.
+// Preserve this implementation for post-V1 restoration.
+// ============================================================
+// Restore the RafiqiPalette import together with these picker widgets and the
+// palette section in AppearanceScreen.
 class _PaletteCard extends StatelessWidget {
   const _PaletteCard({
     required this.palette,
@@ -232,3 +249,4 @@ class _PalettePreview extends StatelessWidget {
     );
   }
 }
+*/

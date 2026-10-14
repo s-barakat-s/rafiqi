@@ -222,7 +222,7 @@ class _ListDhikrCardState extends State<_ListDhikrCard>
         widget.item.virtuePreview ?? _virtuePreview(widget.item.virtue);
     final card = SizeTransition(
       sizeFactor: _remainingSize,
-      axisAlignment: -1,
+      alignment: AlignmentDirectional.topStart,
       child: FadeTransition(
         opacity: _remainingSize,
         child: SlideTransition(

@@ -41,6 +41,7 @@ dependencies:
   path: ^1.9.1
   crypto: ^3.0.7
   sqflite: 2.4.2+1
+  sqflite_common: ^2.5.8
   meta: ^1.17.0
   hijri: ^3.0.1
   flutter_svg: ^2.3.0
@@ -57,7 +58,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
   sqflite_common_ffi: ^2.4.0
-  vector_graphics_compiler: ^1.3.0
   xml: ^6.6.1
 
 flutter_launcher_icons:
@@ -91,23 +91,33 @@ flutter:
     - assets/data/adhkar/
     - assets/data/adhkar/normalized/
     - assets/data/adhkar/manifests/
+    - assets/data/quran/
     # Temporary bundled recording for local Dhikr Audio development only.
-    - assets/audio/adhkar/mishary_alafasy/
-    - assets/image/home/rafiqi/
-    - assets/image/home/ward/
-    - assets/image/home/amethyst/
-    - assets/image/home/linen/
-    - assets/image/home/ocean/
+    - assets/audio/adhkar/mishary_alafasy/morning.m4a
+    # - assets/image/quran/mushaf/
     - assets/image/zekr/rafiqi_zekr_light.png
-    - assets/image/zekr/rafiqi_zekr_dark.png
-    - assets/image/zekr/ward_zekr_light.png
-    - assets/image/zekr/ward_zekr_dark.png
-    - assets/image/zekr/amethyst_zekr_light.png
-    - assets/image/zekr/amethyst_zekr_dark.png
-    - assets/image/zekr/linen_zekr_light.png
-    - assets/image/zekr/linen_zekr_dark.png
-    - assets/image/zekr/ocean_zekr_light.png
-    - assets/image/zekr/ocean_zekr_dark.png
+    # ============================================================
+    # TEMP V1: MULTI-THEME DISABLED
+    # Alternative visual themes are excluded from the first release.
+    # Preserve these declarations for post-V1 restoration.
+    # ============================================================
+    # - assets/image/home/rafiqi/
+    # - assets/image/home/ward/
+    # - assets/image/home/amethyst/
+    # - assets/image/home/linen/
+    # - assets/image/home/ocean/
+    # - assets/image/zekr/rafiqi_zekr_dark.png
+    # - assets/image/zekr/ward_zekr_light.png
+    # - assets/image/zekr/ward_zekr_dark.png
+    # - assets/image/zekr/amethyst_zekr_light.png
+    # - assets/image/zekr/amethyst_zekr_dark.png
+    # - assets/image/zekr/linen_zekr_light.png
+    # - assets/image/zekr/linen_zekr_dark.png
+    # - assets/image/zekr/ocean_zekr_light.png
+    # - assets/image/zekr/ocean_zekr_dark.png
+
+  shaders:
+    - assets/shaders/qpc_tajweed_dark.frag
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

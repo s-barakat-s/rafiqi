@@ -73,4 +73,22 @@ void main() {
       ),
     );
   });
+
+  test('research input may explicitly declare acquisition unavailable', () {
+    final map = jsonDecode(fixture) as Map<String, dynamic>;
+    final metadata = map['metadata'] as Map<String, dynamic>;
+    metadata['dataset_kind'] = 'research';
+    metadata['source_acquired_at'] = 'unavailable';
+    final dataset = parse(map);
+    expect(dataset.metadata.sourceAcquiredAt, isNull);
+    expect(() => QuranCoreDatasetValidator.validate(dataset), returnsNormally);
+  });
+
+  test('production input still requires an acquisition timestamp', () {
+    final map = jsonDecode(fixture) as Map<String, dynamic>;
+    final metadata = map['metadata'] as Map<String, dynamic>;
+    metadata['dataset_kind'] = 'production';
+    metadata['source_acquired_at'] = 'unavailable';
+    expect(() => parse(map), throwsFormatException);
+  });
 }

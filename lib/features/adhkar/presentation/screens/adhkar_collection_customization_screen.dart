@@ -128,10 +128,10 @@ class _AdhkarCollectionCustomizationScreenState
   }
 
   Future<void> _editRepeatCount(DhikrItem item) async {
-    final current = (_overrides!.repeatCountOverrides[item.id] ??
-            item.repeatCount)
-        .clamp(1, 100)
-        .toInt();
+    final current =
+        (_overrides!.repeatCountOverrides[item.id] ?? item.repeatCount)
+            .clamp(1, 100)
+            .toInt();
     var selected = current;
     final result = await showDialog<int>(
       context: context,
@@ -145,8 +145,8 @@ class _AdhkarCollectionCustomizationScreenState
               Text(
                 'العدد الحالي: ${ArabicNumerals.integer(current)}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: context.appColors.textSecondary,
-                    ),
+                  color: context.appColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -170,9 +170,8 @@ class _AdhkarCollectionCustomizationScreenState
                     child: Text(
                       ArabicNumerals.integer(selected),
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
                   IconButton.filledTonal(
@@ -189,8 +188,8 @@ class _AdhkarCollectionCustomizationScreenState
                 'يمكن اختيار عدد من ١ إلى ١٠٠',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: context.appColors.textSecondary,
-                    ),
+                  color: context.appColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -211,7 +210,6 @@ class _AdhkarCollectionCustomizationScreenState
   }
 
   Future<void> _reorder(int oldIndex, int newIndex) async {
-    if (newIndex > oldIndex) newIndex--;
     final items = [..._items];
     final moved = items.removeAt(oldIndex);
     items.insert(newIndex, moved);
@@ -292,7 +290,10 @@ class _AdhkarCollectionCustomizationScreenState
             FilledButton(
               onPressed: () {
                 if (formKey.currentState?.validate() != true) return;
-                Navigator.pop(dialogContext, (textController.text.trim(), count));
+                Navigator.pop(dialogContext, (
+                  textController.text.trim(),
+                  count,
+                ));
               },
               child: const Text('إضافة'),
             ),
@@ -414,7 +415,7 @@ class _AdhkarCollectionCustomizationScreenState
       padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
       buildDefaultDragHandles: false,
       itemCount: _items.length,
-      onReorder: _reorder,
+      onReorderItem: _reorder,
       itemBuilder: (context, index) {
         final item = _items[index];
         return Padding(
@@ -474,7 +475,8 @@ class _AdhkarCollectionCustomizationScreenState
                           _isReordering
                               ? 'اسحب الأذكار لوضعها بالترتيب المناسب لك'
                               : 'عدّل العدد أو أخفِ ذكرًا دون تغيير المحتوى الأصلي',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: colors.textSecondary,
                                 height: 1.45,
                               ),
@@ -482,9 +484,8 @@ class _AdhkarCollectionCustomizationScreenState
                       ),
                       const SizedBox(width: 10),
                       OutlinedButton.icon(
-                        onPressed: () => setState(
-                          () => _isReordering = !_isReordering,
-                        ),
+                        onPressed: () =>
+                            setState(() => _isReordering = !_isReordering),
                         icon: Icon(
                           _isReordering
                               ? Icons.check_rounded
@@ -509,10 +510,7 @@ class _AdhkarCollectionCustomizationScreenState
                       builder: (context, constraints) {
                         final addButton = FilledButton.icon(
                           onPressed: _addDhikr,
-                          icon: const RafiqiSvgIcon(
-                            RafiqiIcons.add,
-                            size: 20,
-                          ),
+                          icon: const RafiqiSvgIcon(RafiqiIcons.add, size: 20),
                           label: const Text('إضافة ذكر'),
                         );
                         final resetButton = OutlinedButton.icon(
@@ -565,9 +563,9 @@ class _SectionLabel extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(width: 8),
           Container(
@@ -579,9 +577,9 @@ class _SectionLabel extends StatelessWidget {
             child: Text(
               ArabicNumerals.integer(count),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                color: colors.primary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -719,10 +717,7 @@ class _CustomizationItemTile extends StatelessWidget {
                       IconButton(
                         onPressed: onDelete,
                         tooltip: 'حذف الذكر المضاف',
-                        icon: const RafiqiSvgIcon(
-                          RafiqiIcons.delete,
-                          size: 20,
-                        ),
+                        icon: const RafiqiSvgIcon(RafiqiIcons.delete, size: 20),
                       ),
                   ],
                 ],
